@@ -1,5 +1,5 @@
 defmodule JokerCynicWeb.PageControllerTest do
-  use JokerCynicWeb.ConnCase
+  use JokerCynicWeb.ConnCase, async: true
 
   test "GET /", %{conn: conn} do
     conn = get(conn, ~p"/")

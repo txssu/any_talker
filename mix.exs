@@ -52,7 +52,8 @@ defmodule JokerCynic.MixProject do
       {:bandit, "~> 1.5"},
       # Code quality
       {:styler, "~> 1.2", only: [:dev, :test], runtime: false},
-      {:tailwind_formatter, "~> 0.4.0", only: [:dev, :test], runtime: false}
+      {:tailwind_formatter, "~> 0.4.0", only: [:dev, :test], runtime: false},
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false}
     ]
   end
 
@@ -74,7 +75,8 @@ defmodule JokerCynic.MixProject do
       ],
       ci: [
         "compile --all-warnings --warnings-as-errors",
-        "format --check-formatted"
+        "format --check-formatted",
+        "credo --strict"
       ]
     ]
   end
