@@ -1,13 +1,36 @@
 defmodule JokerCynicWeb.Router do
   use JokerCynicWeb, :router
 
+  alias JokerCynicWeb.ContentSecurityPolicyPlug
+
+  @nonce 10
+         |> :crypto.strong_rand_bytes()
+         |> Base.url_encode64(padding: false)
+
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
     plug :fetch_live_flash
     plug :put_root_layout, html: {JokerCynicWeb.Layouts, :root}
     plug :protect_from_forgery
-    plug :put_secure_browser_headers
+
+    plug :put_secure_browser_headers, %{
+      "content-security-policy" =>
+        "default-src 'self'; script-src-elem 'self' https://plausible.io; connect-src 'self' https://plausible.io #{ContentSecurityPolicyPlug.get_connect_src()}; img-src 'self' data: blob:; frame-src 'self' www.youtube-nocookie.com;"
+    }
+  end
+
+  pipeline :dev_dashboard do
+    plug :accepts, ["html"]
+    plug :fetch_session
+    plug :protect_from_forgery
+    plug ContentSecurityPolicyPlug, nonce: @nonce
+    plug :put_secure_browser_headers, %{"content-security-policy" => "style-src 'self' 'nonce-#{@nonce}'"}
+  end
+
+  pipeline :mailbox do
+    plug :accepts, ["html"]
+    plug :put_secure_browser_headers, %{"content-security-policy" => "style-src 'unsafe-inline'"}
   end
 
   pipeline :api do
@@ -34,11 +57,14 @@ defmodule JokerCynicWeb.Router do
     # as long as you are also using SSL (which you should anyway).
     import Phoenix.LiveDashboard.Router
 
-    scope "/dev" do
-      pipe_through :browser
+    scope "/dev/dashboard" do
+      pipe_through :dev_dashboard
+      live_dashboard "/", metrics: JokerCynicWeb.Telemetry, csp_nonce_assign_key: :csp_nonce
+    end
 
-      live_dashboard "/dashboard", metrics: JokerCynicWeb.Telemetry
-      forward "/mailbox", Plug.Swoosh.MailboxPreview
+    scope "/dev/mailbox" do
+      pipe_through :mailbox
+      forward "/", Plug.Swoosh.MailboxPreview
     end
   end
 end
