@@ -1,3 +1,4 @@
+# credo:disable-for-this-file Credo.Check.Refactor.ModuleDependencies
 defmodule JokerCynic.Application do
   # See https://hexdocs.pm/elixir/Application.html
   # for more information on OTP Applications
@@ -9,6 +10,7 @@ defmodule JokerCynic.Application do
   def start(_type, _args) do
     children = [
       JokerCynicWeb.Telemetry,
+      JokerCynic.Repo,
       {DNSCluster, query: Application.get_env(:joker_cynic, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: JokerCynic.PubSub},
       # Start the Finch HTTP client for sending emails
