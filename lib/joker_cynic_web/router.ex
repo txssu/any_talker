@@ -16,7 +16,7 @@ defmodule JokerCynicWeb.Router do
 
     plug :put_secure_browser_headers, %{
       "content-security-policy" =>
-        "default-src 'self'; script-src-elem 'self'; connect-src 'self'; img-src 'self' data: blob:; frame-src 'self';"
+        "default-src 'self'; script-src-elem 'self' https://telegram.org; connect-src 'self'; img-src 'self' data: blob:; frame-src 'self' https://oauth.telegram.org;"
     }
   end
 
@@ -40,7 +40,8 @@ defmodule JokerCynicWeb.Router do
   scope "/", JokerCynicWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    live "/log_in", AuthLive
+    get "/log_in/via_tg", AuthController, :via_tg
   end
 
   # Other scopes may use custom stacks.
