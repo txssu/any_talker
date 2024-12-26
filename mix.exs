@@ -73,6 +73,9 @@ defmodule JokerCynic.MixProject do
         "tailwind joker_cynic --minify",
         "esbuild joker_cynic --minify",
         "phx.digest"
+      ],
+      ci: [
+        "compile --all-warnings --warnings-as-errors"
       ]
     ]
   end
