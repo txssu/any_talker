@@ -54,7 +54,9 @@ defmodule JokerCynic.MixProject do
       {:styler, "~> 1.2", only: [:dev, :test], runtime: false},
       {:tailwind_formatter, "~> 0.4.0", only: [:dev, :test], runtime: false},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
-      {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false}
+      {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},
+      {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false}
     ]
   end
 
@@ -78,7 +80,9 @@ defmodule JokerCynic.MixProject do
         "compile --all-warnings --warnings-as-errors",
         "format --check-formatted",
         "credo --strict",
-        "sobelow -i Config.HTTPS --skip --exit"
+        "sobelow -i Config.HTTPS --skip --exit",
+        "deps.unlock --check-unused",
+        "dialyzer"
       ]
     ]
   end
