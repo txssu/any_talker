@@ -11,15 +11,4 @@ defmodule JokerCynicWeb.ContentSecurityPolicyPlug do
     nonce = Keyword.get(opts, :nonce)
     Plug.Conn.assign(conn, :csp_nonce, nonce)
   end
-
-  @doc """
-  Get allowed connect-src domains.
-
-  ## Examples
-
-      iex> ZoonkWeb.Plugs.CspNonce.get_connect_src()
-      "https://fly.storage.tigris.dev"
-  """
-  @spec get_connect_src() :: String.t()
-  def get_connect_src, do: Application.get_env(:zoonk, :csp)[:connect_src]
 end

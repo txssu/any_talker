@@ -16,7 +16,7 @@ defmodule JokerCynicWeb.Router do
 
     plug :put_secure_browser_headers, %{
       "content-security-policy" =>
-        "default-src 'self'; script-src-elem 'self' https://plausible.io; connect-src 'self' https://plausible.io #{ContentSecurityPolicyPlug.get_connect_src()}; img-src 'self' data: blob:; frame-src 'self' www.youtube-nocookie.com;"
+        "default-src 'self'; script-src-elem 'self'; connect-src 'self'; img-src 'self' data: blob:; frame-src 'self';"
     }
   end
 
