@@ -19,15 +19,14 @@ defmodule JokerCynicWeb.ConnCase do
 
   using do
     quote do
-      # The default endpoint for testing
-      @endpoint JokerCynicWeb.Endpoint
-
       use JokerCynicWeb, :verified_routes
 
       # Import conveniences for testing with connections
-      import Plug.Conn
-      import Phoenix.ConnTest
       import JokerCynicWeb.ConnCase
+      import Phoenix.ConnTest
+      import Plug.Conn
+      # The default endpoint for testing
+      @endpoint JokerCynicWeb.Endpoint
     end
   end
 

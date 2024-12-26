@@ -41,12 +41,7 @@ defmodule JokerCynic.MixProject do
       {:esbuild, "~> 0.8", runtime: Mix.env() == :dev},
       {:tailwind, "~> 0.2", runtime: Mix.env() == :dev},
       {:heroicons,
-       github: "tailwindlabs/heroicons",
-       tag: "v2.1.1",
-       sparse: "optimized",
-       app: false,
-       compile: false,
-       depth: 1},
+       github: "tailwindlabs/heroicons", tag: "v2.1.1", sparse: "optimized", app: false, compile: false, depth: 1},
       {:swoosh, "~> 1.5"},
       {:finch, "~> 0.13"},
       {:telemetry_metrics, "~> 1.0"},
@@ -54,7 +49,9 @@ defmodule JokerCynic.MixProject do
       {:gettext, "~> 0.26"},
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.1.1"},
-      {:bandit, "~> 1.5"}
+      {:bandit, "~> 1.5"},
+      # Code quality
+      {:styler, "~> 1.2", only: [:dev, :test], runtime: false}
     ]
   end
 
@@ -75,7 +72,8 @@ defmodule JokerCynic.MixProject do
         "phx.digest"
       ],
       ci: [
-        "compile --all-warnings --warnings-as-errors"
+        "compile --all-warnings --warnings-as-errors",
+        "format --check-formatted"
       ]
     ]
   end
