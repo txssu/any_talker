@@ -35,3 +35,13 @@ joker_cynic-*.tar
 npm-debug.log
 /assets/node_modules/
 
+# Private keys
+.env
+.env.*
+
+# Sobelow
+.sobelow
+
+# Dialyzer
+/priv/plts/*.plt
+/priv/plts/*.plt.hash

@@ -9,7 +9,13 @@ defmodule JokerCynic.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+      dialyzer: [
+        plt_add_apps: [:mix],
+        plt_file: {:no_warn, "priv/plts/dialyzer.plt"},
+        plt_core_path: "priv/plts/core.plt",
+        ignore_warnings: ".dialyzer_ignore.exs"
+      ]
     ]
   end
 
