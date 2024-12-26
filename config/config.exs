@@ -38,6 +38,7 @@ config :joker_cynic, JokerCynicWeb.Endpoint,
   live_view: [signing_salt: "jARMyT1A"]
 
 config :joker_cynic,
+  ecto_repos: [JokerCynic.Repo],
   generators: [timestamp_type: :utc_datetime]
 
 # Configures Elixir's Logger
