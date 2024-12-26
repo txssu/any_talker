@@ -53,7 +53,8 @@ defmodule JokerCynic.MixProject do
       # Code quality
       {:styler, "~> 1.2", only: [:dev, :test], runtime: false},
       {:tailwind_formatter, "~> 0.4.0", only: [:dev, :test], runtime: false},
-      {:credo, "~> 1.7", only: [:dev, :test], runtime: false}
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false}
     ]
   end
 
@@ -76,7 +77,8 @@ defmodule JokerCynic.MixProject do
       ci: [
         "compile --all-warnings --warnings-as-errors",
         "format --check-formatted",
-        "credo --strict"
+        "credo --strict",
+        "sobelow -i Config.HTTPS --skip --exit"
       ]
     ]
   end
