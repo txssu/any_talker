@@ -1,7 +1,7 @@
 defmodule JokerCynicWeb.Router do
   use JokerCynicWeb, :router
 
-  alias JokerCynicWeb.ContentSecurityPolicyPlug
+  alias JokerCynicWeb.CSPNoncePlug
 
   @nonce 10
          |> :crypto.strong_rand_bytes()
@@ -24,7 +24,7 @@ defmodule JokerCynicWeb.Router do
     plug :accepts, ["html"]
     plug :fetch_session
     plug :protect_from_forgery
-    plug ContentSecurityPolicyPlug, nonce: @nonce
+    plug CSPNoncePlug, nonce: @nonce
     plug :put_secure_browser_headers, %{"content-security-policy" => "style-src 'self' 'nonce-#{@nonce}'"}
   end
 
