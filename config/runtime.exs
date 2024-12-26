@@ -20,6 +20,8 @@ if System.get_env("PHX_SERVER") do
   config :joker_cynic, JokerCynicWeb.Endpoint, server: true
 end
 
+config :joker_cynic, JokerCynicBot.Token, token: System.get_env("TELEGRAM_BOT_TOKEN")
+
 if config_env() == :prod do
   # The secret key base is used to sign/encrypt cookies and other secrets.
   # A default value is used in config/dev.exs and config/test.exs but you
