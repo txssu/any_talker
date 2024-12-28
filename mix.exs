@@ -59,6 +59,11 @@ defmodule JokerCynic.MixProject do
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
+      {:typedstruct, "~> 0.5"},
+      # Telegram
+      {:ex_gram, "~> 0.54"},
+      {:tesla, "~> 1.2"},
+      {:hackney, "~> 1.12"},
       # Code quality
       {:styler, "~> 1.2", only: [:dev, :test], runtime: false},
       {:tailwind_formatter, "~> 0.4.0", only: [:dev, :test], runtime: false},

@@ -15,6 +15,9 @@ defmodule JokerCynic.Application do
       {Phoenix.PubSub, name: JokerCynic.PubSub},
       # Start the Finch HTTP client for sending emails
       {Finch, name: JokerCynic.Finch},
+      # Telegram
+      ExGram,
+      {JokerCynicBot.Dispatcher, [method: :polling, token: JokerCynicBot.Token.value()]},
       # Start a worker by calling: JokerCynic.Worker.start_link(arg)
       # {JokerCynic.Worker, arg},
       # Start to serve requests, typically the last entry
