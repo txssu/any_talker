@@ -8,6 +8,7 @@ defmodule JokerCynicBot.Dispatcher do
 
   command("privacy", description: "Политика конфиденциальности")
 
+  middleware(JokerCynicBot.AddTelemetryDataMiddleware)
   middleware(JokerCynicBot.Middlewares.SaveUpdateMiddleware)
   middleware(ExGram.Middleware.IgnoreUsername)
 
@@ -20,6 +21,13 @@ defmodule JokerCynicBot.Dispatcher do
     |> Reply.new(message)
     |> execute_command(message)
     |> Reply.execute()
+
+    now = :os.system_time()
+
+    :telemetry.execute([:joker_cynic, :bot], %{handle_time: now - context.extra.received_at}, %{
+      message: message,
+      context: context
+    })
 
     context
   end
