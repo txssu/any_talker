@@ -8,6 +8,7 @@ defmodule JokerCynicBot.Dispatcher do
 
   command("privacy", description: "Политика конфиденциальности")
 
+  middleware(JokerCynicBot.Middlewares.SaveUpdateMiddleware)
   middleware(ExGram.Middleware.IgnoreUsername)
 
   @spec bot() :: :joker_cynic
@@ -25,5 +26,9 @@ defmodule JokerCynicBot.Dispatcher do
 
   defp execute_command(reply, {:command, :privacy, _msg}) do
     JokerCynicBot.PrivacyCommand.call(reply)
+  end
+
+  defp execute_command(reply, _msg) do
+    %Reply{reply | halt: true}
   end
 end
