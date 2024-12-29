@@ -25,7 +25,7 @@ defmodule JokerCynic.MixProject do
   def application do
     [
       mod: {JokerCynic.Application, []},
-      extra_applications: [:logger, :runtime_tools]
+      extra_applications: [:logger, :runtime_tools, :os_mon]
     ]
   end
 
@@ -60,6 +60,7 @@ defmodule JokerCynic.MixProject do
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
       {:typedstruct, "~> 0.5"},
+      {:ecto_psql_extras, "~> 0.6"},
       # Telegram
       {:ex_gram, "~> 0.54"},
       {:tesla, "~> 1.2"},
