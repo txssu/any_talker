@@ -1,12 +1,18 @@
 defmodule JokerCynic.Events do
   @moduledoc false
 
+  alias JokerCynic.Events.SentMessage
   alias JokerCynic.Events.Update
   alias JokerCynic.Repo
 
   def save_update(id, update) do
     value = remove_deep_nils(update)
     Repo.insert(%Update{id: id, value: value})
+  end
+
+  def save_sent_message(id, message) do
+    value = remove_deep_nils(message)
+    Repo.insert(%SentMessage{id: id, value: value})
   end
 
   defp remove_deep_nils(map) when is_map(map) do

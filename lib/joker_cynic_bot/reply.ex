@@ -44,8 +44,12 @@ defmodule JokerCynicBot.Reply do
 
   defp send_reply({:cont, %__MODULE__{context: context, text: text}}) do
     case ExGram.send_message(context.update.message.chat.id, text, bot: JokerCynicBot.Dispatcher.bot()) do
-      {:ok, _message} -> :ok
-      {:error, error} -> Logger.error("Error sending message: #{error.message}")
+      {:ok, %ExGram.Model.Message{message_id: id} = message} ->
+        JokerCynic.Events.save_sent_message(id, message)
+        :ok
+
+      {:error, error} ->
+        Logger.error("Error sending message: #{error.message}")
     end
   end
 end
