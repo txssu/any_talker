@@ -9,8 +9,9 @@ defmodule JokerCynicBot.Dispatcher do
   command("privacy", description: "Политика конфиденциальности")
 
   middleware(JokerCynicBot.AddTelemetryDataMiddleware)
-  middleware(JokerCynicBot.Middlewares.SaveUpdateMiddleware)
+  middleware(JokerCynicBot.SaveUpdateMiddleware)
   middleware(ExGram.Middleware.IgnoreUsername)
+  middleware(JokerCynicBot.AntispamMiddleware)
 
   @spec bot() :: :joker_cynic
   def bot, do: :joker_cynic
@@ -30,6 +31,14 @@ defmodule JokerCynicBot.Dispatcher do
     })
 
     context
+  end
+
+  defp execute_command(%{context: %{middleware_halted: true} = context} = reply, _message) do
+    if middleware_reply = context.extra[:middleware_reply] do
+      middleware_reply
+    else
+      %Reply{reply | halt: true}
+    end
   end
 
   defp execute_command(reply, {:command, :privacy, _msg}) do
