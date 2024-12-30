@@ -19,7 +19,7 @@ defmodule JokerCynicWeb.Router do
 
     plug :put_secure_browser_headers, %{
       "content-security-policy" =>
-        "default-src 'self'; script-src-elem 'self' https://telegram.org; connect-src 'self'; img-src 'self' data: blob:; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com;"
+        "default-src 'self'; script-src-elem 'self' https://telegram.org; connect-src 'self'; img-src 'self' data: blob: https://t.me; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com;"
     }
   end
 
@@ -40,18 +40,16 @@ defmodule JokerCynicWeb.Router do
     plug :put_secure_browser_headers, %{"content-security-policy" => "style-src 'unsafe-inline'"}
   end
 
-  pipeline :api do
-    plug :accepts, ["json"]
-  end
-
   scope "/", JokerCynicWeb do
     pipe_through :browser
 
-    live "/log_in", AuthLive
-    get "/webapp/log_in", AuthController, :webapp
-
-    get "/log_in/via_tg", AuthController, :via_tg
     get "/log_in/via_webapp", AuthController, :via_webapp
+  end
+
+  scope "/", JokerCynicWeb do
+    pipe_through [:browser, :webapp, :redirect_if_user_is_authenticated]
+
+    get "/webapp/log_in", AuthController, :webapp
   end
 
   scope "/webapp", JokerCynicWeb.WebApp do
@@ -62,11 +60,6 @@ defmodule JokerCynicWeb.Router do
       live "/", MenuLive
     end
   end
-
-  # Other scopes may use custom stacks.
-  # scope "/api", JokerCynicWeb do
-  #   pipe_through :api
-  # end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:joker_cynic, :dev_routes) do
