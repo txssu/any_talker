@@ -1,6 +1,6 @@
 defmodule JokerCynicWeb.AuthHTML do
   use JokerCynicWeb, :html
 
-  @spec via_webapp(map()) :: String.t()
-  def via_webapp(_params), do: ""
+  @spec webapp_auth(map()) :: String.t()
+  def webapp_auth(_params), do: ""
 end
