@@ -37,6 +37,11 @@ config :joker_cynic, JokerCynicWeb.Endpoint,
   pubsub_server: JokerCynic.PubSub,
   live_view: [signing_salt: "jARMyT1A"]
 
+config :joker_cynic, Oban,
+  engine: Oban.Engines.Basic,
+  queues: [default: 10],
+  repo: JokerCynic.Repo
+
 config :joker_cynic,
   ecto_repos: [JokerCynic.Repo],
   generators: [timestamp_type: :utc_datetime]

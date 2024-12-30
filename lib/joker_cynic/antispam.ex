@@ -2,6 +2,7 @@ defmodule JokerCynic.Antispam do
   @moduledoc false
 
   alias JokerCynic.Accounts.UserCaptcha
+  alias JokerCynic.Antispam.KickUserJob
   alias JokerCynic.Repo
 
   def generate_captcha do
@@ -13,15 +14,20 @@ defmodule JokerCynic.Antispam do
   end
 
   def assign_captcha(user_id, chat_id, answer, bot_message_id, join_message_id) do
-    %UserCaptcha{
-      answer: answer,
-      message_ids: [bot_message_id],
-      join_message_id: join_message_id,
-      chat_id: chat_id,
-      user_id: user_id
-    }
-    |> JokerCynic.Repo.insert!()
-    |> dbg()
+    captcha =
+      JokerCynic.Repo.insert!(%UserCaptcha{
+        answer: answer,
+        message_ids: [bot_message_id],
+        join_message_id: join_message_id,
+        chat_id: chat_id,
+        user_id: user_id
+      })
+
+    %{user_id: user_id, chat_id: chat_id}
+    |> KickUserJob.new(schedule_in: 60)
+    |> Oban.insert!()
+
+    captcha
   end
 
   def validate_captcha(user_id, chat_id, text) do

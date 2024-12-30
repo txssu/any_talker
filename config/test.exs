@@ -22,6 +22,8 @@ config :joker_cynic, JokerCynicWeb.Endpoint,
   secret_key_base: "IRJWbTbBFdPAtYWk8k3kzxnkHaMJWHknrNt76tJ00fpa6SpTqa02/ykNpKhJBgjC",
   server: false
 
+config :joker_cynic, Oban, testing: :inline
+
 # Print only warnings and errors during test
 config :logger, level: :warning
 
