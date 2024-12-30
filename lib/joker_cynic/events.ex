@@ -5,10 +5,18 @@ defmodule JokerCynic.Events do
   alias JokerCynic.Events.Update
   alias JokerCynic.Repo
 
-  @spec save_update(integer() | String.t(), map()) :: {:ok, Update.t()}
+  @spec save_update(integer() | String.t(), map()) :: :ok
   def save_update(id, update) do
     value = remove_deep_nils(update)
-    Repo.insert(%Update{id: id, value: value})
+
+    %Update{id: id, value: value}
+    |> Ecto.Changeset.change()
+    # Ignore already saved updates.
+    # Telegram sends updates again if bot can't process them.
+    |> Ecto.Changeset.unique_constraint(:id, name: "updates_pkey")
+    |> Repo.insert()
+
+    :ok
   end
 
   @spec save_sent_message(integer() | String.t(), map()) :: {:ok, SentMessage.t()}

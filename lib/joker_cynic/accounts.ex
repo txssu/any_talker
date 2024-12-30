@@ -8,7 +8,13 @@ defmodule JokerCynic.Accounts do
   def upsert_user(attrs) do
     %User{}
     |> User.changeset(attrs)
-    |> Repo.insert(on_conflict: :replace_all, conflict_target: [:id])
+    |> Repo.insert(on_conflict: {:replace, ~w[username first_name last_name]a}, conflict_target: [:id])
+  end
+
+  def update_user(user, attrs) do
+    user
+    |> User.changeset(attrs)
+    |> Repo.update()
   end
 
   @spec create_token(User.t()) :: String.t()
