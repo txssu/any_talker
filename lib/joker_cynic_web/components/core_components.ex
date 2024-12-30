@@ -1,4 +1,3 @@
-# credo:disable-for-this-file Credo.Check.Refactor.ModuleDependencies
 defmodule JokerCynicWeb.CoreComponents do
   @moduledoc """
   Provides core UI components.

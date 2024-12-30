@@ -1,4 +1,3 @@
-# credo:disable-for-this-file Credo.Check.Refactor.ModuleDependencies
 # credo:disable-for-this-file Credo.Check.Readability.Specs
 defmodule JokerCynicWeb do
   @moduledoc """

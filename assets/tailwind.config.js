@@ -4,6 +4,7 @@
 const plugin = require("tailwindcss/plugin")
 const fs = require("fs")
 const path = require("path")
+const defaultTheme = require('tailwindcss/defaultTheme')
 
 module.exports = {
   content: [
@@ -13,9 +14,33 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Roboto', ...defaultTheme.fontFamily.sans],
+      },
       colors: {
-        brand: "#FD4F00",
-      }
+        'tg-bg': 'var(--tg-theme-bg-color)',
+        'tg-text': 'var(--tg-theme-text-color)',
+        'tg-hint': 'var(--tg-theme-hint-color)',
+        'tg-link': 'var(--tg-theme-link-color)',
+        'tg-button': 'var(--tg-theme-button-color)',
+        'tg-button-text': 'var(--tg-theme-button-text-color)',
+        'tg-secondary-bg': 'var(--tg-theme-secondary-bg-color)',
+        'tg-header-bg': 'var(--tg-theme-header-bg-color)',
+        'tg-bottom-bar-bg': 'var(--tg-theme-bottom-bar-bg-color)',
+        'tg-accent-text': 'var(--tg-theme-accent-text-color)',
+        'tg-section-bg': 'var(--tg-theme-section-bg-color)',
+        'tg-section-header-text': 'var(--tg-theme-section-header-text-color)',
+        'tg-section-separator': 'var(--tg-theme-section-separator-color)',
+        'tg-subtitle-text': 'var(--tg-theme-subtitle-text-color)',
+        'tg-destructive-text': 'var(--tg-theme-destructive-text-color)',
+
+      },
+      spacing: {
+        'tg-safe-top': 'var(--tg-safe-area-inset-top)',
+        'tg-safe-bottom': 'var(--tg-safe-area-inset-bottom)',
+        'tg-safe-left': 'var(--tg-safe-area-inset-left)',
+        'tg-safe-right': 'var(--tg-safe-area-inset-right)',
+      },
     },
   },
   plugins: [
@@ -25,14 +50,14 @@ module.exports = {
     //
     //     <div class="phx-click-loading:animate-ping">
     //
-    plugin(({addVariant}) => addVariant("phx-click-loading", [".phx-click-loading&", ".phx-click-loading &"])),
-    plugin(({addVariant}) => addVariant("phx-submit-loading", [".phx-submit-loading&", ".phx-submit-loading &"])),
-    plugin(({addVariant}) => addVariant("phx-change-loading", [".phx-change-loading&", ".phx-change-loading &"])),
+    plugin(({ addVariant }) => addVariant("phx-click-loading", [".phx-click-loading&", ".phx-click-loading &"])),
+    plugin(({ addVariant }) => addVariant("phx-submit-loading", [".phx-submit-loading&", ".phx-submit-loading &"])),
+    plugin(({ addVariant }) => addVariant("phx-change-loading", [".phx-change-loading&", ".phx-change-loading &"])),
 
     // Embeds Heroicons (https://heroicons.com) into your app.css bundle
     // See your `CoreComponents.icon/1` for more information.
     //
-    plugin(function({matchComponents, theme}) {
+    plugin(function ({ matchComponents, theme }) {
       let iconsDir = path.join(__dirname, "../deps/heroicons/optimized")
       let values = {}
       let icons = [
@@ -44,11 +69,11 @@ module.exports = {
       icons.forEach(([suffix, dir]) => {
         fs.readdirSync(path.join(iconsDir, dir)).forEach(file => {
           let name = path.basename(file, ".svg") + suffix
-          values[name] = {name, fullPath: path.join(iconsDir, dir, file)}
+          values[name] = { name, fullPath: path.join(iconsDir, dir, file) }
         })
       })
       matchComponents({
-        "hero": ({name, fullPath}) => {
+        "hero": ({ name, fullPath }) => {
           let content = fs.readFileSync(fullPath).toString().replace(/\r?\n|\r/g, "")
           let size = theme("spacing.6")
           if (name.endsWith("-mini")) {
@@ -68,7 +93,7 @@ module.exports = {
             "height": size
           }
         }
-      }, {values})
+      }, { values })
     })
   ]
 }

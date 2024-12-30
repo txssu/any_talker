@@ -5,11 +5,13 @@ defmodule JokerCynic.Events do
   alias JokerCynic.Events.Update
   alias JokerCynic.Repo
 
+  @spec save_update(integer() | String.t(), map()) :: {:ok, Update.t()}
   def save_update(id, update) do
     value = remove_deep_nils(update)
     Repo.insert(%Update{id: id, value: value})
   end
 
+  @spec save_sent_message(integer() | String.t(), map()) :: {:ok, SentMessage.t()}
   def save_sent_message(id, message) do
     value = remove_deep_nils(message)
     Repo.insert(%SentMessage{id: id, value: value})

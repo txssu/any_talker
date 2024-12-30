@@ -1,4 +1,3 @@
-# credo:disable-for-this-file Credo.Check.Refactor.ModuleDependencies
 defmodule JokerCynic.Application do
   # See https://hexdocs.pm/elixir/Application.html
   # for more information on OTP Applications

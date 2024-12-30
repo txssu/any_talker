@@ -1,6 +1,8 @@
 defmodule JokerCynicWeb.Router do
   use JokerCynicWeb, :router
 
+  import JokerCynicWeb.AuthPlug
+
   alias JokerCynicWeb.CSPNoncePlug
 
   @nonce 10
@@ -13,11 +15,16 @@ defmodule JokerCynicWeb.Router do
     plug :fetch_live_flash
     plug :put_root_layout, html: {JokerCynicWeb.Layouts, :root}
     plug :protect_from_forgery
+    plug :fetch_current_user
 
     plug :put_secure_browser_headers, %{
       "content-security-policy" =>
-        "default-src 'self'; script-src-elem 'self' https://telegram.org; connect-src 'self'; img-src 'self' data: blob:; frame-src 'self' https://oauth.telegram.org;"
+        "default-src 'self'; script-src-elem 'self' https://telegram.org; connect-src 'self'; img-src 'self' data: blob:; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com;"
     }
+  end
+
+  pipeline :webapp do
+    plug :put_root_layout, html: :webapp
   end
 
   pipeline :dev_dashboard do
@@ -41,7 +48,19 @@ defmodule JokerCynicWeb.Router do
     pipe_through :browser
 
     live "/log_in", AuthLive
+    get "/webapp/log_in", AuthController, :webapp
+
     get "/log_in/via_tg", AuthController, :via_tg
+    get "/log_in/via_webapp", AuthController, :via_webapp
+  end
+
+  scope "/webapp", JokerCynicWeb.WebApp do
+    pipe_through [:browser, :webapp, :require_authenticated_user]
+
+    live_session :require_authenticated_user,
+      on_mount: [{JokerCynicWeb.AuthPlug, :ensure_authenticated}] do
+      live "/", MenuLive
+    end
   end
 
   # Other scopes may use custom stacks.
