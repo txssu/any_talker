@@ -3,14 +3,18 @@ defmodule JokerCynicBot.Reply do
 
   use TypedStruct
 
+  alias ExGram.Model.Message
+
   require Logger
 
   typedstruct do
     field :text, String.t()
     field :direct_message_only, boolean(), default: false
     field :halt, boolean(), default: false
+    field :markdown, boolean(), default: false
+    field :on_sent, (Message.t() -> any()) | nil
 
-    field :message, ExGram.Dispatcher.parsed_message()
+    field :message, ExGram.Dispatcher.parsed_message() | nil
     field :context, ExGram.Cnt.t()
   end
 
@@ -33,23 +37,35 @@ defmodule JokerCynicBot.Reply do
   defp check_direct_message_only({:halt, reply}), do: {:halt, reply}
 
   defp check_direct_message_only({:cont, %__MODULE__{} = reply}) do
-    if reply.direct_message_only and reply.context.update.message.chat.type == "private" do
+    if not reply.direct_message_only or reply.context.update.message.chat.type == "private" do
       {:cont, reply}
     else
-      {:halt, nil}
+      {:halt, reply}
     end
   end
 
   defp send_reply({:halt, %__MODULE__{}}), do: :ok
 
-  defp send_reply({:cont, %__MODULE__{context: context, text: text}}) do
-    case ExGram.send_message(context.update.message.chat.id, text, bot: JokerCynicBot.Dispatcher.bot()) do
-      {:ok, %ExGram.Model.Message{message_id: id} = message} ->
+  defp send_reply({:cont, %__MODULE__{context: context, text: text} = reply}) do
+    case ExGram.send_message(context.update.message.chat.id, text, send_options(reply)) do
+      {:ok, %Message{message_id: id} = message} ->
         JokerCynic.Events.save_sent_message(id, message)
+        if reply.on_sent, do: reply.on_sent.(message)
         :ok
 
       {:error, error} ->
         Logger.error("Error sending message: #{error.message}")
     end
   end
+
+  defp send_options(reply) do
+    []
+    |> add_bot()
+    |> maybe_add_markdown(reply)
+  end
+
+  defp add_bot(options), do: [{:bot, JokerCynicBot.Dispatcher.bot()} | options]
+
+  defp maybe_add_markdown(options, %__MODULE__{markdown: true}), do: [{:parse_mode, "MarkdownV2"} | options]
+  defp maybe_add_markdown(options, _), do: options
 end

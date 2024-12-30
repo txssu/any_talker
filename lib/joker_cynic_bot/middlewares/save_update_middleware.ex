@@ -1,4 +1,4 @@
-defmodule JokerCynicBot.Middlewares.SaveUpdateMiddleware do
+defmodule JokerCynicBot.SaveUpdateMiddleware do
   @moduledoc false
   use ExGram.Middleware
 
