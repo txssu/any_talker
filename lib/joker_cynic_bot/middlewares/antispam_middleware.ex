@@ -18,11 +18,11 @@ defmodule JokerCynicBot.AntispamMiddleware do
       clean_bot_messages(left_chat_member, message)
     end
 
-    (message.new_chat_members || [])
-    |> Enum.reject(&(&1.id == bot_id))
-    |> case do
+    new_chat_members = Enum.reject(message.new_chat_members || [], &(&1.id == bot_id))
+
+    case new_chat_members do
       [] -> validate_message(context, message)
-      new_chat_members -> add_captcha(context, message, new_chat_members)
+      _list -> add_captcha(context, message, new_chat_members)
     end
   end
 
@@ -89,7 +89,7 @@ defmodule JokerCynicBot.AntispamMiddleware do
     """
   end
 
-  def welcome_message(user) do
+  defp welcome_message(user) do
     ~i"""
     Закуриваю 🚬, выдыхаю дым и с ехидной улыбкой шепчу: “Добро пожаловать в этот цирк, [#{user.first_name}](tg://user?id=#{user.id}), здесь каждый клоун думает, что он главная звезда\.”
     """
