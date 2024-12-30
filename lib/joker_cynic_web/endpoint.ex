@@ -1,4 +1,3 @@
-# credo:disable-for-this-file Credo.Check.Refactor.ModuleDependencies
 defmodule JokerCynicWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :joker_cynic
 

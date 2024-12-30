@@ -2,6 +2,8 @@ defmodule JokerCynic.Events.SentMessage do
   @moduledoc false
   use Ecto.Schema
 
+  @type t() :: %__MODULE__{}
+
   schema "sent_messages" do
     field :value, :map
 
