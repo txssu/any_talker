@@ -12,6 +12,7 @@ defmodule JokerCynicBot.Dispatcher do
   middleware(JokerCynicBot.SaveUpdateMiddleware)
   middleware(ExGram.Middleware.IgnoreUsername)
   middleware(JokerCynicBot.AntispamMiddleware)
+  middleware(JokerCynicBot.LoadDataMiddleware)
 
   @spec bot() :: :joker_cynic
   def bot, do: :joker_cynic

@@ -11,10 +11,10 @@ defmodule JokerCynicWeb.AuthController do
     data = Map.delete(params, "hash")
 
     if JokerCynicWeb.AuthPlug.valid_web_app_data?(data, hash) do
-      {:ok, user} =
-        user
-        |> Jason.decode!()
-        |> JokerCynic.Accounts.upsert_user()
+      attrs = Jason.decode!(user)
+
+      {:ok, user} = attrs |> Map.take(~w[id username first_name last_name]) |> JokerCynic.Accounts.upsert_user()
+      {:ok, user} = JokerCynic.Accounts.update_user(user, attrs)
 
       conn
       |> JokerCynicWeb.AuthPlug.log_in_user(user)
