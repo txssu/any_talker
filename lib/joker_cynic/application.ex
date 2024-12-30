@@ -20,7 +20,8 @@ defmodule JokerCynic.Application do
       # Start a worker by calling: JokerCynic.Worker.start_link(arg)
       # {JokerCynic.Worker, arg},
       # Start to serve requests, typically the last entry
-      JokerCynicWeb.Endpoint
+      JokerCynicWeb.Endpoint,
+      {Oban, Application.fetch_env!(:joker_cynic, Oban)}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
