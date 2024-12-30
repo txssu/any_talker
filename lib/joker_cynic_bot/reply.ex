@@ -67,5 +67,5 @@ defmodule JokerCynicBot.Reply do
   defp add_bot(options), do: [{:bot, JokerCynicBot.Dispatcher.bot()} | options]
 
   defp maybe_add_markdown(options, %__MODULE__{markdown: true}), do: [{:parse_mode, "MarkdownV2"} | options]
-  defp maybe_add_markdown(options, _), do: options
+  defp maybe_add_markdown(options, _reply), do: options
 end
