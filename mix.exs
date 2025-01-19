@@ -62,6 +62,7 @@ defmodule JokerCynic.MixProject do
       {:typedstruct, "~> 0.5"},
       {:ecto_psql_extras, "~> 0.6"},
       {:oban, "~> 2.17"},
+      {:logger_json, "~> 6.1"},
       # Telegram
       {:ex_gram, "~> 0.54"},
       {:tesla, "~> 1.2"},

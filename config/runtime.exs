@@ -51,7 +51,8 @@ if config_env() == :prod do
     # ssl: true,
     url: database_url,
     pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
-    socket_options: maybe_ipv6
+    socket_options: maybe_ipv6,
+    start_apps_before_migration: [:logger_json]
 
   config :joker_cynic, JokerCynicWeb.Endpoint,
     url: [host: host, port: 443, scheme: "https"],
@@ -66,6 +67,9 @@ if config_env() == :prod do
     secret_key_base: secret_key_base
 
   config :joker_cynic, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
+
+  config :logger, :default_handler,
+    formatter: {LoggerJSON.Formatters.Elastic, [redactors: [{JokerCynicBot.TokenRedactor, []}]]}
 
   # ## SSL Support
   #
