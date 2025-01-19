@@ -1,0 +1,101 @@
+x-app-common: &app-common
+  build:
+    context: .
+  environment:
+    DATABASE_URL: "ecto://postgres:postgres@database/joker_cynic_prod"
+    SECRET_KEY_BASE: "/mtcJdz/VjE4ZfwVi/RMkKevnX027sfhZTM5FKvGxu6yMv3AnGf/kCIkeRvVclAh"
+    PHX_HOST: "localhost"
+    TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN} 
+  logging:
+    driver: "syslog"
+    options:
+      syslog-address: "tcp://localhost:5000"
+
+services:
+  database:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: joker_cynic_prod
+      PGDATA: /data/postgres
+    volumes:
+      - database:/data/postgres
+    restart: unless-stopped
+    healthcheck:
+      test: pg_isready -U postgres -h localhost
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  elasticsearch:
+    image: elasticsearch:7.17.27
+    environment:
+      discovery.type: single-node
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+    healthcheck:
+      test: ["CMD-SHELL", "curl --silent --fail localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+    networks:
+      - elastic
+
+  logstash:
+    image: logstash:7.17.27
+    environment:
+      discovery.seed_hosts: logstash
+      LS_JAVA_OPTS: "-Xms512m -Xmx512m"
+    volumes:
+      - ./logstash/pipeline/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    depends_on:
+      - elasticsearch
+    ports:
+      - "5000:5000"
+    command: logstash -f /usr/share/logstash/pipeline/logstash.conf
+    healthcheck:
+      test: ["CMD-SHELL", "curl --silent --fail localhost:9600 || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+    networks:
+      - elastic
+
+  kibana:
+    image: kibana:7.17.27
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    networks:
+      - elastic
+
+  app-db-migration:
+    <<: *app-common
+    command: bin/migrate
+    depends_on:
+      database:
+        condition: service_healthy
+      logstash:
+        condition: service_healthy
+
+
+  app:
+    <<: *app-common
+    restart: unless-stopped
+    depends_on:
+      app-db-migration:
+        condition: service_completed_successfully
+      database:
+        condition: service_healthy
+      logstash:
+        condition: service_healthy
+    ports:
+      - "4000:4000"
+
+volumes:
+  database:
+
+networks:
+  elastic:
+    driver: bridge
