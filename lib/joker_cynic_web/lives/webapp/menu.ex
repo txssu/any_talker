@@ -15,11 +15,13 @@ defmodule JokerCynicWeb.WebApp.MenuLive do
       <p class="text-tg-hint mt-2.5 text-center text-sm">Циничен как никогда</p>
     </section>
 
-    <section>
-      <h2 class="text-xl font-bold">Чаты</h2>
+    <section class="bg-tg-bg p-[15px] mt-5 rounded-xl">
+      <h2 class="text-center text-xl font-bold">Чаты</h2>
+      <p :if={@chats == []} class="text-[15px] text-tg-hint mt-2.5 text-center">Как одинокий зритель в пустом зале</p>
       <ul>
-        <li :for={chat <- @chats}>
-          {inspect(chat)}
+        <li :for={chat <- @chats} class="border-tg-section-separator border-b-2 pl-5 last:border-b-0">
+          <p class="text-[15px] py-2.5">{chat.title}</p>
+          <div class=" h-px"></div>
         </li>
       </ul>
     </section>

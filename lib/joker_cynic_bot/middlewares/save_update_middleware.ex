@@ -6,12 +6,12 @@ defmodule JokerCynicBot.SaveUpdateMiddleware do
   def call(%ExGram.Cnt{update: %ExGram.Model.Update{update_id: id} = update} = context, _options) do
     JokerCynic.Events.save_update(id, update)
 
-    chat = update.message.chat
+    with %{message: %{chat: chat}} <- update do
+      if chat.type != "private" do
+        user_id = update.message.from.id
 
-    if chat.type != "private" do
-      user_id = update.message.from.id
-
-      JokerCynic.Accounts.add_chat_member(user_id, chat.id)
+        JokerCynic.Accounts.add_chat_member(user_id, chat.id, chat.title)
+      end
     end
 
     context
