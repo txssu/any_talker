@@ -6,6 +6,7 @@ defmodule JokerCynic.Accounts do
   alias JokerCynic.Accounts.User
   alias JokerCynic.Accounts.UserToken
   alias JokerCynic.Repo
+  alias JokerCynic.Settings.ChatConfig
 
   @spec upsert_user(map()) :: {:ok, User.t()} | {:error, Ecto.Changeset.t()}
   def upsert_user(attrs) do
@@ -34,19 +35,28 @@ defmodule JokerCynic.Accounts do
     Repo.one(query)
   end
 
-  @spec add_chat_member(integer(), integer()) :: {:ok, ChatMember.t()}
-  def add_chat_member(user_id, chat_id) do
-    %ChatMember{user_id: user_id, chat_id: chat_id}
-    |> Ecto.Changeset.change()
-    |> Ecto.Changeset.unique_constraint(:user_id, name: "chats_members_user_id_chat_id_index")
-    |> Repo.insert()
+  @spec add_chat_member(integer(), integer(), String.t()) :: {:ok, any()} | {:error, any()} | Ecto.Multi.failure()
+  def add_chat_member(user_id, chat_id, chat_title) do
+    Ecto.Multi.new()
+    |> Ecto.Multi.insert(:chat_member, fn _schema ->
+      %ChatMember{user_id: user_id, chat_id: chat_id}
+      |> Ecto.Changeset.change()
+      |> Ecto.Changeset.unique_constraint(:user_id, name: "chats_members_chat_id_user_id_index")
+    end)
+    |> Ecto.Multi.run(:chat_config, fn _repo, _data ->
+      JokerCynic.Settings.upsert_chat_config(chat_id, chat_title)
+    end)
+    |> Repo.transaction()
   end
 
-  @spec list_user_chats(integer()) :: [ChatMember.t()]
+  @spec list_user_chats(integer()) :: [ChatConfig.t()]
   def list_user_chats(user_id) do
     query =
       from cm in ChatMember,
-        where: cm.user_id == ^user_id
+        where: cm.user_id == ^user_id,
+        left_join: cc in ChatConfig,
+        on: cc.id == cm.chat_id,
+        select: cc
 
     Repo.all(query)
   end
