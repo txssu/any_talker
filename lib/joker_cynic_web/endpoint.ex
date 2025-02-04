@@ -8,7 +8,8 @@ defmodule JokerCynicWeb.Endpoint do
     store: :cookie,
     key: "_joker_cynic_key",
     signing_salt: "zSI0UqgN",
-    same_site: "Lax"
+    same_site: "None",
+    secure: true
   ]
 
   socket "/live", Phoenix.LiveView.Socket,
