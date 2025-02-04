@@ -18,13 +18,17 @@
 // Include phoenix_html to handle method=PUT/DELETE in forms and buttons.
 import "phoenix_html"
 // Establish Phoenix Socket and LiveView configuration.
-import {Socket} from "phoenix"
-import {LiveSocket} from "phoenix_live_view"
+import { Socket } from "phoenix"
+import { LiveSocket } from "phoenix_live_view"
+import TelegramBack from "./telegram_back"
+
+const Hooks = { TelegramBack }
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
-  params: {_csrf_token: csrfToken}
+  params: { _csrf_token: csrfToken },
+  hooks: Hooks
 })
 
 // connect if there are any LiveViews on the page
@@ -36,3 +40,8 @@ liveSocket.connect()
 // >> liveSocket.disableLatencySim()
 window.liveSocket = liveSocket
 
+if ('ontouchstart' in document.documentElement) {
+  document.documentElement.classList.add("touch");
+} else {
+  document.documentElement.classList.add("no-touch");
+}

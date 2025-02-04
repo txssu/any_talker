@@ -5,3 +5,27 @@
 @layer base {
   @import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
 }
+
+@layer components {
+  html.no-touch .hover-effect:hover, html.touch .hover-effect:active {
+    background-color: color-mix(in srgb, var(--tg-theme-text-color) 8%, transparent);
+  }
+
+  .tg-switch .checkbox-toggle {
+    transition: background-color .1s;
+  }
+
+  .tg-switch .checkbox-field-input:checked + .checkbox-toggle {
+    @apply bg-tg-accent-text;
+  }
+  
+  .tg-switch .checkbox-toggle-circle {
+    transition: border-color 0.1s,
+      transform 0.1s cubic-bezier(0.22, 0.75, 0.7, 1.3);
+  }
+  
+  .tg-switch .checkbox-field-input:checked + .checkbox-toggle .checkbox-toggle-circle {
+    @apply border-2 border-tg-accent-text;
+    transform: translate(calc((1.9375rem - 1.25rem + 3px)));
+  }
+}

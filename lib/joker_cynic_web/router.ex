@@ -19,7 +19,7 @@ defmodule JokerCynicWeb.Router do
 
     plug :put_secure_browser_headers, %{
       "content-security-policy" =>
-        "default-src 'self'; script-src-elem 'self' https://telegram.org; connect-src 'self'; img-src 'self' data: blob: https://t.me; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com;"
+        "default-src 'self'; script-src-elem 'self' https://telegram.org; connect-src 'self'; img-src 'self' data: blob: https://t.me; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; frame-ancestors https://web.telegram.org"
     }
   end
 
@@ -58,6 +58,7 @@ defmodule JokerCynicWeb.Router do
     live_session :require_authenticated_user,
       on_mount: [{JokerCynicWeb.AuthPlug, :ensure_authenticated}] do
       live "/", MenuLive
+      live "/c/:chat_id", ChatLive
     end
   end
 

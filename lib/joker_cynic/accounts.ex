@@ -60,4 +60,9 @@ defmodule JokerCynic.Accounts do
 
     Repo.all(query)
   end
+
+  @spec owner?(User.t()) :: boolean()
+  def owner?(%User{id: user_id}) do
+    Application.get_env(:joker_cynic, :owner_id) == user_id
+  end
 end
