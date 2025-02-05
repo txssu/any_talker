@@ -33,11 +33,12 @@ defmodule JokerCynicWeb.WebApp.ChatLive do
   def mount(%{"chat_id" => id}, _session, socket) do
     user_owner? = Accounts.owner?(socket.assigns.current_user)
 
-    dbg(socket.assigns.current_user)
-
     chat_config = Settings.get_chat_config(id)
 
-    {:ok, socket |> assign(user_owner?: user_owner?) |> assign_chat_config(chat_config)}
+    {:ok,
+     socket
+     |> assign(user_owner?: user_owner?)
+     |> assign_chat_config(chat_config)}
   end
 
   @impl Phoenix.LiveView

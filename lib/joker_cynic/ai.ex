@@ -5,6 +5,7 @@ defmodule JokerCynic.AI do
 
   require Logger
 
+  @spec ask(String.t()) :: String.t()
   def ask(message) do
     case OpenAICLient.completion([
            OpenAICLient.message("system", "Твоё имя Джокер Грёбанный-Циник"),
