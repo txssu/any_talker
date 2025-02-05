@@ -4,8 +4,8 @@ defmodule JokerCynicBot.PrivacyCommand do
   alias JokerCynicBot.Reply
 
   @spec call(Reply.t()) :: Reply.t()
-  def call(%Reply{message: message, context: context}) do
-    %Reply{text: privacy_policy(), direct_message_only: true, message: message, context: context}
+  def call(reply) do
+    %Reply{reply | text: privacy_policy(), direct_message_only: true}
   end
 
   defp privacy_policy do
