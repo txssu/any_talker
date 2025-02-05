@@ -47,9 +47,9 @@ config :joker_cynic,
   generators: [timestamp_type: :utc_datetime]
 
 # Configures Elixir's Logger
-config :logger, :console,
-  format: "$time $metadata[$level] $message\n",
-  metadata: [:request_id]
+config :logger, :default_formatter,
+  format: {JokerCynic.LogFormatter, :format},
+  metadata: [:request_id, :error_details]
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
