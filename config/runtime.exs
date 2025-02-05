@@ -20,6 +20,10 @@ if System.get_env("PHX_SERVER") do
   config :joker_cynic, JokerCynicWeb.Endpoint, server: true
 end
 
+config :joker_cynic, JokerCynic.AI.OpenAICLient,
+  api_url: System.get_env("OPENAI_URL"),
+  api_key: System.get_env("OPENAI_KEY")
+
 config :joker_cynic, JokerCynicBot.Token, token: System.get_env("TELEGRAM_BOT_TOKEN")
 config :joker_cynic, owner_id: "TELEGRAM_BOT_OWNER_ID" |> System.get_env() |> String.to_integer()
 

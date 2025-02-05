@@ -7,6 +7,7 @@ defmodule JokerCynicBot.Dispatcher do
   alias JokerCynicBot.Reply
 
   command("privacy", description: "Политика конфиденциальности")
+  command("ask", description: "Задать вопрос мудрецу")
 
   middleware(JokerCynicBot.AddTelemetryDataMiddleware)
   middleware(JokerCynicBot.SaveUpdateMiddleware)
@@ -44,6 +45,10 @@ defmodule JokerCynicBot.Dispatcher do
 
   defp execute_command(reply, {:command, :privacy, _msg}) do
     JokerCynicBot.PrivacyCommand.call(reply)
+  end
+
+  defp execute_command(reply, {:command, :ask, _msg}) do
+    JokerCynicBot.AskCommand.call(reply)
   end
 
   defp execute_command(reply, _msg) do
