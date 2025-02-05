@@ -11,10 +11,9 @@ defmodule JokerCynicBot.AntispamMiddleware do
 
   @spec call(ExGram.Cnt.t(), any()) :: ExGram.Cnt.t()
   def call(context, _options) do
-    if context.extra.chat.antispam do
-      do_call(context)
-    else
-      context
+    case context.extra.chat do
+      %{antispam: true} -> do_call(context)
+      _error -> context
     end
   end
 
