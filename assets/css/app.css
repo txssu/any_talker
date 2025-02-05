@@ -11,6 +11,10 @@
     background-color: color-mix(in srgb, var(--tg-theme-text-color) 8%, transparent);
   }
 
+  html.touch .hover-effect:active {
+    transition: background-color .1s;
+  }
+
   .tg-switch .checkbox-toggle {
     transition: background-color .1s;
   }
