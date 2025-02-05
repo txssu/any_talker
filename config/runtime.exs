@@ -21,6 +21,7 @@ if System.get_env("PHX_SERVER") do
 end
 
 config :joker_cynic, JokerCynicBot.Token, token: System.get_env("TELEGRAM_BOT_TOKEN")
+config :joker_cynic, owner_id: "TELEGRAM_BOT_OWNER_ID" |> System.get_env() |> String.to_integer()
 
 if config_env() == :prod do
   database_url =

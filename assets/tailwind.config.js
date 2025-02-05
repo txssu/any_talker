@@ -32,8 +32,7 @@ module.exports = {
         'tg-section-header-text': 'var(--tg-theme-section-header-text-color)',
         'tg-section-separator': 'var(--tg-theme-section-separator-color)',
         'tg-subtitle-text': 'var(--tg-theme-subtitle-text-color)',
-        'tg-destructive-text': 'var(--tg-theme-destructive-text-color)',
-
+        'tg-destructive-text': 'var(--tg-theme-destructive-text-color)'
       },
       spacing: {
         'tg-safe-top': 'var(--tg-safe-area-inset-top)',

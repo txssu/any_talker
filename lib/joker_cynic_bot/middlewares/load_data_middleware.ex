@@ -27,5 +27,7 @@ defmodule JokerCynicBot.LoadDataMiddleware do
 
   def call(context, _options) do
     context
+    |> add_extra(:user, nil)
+    |> add_extra(:chat, nil)
   end
 end
