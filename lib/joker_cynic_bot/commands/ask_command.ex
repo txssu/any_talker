@@ -12,7 +12,7 @@ defmodule JokerCynicBot.AskCommand do
         %Reply{reply | text: "Используй: /ask текст-вопроса"}
 
       text ->
-        reply_text = AI.ask(text)
+        reply_text = AI.ask(message.from.first_name, text)
 
         %Reply{reply | text: reply_text}
     end
