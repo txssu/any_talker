@@ -15,6 +15,7 @@ defmodule JokerCynic.Application do
       # Start the Finch HTTP client for sending emails
       {Finch, name: JokerCynic.Finch},
       # Telegram
+      {JokerCynic.AI.ContextStorage, []},
       ExGram,
       {JokerCynicBot.Dispatcher, [method: :polling, token: JokerCynicBot.Token.value()]},
       # Start a worker by calling: JokerCynic.Worker.start_link(arg)
