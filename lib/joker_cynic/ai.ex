@@ -3,35 +3,33 @@ defmodule JokerCynic.AI do
 
   alias JokerCynic.AI.ContextStorage
   alias JokerCynic.AI.Message
-  alias JokerCynic.AI.OpenAICLient
+  alias JokerCynic.AI.OpenAIClient
 
   require Logger
 
   @type history_key :: {integer(), integer()}
 
-  @spec ask(String.t(), String.t(), history_key() | nil) :: {String.t(), (history_key() -> :ok)} | nil
-  def ask(username, text, history_key) do
-    messages =
-      username
-      |> Message.new_from_user(text)
-      |> append_history(history_key)
+  @spec ask(history_key() | nil, Message.t()) :: {String.t(), callback_fun} | nil
+        when callback_fun: (history_key() | nil, Message.t() -> :ok)
+  def ask(history_key, message) do
+    messages = append_history(message, history_key)
 
-    fromatted_messages = JokerCynic.AI.Message.format_list(messages)
+    formatted_messages = JokerCynic.AI.Message.format_list(messages)
 
-    case OpenAICLient.completion(fromatted_messages) do
+    case OpenAIClient.completion(formatted_messages) do
       {:ok, reply_text} ->
-        {reply_text, add_reply_callback(reply_text, messages)}
+        {reply_text, add_reply_callback(messages)}
 
       {:error, error} ->
-        Logger.error("OpenAICLient error.", error_details: error)
+        Logger.error("OpenAIClient error.", error_details: error)
         nil
     end
   end
 
-  defp add_reply_callback(reply_text, messages) do
-    fn history_key ->
+  defp add_reply_callback(messages) do
+    fn history_key, message ->
       prompt = List.last(messages)
-      updated_history = [Message.new_from_assistant(reply_text) | messages]
+      updated_history = [message | messages]
 
       truncated_history =
         if Enum.count(updated_history) > 30 do
@@ -49,7 +47,7 @@ defmodule JokerCynic.AI do
   defp append_history(new_message, history_key) do
     previous_messages =
       (history_key && ContextStorage.get(history_key)) ||
-        [Message.new_from_system("Твоё имя Джокер Грёбанный-Циник. Only call users what the system message says.")]
+        [Message.prompt_message("Твоё имя Джокер Грёбаный-Циник. Only call users what the system message says.")]
 
     [new_message | previous_messages]
   end

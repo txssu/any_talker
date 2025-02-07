@@ -20,7 +20,7 @@ if System.get_env("PHX_SERVER") do
   config :joker_cynic, JokerCynicWeb.Endpoint, server: true
 end
 
-config :joker_cynic, JokerCynic.AI.OpenAICLient,
+config :joker_cynic, JokerCynic.AI.OpenAIClient,
   api_url: System.get_env("OPENAI_URL"),
   api_key: System.get_env("OPENAI_KEY")
 
