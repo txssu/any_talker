@@ -9,6 +9,7 @@ defmodule JokerCynic.Settings.ChatConfig do
   schema "chat_configs" do
     field :title, :string
     field :antispam, :boolean, default: false
+    field :ask_command, :boolean, default: false
 
     timestamps(type: :utc_datetime)
   end
@@ -16,7 +17,7 @@ defmodule JokerCynic.Settings.ChatConfig do
   @spec changeset(t(), map()) :: Ecto.Changeset.t()
   def changeset(chat_config, attrs) do
     chat_config
-    |> cast(attrs, [:antispam])
-    |> validate_required([:antispam])
+    |> cast(attrs, [:antispam, :ask_command])
+    |> validate_required([:antispam, :ask_command])
   end
 end

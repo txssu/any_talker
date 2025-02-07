@@ -23,6 +23,7 @@ defmodule JokerCynicWeb.WebApp.ChatLive do
       <div class="px-2">
         <.form for={@form} phx-change="save">
           <.switch label="Антиспам" field={@form[:antispam]} />
+          <.switch label="Команда /ask" field={@form[:ask_command]} />
         </.form>
       </div>
     </.section>
