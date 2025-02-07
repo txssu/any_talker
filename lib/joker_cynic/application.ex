@@ -12,6 +12,7 @@ defmodule JokerCynic.Application do
       JokerCynic.Repo,
       {DNSCluster, query: Application.get_env(:joker_cynic, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: JokerCynic.PubSub},
+      JokerCynic.RateLimit,
       # Start the Finch HTTP client for sending emails
       {Finch, name: JokerCynic.Finch},
       # Telegram

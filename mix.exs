@@ -64,6 +64,7 @@ defmodule JokerCynic.MixProject do
       {:oban, "~> 2.17"},
       {:logger_json, "~> 6.1"},
       {:nebulex, "~> 2.6"},
+      {:hammer, "~> 7.0"},
       # Telegram
       {:ex_gram, "~> 0.54"},
       {:tesla, "~> 1.2"},
