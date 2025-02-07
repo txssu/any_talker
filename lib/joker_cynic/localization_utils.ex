@@ -1,6 +1,7 @@
 defmodule JokerCynic.LocalizationUtils do
   @moduledoc false
 
+  @spec pluralize(integer(), String.t(), String.t(), String.t()) :: String.t()
   def pluralize(number, one, few, many) do
     n = rem(abs(number), 100)
 
@@ -10,7 +11,7 @@ defmodule JokerCynic.LocalizationUtils do
       case rem(n, 10) do
         1 -> one
         n when n in 2..4 -> few
-        _ -> many
+        _other -> many
       end
     end
   end

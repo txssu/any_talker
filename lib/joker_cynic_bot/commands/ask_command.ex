@@ -8,13 +8,31 @@ defmodule JokerCynicBot.AskCommand do
 
   @impl JokerCynicBot.Command
   def call(%Reply{message: {:command, :ask, message}} = reply) do
-    case validate_rate("ask:#{message.from.id}") do
-      :ok ->
-        reply(message.text, reply, message, reply.context.bot_info.id)
+    with :ok <- validate_config(reply.context.extra.chat),
+         :ok <- validate_text(message.text),
+         :ok <- validate_rate("ask:#{message.from.id}") do
+      reply(reply, message, reply.context.bot_info.id)
+    else
+      {:error, :not_enabled} ->
+        feature_toggle_reply(reply)
+
+      {:error, :empty_text} ->
+        usage_reply(reply)
 
       {:error, :rate_limit, time_left_ms} ->
         rate_limit_reply(time_left_ms, reply)
     end
+  end
+
+  defp feature_toggle_reply(reply) do
+    text =
+      "Я тут, чтобы наслаждаться своим внутренним fonk, а не выдавать поток слов.\n(в этом чате команда недоступна)"
+
+    %Reply{reply | text: text}
+  end
+
+  defp usage_reply(reply) do
+    %Reply{reply | text: "Используй: /ask текст-вопроса"}
   end
 
   defp rate_limit_reply(time_left_ms, reply) do
@@ -30,7 +48,7 @@ defmodule JokerCynicBot.AskCommand do
     %Reply{reply | text: text}
   end
 
-  defp reply(text, reply, message, bot_id) when text != "" and is_binary(text) do
+  defp reply(reply, message, bot_id) do
     parsed_message = parse_message(message, bot_id)
 
     {reply_text, reply_callback} =
@@ -40,10 +58,6 @@ defmodule JokerCynicBot.AskCommand do
       |> handle_ask_response()
 
     %Reply{reply | text: reply_text, on_sent: reply_callback}
-  end
-
-  defp reply(_text, reply, _message, _bot_id) do
-    %Reply{reply | text: "Используй: /ask текст-вопроса"}
   end
 
   defp handle_ask_response(nil) do
@@ -80,6 +94,12 @@ defmodule JokerCynicBot.AskCommand do
   defp history_key(%Message{chat: chat, message_id: message_id}) do
     {chat.id, message_id}
   end
+
+  defp validate_config(%{ask_command: true}), do: :ok
+  defp validate_config(_chat_config), do: {:error, :not_enabled}
+
+  defp validate_text(non_empty) when non_empty != "" and is_binary(non_empty), do: :ok
+  defp validate_text(_empty), do: {:error, :empty_text}
 
   defp validate_rate(user_id) do
     key = "ask:#{user_id}"
