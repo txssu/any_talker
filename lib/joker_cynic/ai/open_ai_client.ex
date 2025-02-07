@@ -1,9 +1,10 @@
 defmodule JokerCynic.AI.OpenAIClient do
   @moduledoc false
+  alias JokerCynic.AI.OpenAIResponse
 
   @type message :: %{role: String.t(), content: String.t()}
 
-  @spec completion([message()], Keyword.t()) :: {:error, any()} | {:ok, String.t()}
+  @spec completion([message()], Keyword.t()) :: {:error, any()} | {:ok, OpenAIResponse.t()}
   def completion(messages, options \\ []) do
     model = Keyword.get(options, :model, "gpt-4o-mini")
 
@@ -13,23 +14,14 @@ defmodule JokerCynic.AI.OpenAIClient do
     }
 
     with {:ok, %{body: body}} <- Tesla.post(client(), "/v1/chat/completions", body) do
-      get_content(body)
+      cast_response(body)
     end
   end
 
-  defp get_content(data) do
-    if error = data["error"] do
-      {:error, error}
-    else
-      maybe_content =
-        data
-        |> Access.get("choices")
-        |> List.wrap()
-        |> List.first()
-        |> Access.get("message")
-        |> Access.get("content")
-
-      if maybe_content, do: {:ok, maybe_content}, else: {:error, {:wrong_response_data, data}}
+  defp cast_response(data) do
+    case OpenAIResponse.cast(data) do
+      :error -> {:error, :cast_error}
+      ok -> ok
     end
   end
 
