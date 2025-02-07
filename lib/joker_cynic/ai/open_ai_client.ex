@@ -1,4 +1,4 @@
-defmodule JokerCynic.AI.OpenAICLient do
+defmodule JokerCynic.AI.OpenAIClient do
   @moduledoc false
 
   @type message :: %{role: String.t(), content: String.t()}
