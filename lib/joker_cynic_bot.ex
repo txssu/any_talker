@@ -7,6 +7,8 @@ defmodule JokerCynicBot do
   def command do
     quote do
       @behaviour JokerCynicBot.Command
+
+      import JokerCynic.LocalizationUtils
     end
   end
 
