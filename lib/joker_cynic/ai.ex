@@ -17,8 +17,8 @@ defmodule JokerCynic.AI do
     formatted_messages = JokerCynic.AI.Message.format_list(messages)
 
     case OpenAIClient.completion(formatted_messages) do
-      {:ok, reply_text} ->
-        {reply_text, add_reply_callback(messages)}
+      {:ok, open_ai_response} ->
+        {open_ai_response.text, add_reply_callback(messages)}
 
       {:error, error} ->
         Logger.error("OpenAIClient error.", error_details: error)
