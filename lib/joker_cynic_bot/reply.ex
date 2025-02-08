@@ -48,8 +48,8 @@ defmodule JokerCynicBot.Reply do
 
   defp send_reply({:cont, %__MODULE__{context: context, text: text} = reply}) do
     case ExGram.send_message(context.update.message.chat.id, text, send_options(reply)) do
-      {:ok, %Message{message_id: id} = message} ->
-        JokerCynic.Events.save_sent_message(id, message)
+      {:ok, message} ->
+        JokerCynic.Events.save_message(message)
         if reply.on_sent, do: reply.on_sent.(message)
         :ok
 

@@ -35,6 +35,13 @@ if config_env() == :prod do
       For example: ecto://USER:PASS@HOST/DATABASE
       """
 
+  warehouse_url =
+    System.get_env("WAREHOUSE_URL") ||
+      raise """
+      environment variable WAREHOUSE_URL is missing.
+      For example: ecto://USER:PASS@HOST/DATABASE
+      """
+
   maybe_ipv6 = if System.get_env("ECTO_IPV6") in ~w(true 1), do: [:inet6], else: []
 
   # The secret key base is used to sign/encrypt cookies and other secrets.
@@ -51,6 +58,13 @@ if config_env() == :prod do
 
   host = System.get_env("PHX_HOST") || "example.com"
   port = String.to_integer(System.get_env("PORT") || "4000")
+
+  config :joker_cynic, JokerCynic.ChRepo,
+    # ssl: true,
+    url: warehouse_url,
+    pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
+    socket_options: maybe_ipv6,
+    start_apps_before_migration: [:logger_json]
 
   config :joker_cynic, JokerCynic.Repo,
     # ssl: true,

@@ -24,6 +24,8 @@ config :joker_cynic, JokerCynic.AI.ContextStorage,
   gc_cleanup_min_timeout: :timer.seconds(10),
   gc_cleanup_max_timeout: :timer.minutes(10)
 
+config :joker_cynic, JokerCynic.ChRepo, priv: "priv/ch_repo"
+
 # Configures the mailer
 #
 # By default it uses the "Local" adapter which stores the emails
@@ -50,7 +52,7 @@ config :joker_cynic, Oban,
   repo: JokerCynic.Repo
 
 config :joker_cynic,
-  ecto_repos: [JokerCynic.Repo],
+  ecto_repos: [JokerCynic.Repo, JokerCynic.ChRepo],
   generators: [timestamp_type: :utc_datetime]
 
 # Configures Elixir's Logger
