@@ -15,7 +15,7 @@ defmodule JokerCynicWeb.AuthController do
 
       {:ok, user} =
         attrs
-        |> Map.take(~w[id username first_name last_name])
+        |> Map.take(~w[id username first_name last_name photo_url])
         |> JokerCynic.Accounts.upsert_user()
 
       {:ok, user} = JokerCynic.Accounts.update_user(user, attrs)

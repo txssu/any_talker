@@ -12,7 +12,7 @@ defmodule JokerCynic.Accounts do
   def upsert_user(attrs) do
     %User{}
     |> User.changeset(attrs)
-    |> Repo.insert(on_conflict: {:replace, ~w[username first_name last_name]a}, conflict_target: [:id])
+    |> Repo.insert(on_conflict: {:replace, ~w[username first_name last_name photo_url]a}, conflict_target: [:id])
   end
 
   @spec update_user(User.t(), map()) :: {:ok, User.t()}
