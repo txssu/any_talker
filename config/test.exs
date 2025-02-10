@@ -11,6 +11,7 @@ config :joker_cynic, JokerCynic.ChRepo,
   pool_size: System.schedulers_online() * 2
 
 config :joker_cynic, JokerCynic.Mailer, adapter: Swoosh.Adapters.Test
+config :joker_cynic, JokerCynic.PromEx, disabled: true
 
 # Configure your database
 #

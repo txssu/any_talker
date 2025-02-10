@@ -10,6 +10,16 @@ config :joker_cynic, JokerCynic.ChRepo,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
 
+config :joker_cynic, JokerCynic.PromEx,
+  grafana: [
+    folder_name: "JokerCynic",
+    host: "http://localhost:3000",
+    username: "admin",
+    password: "grafana",
+    upload_dashboards_on_start: true
+  ],
+  metrics_server: :disabled
+
 config :joker_cynic, JokerCynic.Repo,
   username: "postgres",
   password: "postgres",
@@ -71,6 +81,8 @@ config :joker_cynic, JokerCynicWeb.Endpoint,
     ]
   ]
 
+config :joker_cynic, :metrics_auth_token, "Bearer my-super-secret"
+
 # Enable dev routes for dashboard and mailbox
 config :joker_cynic, dev_routes: true
 
@@ -89,3 +101,5 @@ config :phoenix_live_view,
 
 # Disable swoosh api client as it is only required for production adapters.
 config :swoosh, :api_client, false
+
+config :unplug, :init_mode, :runtime
