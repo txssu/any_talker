@@ -85,7 +85,13 @@ if config_env() == :prod do
   config :joker_cynic, :metrics_auth_token, "Bearer #{System.get_env("METRICS_AUTH_TOKEN")}"
 
   config :logger, :default_handler,
-    formatter: {LoggerJSON.Formatters.Elastic, [redactors: [{JokerCynicBot.TokenRedactor, []}]]}
+    formatter:
+      {JokerCynic.LogFormatterJSON,
+       [
+         redactors: [{JokerCynicBot.TokenRedactor, []}],
+         metadata: [:error_details],
+         static_fields: [service: "joker_cynic"]
+       ]}
 
   # ## SSL Support
   #
