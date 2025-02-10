@@ -11,6 +11,9 @@ x-app-common: &app-common
     WAREHOUSE_PASSWORD: default
     WAREHOUSE_HOSTNAME: warehouse
     WAREHOUSE_DATABASE: joker_cynic_prod
+    METRICS_AUTH_TOKEN: my-super-secret
+    OPENAI_URL: ${OPENAI_URL}
+    OPENAI_KEY: ${OPENAI_KEY}
   logging:
     driver: "syslog"
     options:
@@ -93,6 +96,26 @@ services:
     volumes:
       - kibana:/usr/share/kibana/config
 
+  prometheus:
+    image: prom/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    restart: unless-stopped
+    volumes:
+      - ./docker/prometheus:/etc/prometheus
+      - prom_data:/prometheus
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - 3000:3000
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=grafana
+    volumes:
+      - ./docker/grafana:/etc/grafana/provisioning/datasources
+
   app-db-migration:
     <<: *app-common
     command: bin/migrate
@@ -124,6 +147,7 @@ volumes:
   warehouse:
   kibana:
   elasticsearch:
+  prom_data:
 
 networks:
   elastic:

@@ -82,6 +82,7 @@ if config_env() == :prod do
     secret_key_base: secret_key_base
 
   config :joker_cynic, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
+  config :joker_cynic, :metrics_auth_token, "Bearer #{System.get_env("METRICS_AUTH_TOKEN")}"
 
   config :logger, :default_handler,
     formatter: {LoggerJSON.Formatters.Elastic, [redactors: [{JokerCynicBot.TokenRedactor, []}]]}

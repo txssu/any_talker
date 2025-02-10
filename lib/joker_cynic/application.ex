@@ -8,6 +8,7 @@ defmodule JokerCynic.Application do
   @impl Application
   def start(_type, _args) do
     children = [
+      JokerCynic.PromEx,
       JokerCynicWeb.Telemetry,
       JokerCynic.Repo,
       JokerCynic.ChRepo,
