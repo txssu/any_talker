@@ -7,7 +7,8 @@ defmodule JokerCynic.ChRepo.Migrations.AddAiResponses do
       add :chat_id, :Int64, primary_key: true
       add :message_id, :Int64, primary_key: true
       add :text, :String
-      add :token_usage, :Int64
+      add :prompt_tokens, :Int64
+      add :completion_tokens, :Int64
       add :model, :String
 
       timestamps(type: :utc_datetime)
