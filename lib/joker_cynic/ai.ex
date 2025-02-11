@@ -57,6 +57,16 @@ defmodule JokerCynic.AI do
   defp insert_response(message, response) do
     response = %{response | user_id: message.user_id, chat_id: message.chat_id, message_id: message.message_id}
 
+    :telemetry.execute(
+      [:joker_cynic, :bot, :ai],
+      %{
+        prompt_tokens: response.prompt_tokens,
+        completion_tokens: response.completion_tokens,
+        total_tokens: response.prompt_tokens + response.completion_tokens
+      },
+      %{model: response.model}
+    )
+
     case ChRepo.insert(response) do
       {:ok, _data} -> nil
       {:error, error} -> Logger.error("OpenAIClient error.", error_details: error)

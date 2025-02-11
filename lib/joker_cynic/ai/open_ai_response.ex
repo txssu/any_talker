@@ -12,7 +12,8 @@ defmodule JokerCynic.AI.OpenAIResponse do
     field :user_id, Ch, type: "Int64"
 
     field :text, Ch, type: "String"
-    field :token_usage, Ch, type: "Int64"
+    field :prompt_tokens, Ch, type: "Int64"
+    field :completion_tokens, Ch, type: "Int64"
     field :model, Ch, type: "String"
 
     timestamps(type: :utc_datetime)
@@ -21,12 +22,14 @@ defmodule JokerCynic.AI.OpenAIResponse do
   @spec cast(map()) :: {:ok, t()} | :error
   def cast(response) do
     with {:ok, text} <- cast_text(response),
-         {:ok, token_usage} <- cast_token_usage(response),
+         {:ok, prompt_tokens} <- cast_token_usage(response, "prompt_tokens"),
+         {:ok, completion_tokens} <- cast_token_usage(response, "completion_tokens"),
          {:ok, model} <- cast_model(response) do
       {:ok,
        %__MODULE__{
          text: text,
-         token_usage: token_usage,
+         prompt_tokens: prompt_tokens,
+         completion_tokens: completion_tokens,
          model: model
        }}
     end
@@ -42,10 +45,10 @@ defmodule JokerCynic.AI.OpenAIResponse do
     |> validate_not_nil()
   end
 
-  defp cast_token_usage(response) do
+  defp cast_token_usage(response, key) do
     response
     |> Access.get("usage")
-    |> Access.get("total_tokens")
+    |> Access.get(key)
     |> validate_not_nil()
   end
 
