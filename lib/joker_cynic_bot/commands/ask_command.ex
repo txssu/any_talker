@@ -76,7 +76,13 @@ defmodule JokerCynicBot.AskCommand do
         AI.Message.new(reply.message_id, role, reply.text, username: reply.from.first_name, quote: quote_text)
       end
 
-    AI.Message.new(message.message_id, :user, message.text, username: message.from.first_name, reply: reply)
+    AI.Message.new(message.message_id, :user, message.text,
+      username: message.from.first_name,
+      reply: reply,
+      user_id: message.from.id,
+      message_id: message.message_id,
+      chat_id: message.chat.id
+    )
   end
 
   defp format_callback(reply_callback) do
