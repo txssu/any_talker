@@ -4,6 +4,7 @@ defmodule JokerCynic.AI do
   alias JokerCynic.AI.ContextStorage
   alias JokerCynic.AI.Message
   alias JokerCynic.AI.OpenAIClient
+  alias JokerCynic.ChRepo
 
   require Logger
 
@@ -18,6 +19,7 @@ defmodule JokerCynic.AI do
 
     case OpenAIClient.completion(formatted_messages) do
       {:ok, open_ai_response} ->
+        insert_response(message, open_ai_response)
         {open_ai_response.text, add_reply_callback(messages)}
 
       {:error, error} ->
@@ -50,5 +52,16 @@ defmodule JokerCynic.AI do
         [Message.prompt_message("Твоё имя Джокер Грёбаный-Циник. Only call users what the system message says.")]
 
     [new_message | previous_messages]
+  end
+
+  defp insert_response(message, response) do
+    response = %{response | user_id: message.user_id, chat_id: message.chat_id, message_id: message.message_id}
+
+    case ChRepo.insert(response) do
+      {:ok, _data} -> nil
+      {:error, error} -> Logger.error("OpenAIClient error.", error_details: error)
+    end
+
+    :ok
   end
 end

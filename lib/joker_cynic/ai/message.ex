@@ -6,6 +6,8 @@ defmodule JokerCynic.AI.Message do
 
   typedstruct do
     field :message_id, integer() | nil
+    field :chat_id, integer() | nil
+    field :user_id, integer() | nil
 
     field :role, role()
     field :username, String.t() | nil
@@ -23,7 +25,9 @@ defmodule JokerCynic.AI.Message do
       username: options[:username],
       text: text,
       reply: options[:reply],
-      quote: options[:quote]
+      quote: options[:quote],
+      user_id: options[:user_id],
+      chat_id: options[:chat_id]
     }
   end
 
