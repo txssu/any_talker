@@ -1,4 +1,5 @@
 # Copied from LoggerJSON.Formatters.Basic
+# credo:disable-for-this-file
 defmodule JokerCynic.LogFormatterJSON do
   @moduledoc false
   @behaviour LoggerJSON.Formatter
@@ -9,6 +10,8 @@ defmodule JokerCynic.LogFormatterJSON do
   import LoggerJSON.Formatter.Metadata
   import LoggerJSON.Formatter.RedactorEncoder
 
+  alias LoggerJSON.Formatter
+
   require Jason.Helpers
 
   @processed_metadata_keys ~w[file line mfa
@@ -16,7 +19,7 @@ defmodule JokerCynic.LogFormatterJSON do
                               otel_trace_id trace_id
                               conn]a
 
-  @impl true
+  @impl LoggerJSON.Formatter
   def format(%{level: level, meta: meta, msg: msg}, opts) do
     opts = Keyword.new(opts)
     encoder_opts = Keyword.get(opts, :encoder_opts, [])
@@ -24,7 +27,10 @@ defmodule JokerCynic.LogFormatterJSON do
     metadata_selector = update_metadata_selector(metadata_keys_or_selector, @processed_metadata_keys)
     redactors = Keyword.get(opts, :redactors, [])
 
-    static_fields = opts |> Keyword.get(:static_fields, %{}) |> Map.new()
+    static_fields =
+      opts
+      |> Keyword.get(:static_fields, %{})
+      |> Map.new()
 
     message =
       format_message(msg, meta, %{
@@ -78,8 +84,8 @@ defmodule JokerCynic.LogFormatterJSON do
           ),
         client:
           Jason.Helpers.json_map(
-            user_agent: LoggerJSON.Formatter.Plug.get_header(conn, "user-agent"),
-            ip: LoggerJSON.Formatter.Plug.remote_ip(conn)
+            user_agent: Formatter.Plug.get_header(conn, "user-agent"),
+            ip: Formatter.Plug.remote_ip(conn)
           )
       )
     end
