@@ -4,7 +4,7 @@ defmodule JokerCynic.PromEx do
 
   alias PromEx.Plugins
 
-  @impl true
+  @impl PromEx
   def plugins do
     [
       Plugins.Application,
@@ -17,7 +17,7 @@ defmodule JokerCynic.PromEx do
     ]
   end
 
-  @impl true
+  @impl PromEx
   def dashboard_assigns do
     [
       datasource_id: "Prometheus",
@@ -25,7 +25,7 @@ defmodule JokerCynic.PromEx do
     ]
   end
 
-  @impl true
+  @impl PromEx
   def dashboards do
     [
       {:prom_ex, "application.json"},
