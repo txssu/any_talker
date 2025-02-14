@@ -20,7 +20,7 @@ defmodule JokerCynic.AI do
     case OpenAIClient.completion(formatted_messages) do
       {:ok, open_ai_response} ->
         insert_response(message, open_ai_response)
-        {open_ai_response.text, add_reply_callback(messages)}
+        {open_ai_response.text, &add_reply(messages, &1, &2)}
 
       {:error, error} ->
         Logger.error("OpenAIClient error.", error_details: error)
@@ -28,22 +28,20 @@ defmodule JokerCynic.AI do
     end
   end
 
-  defp add_reply_callback(messages) do
-    fn history_key, message ->
-      prompt = List.last(messages)
-      updated_history = [message | messages]
+  defp add_reply(messages, history_key, message) do
+    prompt = List.last(messages)
+    updated_history = [message | messages]
 
-      truncated_history =
-        if Enum.count(updated_history) > 30 do
-          updated_history
-          |> Enum.take(29)
-          |> List.insert_at(29, prompt)
-        else
-          updated_history
-        end
+    truncated_history =
+      if Enum.count(updated_history) > 30 do
+        updated_history
+        |> Enum.take(29)
+        |> List.insert_at(29, prompt)
+      else
+        updated_history
+      end
 
-      ContextStorage.put(history_key, truncated_history)
-    end
+    ContextStorage.put(history_key, truncated_history)
   end
 
   defp append_history(new_message, history_key) do
