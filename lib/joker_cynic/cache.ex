@@ -1,4 +1,4 @@
-defmodule JokerCynic.AI.ContextStorage do
+defmodule JokerCynic.Cache do
   @moduledoc false
   use Nebulex.Cache,
     otp_app: :joker_cynic,
