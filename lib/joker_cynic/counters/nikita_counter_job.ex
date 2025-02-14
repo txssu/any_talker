@@ -19,7 +19,7 @@ defmodule JokerCynic.Counters.NikitaCounterJob do
       end
 
     message =
-      ExGram.send_message!(-1_002_295_394_555, "[Никита](tg://user?id=#{632_365_722}), ты сегодня занялся сексом?",
+      ExGram.send_message!(-1_001_549_164_880, "[Никита](tg://user?id=#{632_365_722}), ты сегодня занялся сексом?",
         reply_markup: markup,
         parse_mode: "MarkdownV2",
         bot: JokerCynicBot.Dispatcher.bot()
