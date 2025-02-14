@@ -65,7 +65,7 @@ defmodule JokerCynicBot.AskCommand do
   end
 
   defp handle_ask_response({reply_text, reply_callback}) do
-    {reply_text, format_callback(reply_callback)}
+    {reply_text, &adjust_params(reply_callback, &1)}
   end
 
   defp parse_message(message, bot_id) do
@@ -85,12 +85,10 @@ defmodule JokerCynicBot.AskCommand do
     )
   end
 
-  defp format_callback(reply_callback) do
-    fn message ->
-      key = history_key(message)
-      message = AI.Message.new(message.message_id, :assistant, message.text)
-      reply_callback.(key, message)
-    end
+  defp adjust_params(reply_callback, message) do
+    key = history_key(message)
+    message = AI.Message.new(message.message_id, :assistant, message.text)
+    reply_callback.(key, message)
   end
 
   defp history_key(nil) do
