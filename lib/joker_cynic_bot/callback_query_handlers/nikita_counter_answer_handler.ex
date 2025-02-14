@@ -8,7 +8,7 @@ defmodule JokerCynicBot.NikitaCounterAnswerHandler do
 
   @impl JokerCynicBot.Command
   def call(%Reply{message: {:callback_query, callback_query}} = reply) do
-    if callback_query.from.id == 632_365_722 do
+    if callback_query.from.id == 562_754_575 do
       message = callback_query.message
 
       answer_counter(message.chat.id, message.message_id, "#{message.text}\nОтвет дан.", answer(callback_query.data))
