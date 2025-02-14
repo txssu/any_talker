@@ -1,9 +1,9 @@
 defmodule JokerCynic.AI do
   @moduledoc false
 
-  alias JokerCynic.AI.ContextStorage
   alias JokerCynic.AI.Message
   alias JokerCynic.AI.OpenAIClient
+  alias JokerCynic.Cache
   alias JokerCynic.ChRepo
 
   require Logger
@@ -41,12 +41,12 @@ defmodule JokerCynic.AI do
         updated_history
       end
 
-    ContextStorage.put(history_key, truncated_history)
+    Cache.put(history_key, truncated_history)
   end
 
   defp append_history(new_message, history_key) do
     previous_messages =
-      (history_key && ContextStorage.get(history_key)) ||
+      (history_key && Cache.get(history_key)) ||
         [Message.prompt_message("Твоё имя Джокер Грёбаный-Циник. Only call users what the system message says.")]
 
     [new_message | previous_messages]
