@@ -29,7 +29,7 @@ defmodule JokerCynicBot.PromExTelemetry do
     )
   end
 
-  def token_metric(metric_prefix, name) do
+  defp token_metric(metric_prefix, name) do
     sum(metric_prefix ++ [:ai, name, :sum],
       event_name: [:joker_cynic, :bot, :ai],
       measurement: name,
