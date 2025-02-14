@@ -49,7 +49,13 @@ config :joker_cynic, JokerCynicWeb.Endpoint,
 config :joker_cynic, Oban,
   engine: Oban.Engines.Basic,
   queues: [default: 10],
-  repo: JokerCynic.Repo
+  repo: JokerCynic.Repo,
+  plugins: [
+    {Oban.Plugins.Cron,
+     crontab: [
+       {"0 23 * * *", JokerCynic.Counters.NikitaCounterJob}
+     ]}
+  ]
 
 config :joker_cynic,
   ecto_repos: [JokerCynic.Repo, JokerCynic.ChRepo],

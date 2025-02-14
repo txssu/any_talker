@@ -43,6 +43,10 @@ defmodule JokerCynicBot.Dispatcher do
     end
   end
 
+  defp execute_command(reply, {:callback_query, %{data: "counter-" <> _rest}}) do
+    JokerCynicBot.NikitaCounterAnswerHandler.call(reply)
+  end
+
   defp execute_command(reply, {:command, :privacy, _msg}) do
     JokerCynicBot.PrivacyCommand.call(reply)
   end
