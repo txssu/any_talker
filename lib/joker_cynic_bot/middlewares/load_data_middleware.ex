@@ -15,8 +15,7 @@ defmodule JokerCynicBot.LoadDataMiddleware do
     upsert_result =
       message_user
       |> Map.from_struct()
-      |> Map.take(~w[id username first_name last_name]a)
-      |> Accounts.upsert_user()
+      |> Accounts.upsert_user(~w[username first_name last_name]a)
 
     maybe_user =
       case upsert_result do
