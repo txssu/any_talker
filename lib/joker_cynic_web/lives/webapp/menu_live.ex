@@ -22,11 +22,11 @@ defmodule JokerCynicWeb.WebApp.MenuLive do
       <:header>Чаты</:header>
       <p :if={@chats == []} class="text-[15px] text-tg-hint mt-2.5 text-center">Как одинокий зритель в пустом зале</p>
       <ul>
-        <li
-          :for={chat <- @chats}
-          class="border-tg-section-separator hover-effect h-[42px] flex items-center rounded-lg border-b-2 pl-5 last:border-b-0"
-        >
-          <.link navigate={~p"/webapp/c/#{chat.id}"}>
+        <li :for={chat <- @chats}>
+          <.link
+            navigate={~p"/webapp/c/#{chat.id}"}
+            class="border-tg-section-separator hover-effect h-[42px] flex items-center rounded-lg border-b-2 pl-5 last:border-b-0"
+          >
             <span class="text-[15px] py-2.5">{chat.title}</span>
           </.link>
         </li>

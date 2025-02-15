@@ -8,11 +8,11 @@ defmodule JokerCynic.Accounts do
   alias JokerCynic.Repo
   alias JokerCynic.Settings.ChatConfig
 
-  @spec upsert_user(map()) :: {:ok, User.t()} | {:error, Ecto.Changeset.t()}
-  def upsert_user(attrs) do
+  @spec upsert_user(map(), [atom()]) :: {:ok, User.t()} | {:error, Ecto.Changeset.t()}
+  def upsert_user(attrs, keys) do
     %User{}
     |> User.changeset(attrs)
-    |> Repo.insert(on_conflict: {:replace, ~w[username first_name last_name photo_url]a}, conflict_target: [:id])
+    |> Repo.insert(on_conflict: {:replace, keys}, conflict_target: [:id])
   end
 
   @spec update_user(User.t(), map()) :: {:ok, User.t()}
