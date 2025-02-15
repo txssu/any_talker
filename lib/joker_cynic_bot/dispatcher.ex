@@ -52,7 +52,7 @@ defmodule JokerCynicBot.Dispatcher do
   end
 
   defp execute_command(reply, {:command, :ask, _msg}) do
-    JokerCynicBot.AskCommand.call(reply)
+    JokerCynicBot.TypingStatus.with_typing(&JokerCynicBot.AskCommand.call/1, reply)
   end
 
   defp execute_command(reply, _msg) do
