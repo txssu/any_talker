@@ -62,10 +62,21 @@ defmodule JokerCynicBot.Reply do
     []
     |> add_bot()
     |> maybe_add_markdown(reply)
+    |> maybe_add_reply_to(reply)
   end
 
   defp add_bot(options), do: [{:bot, JokerCynicBot.Dispatcher.bot()} | options]
 
   defp maybe_add_markdown(options, %__MODULE__{markdown: true}), do: [{:parse_mode, "MarkdownV2"} | options]
   defp maybe_add_markdown(options, _reply), do: options
+
+  defp maybe_add_reply_to(options, reply) do
+    if reply.context.update.message.chat.type == "private" do
+      options
+    else
+      message = reply.context.update.message
+      reply_to = %ExGram.Model.ReplyParameters{message_id: message.message_id, chat_id: message.chat.id}
+      [{:reply_parameters, reply_to} | options]
+    end
+  end
 end
