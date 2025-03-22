@@ -4,7 +4,6 @@ defmodule JokerCynic.AI do
   alias JokerCynic.AI.Message
   alias JokerCynic.AI.OpenAIClient
   alias JokerCynic.Cache
-  alias JokerCynic.ChRepo
 
   require Logger
 
@@ -64,11 +63,6 @@ defmodule JokerCynic.AI do
       },
       %{model: response.model}
     )
-
-    case ChRepo.insert(response) do
-      {:ok, _data} -> nil
-      {:error, error} -> Logger.error("OpenAIClient error.", error_details: error)
-    end
 
     :ok
   end
