@@ -1,6 +1,5 @@
 import Config
-
-alias JokerCynic.Utils
+import JokerCynic.Utils
 
 # config/runtime.exs is executed for all environments, including
 # during releases. It is executed after compilation and before the
@@ -23,12 +22,12 @@ if System.get_env("PHX_SERVER") do
 end
 
 config :joker_cynic, JokerCynic.AI.OpenAIClient,
-  api_url: System.get_env("OPENAI_URL"),
+  api_url: System.get_env("OPENAI_URL", "https://api.openai.com/"),
   api_key: System.get_env("OPENAI_KEY"),
-  proxy_url: "OPENAI_PROXY_URL" |> System.get_env() |> Utils.parse_proxy_config()
+  proxy_url: "OPENAI_PROXY_URL" |> System.get_env() |> parse_proxy_config()
 
 config :joker_cynic, JokerCynicBot.Token, token: System.get_env("TELEGRAM_BOT_TOKEN")
-config :joker_cynic, owner_id: "TELEGRAM_BOT_OWNER_ID" |> System.get_env() |> String.to_integer()
+config :joker_cynic, owner_id: get_env_and_transform("TELEGRAM_BOT_OWNER_ID", &String.to_integer/1)
 
 if config_env() == :prod do
   database_url =
@@ -52,7 +51,12 @@ if config_env() == :prod do
       You can generate one by calling: mix phx.gen.secret
       """
 
-  host = System.get_env("PHX_HOST") || "example.com"
+  host =
+    System.get_env("PHX_HOST") ||
+      raise """
+      environment variable PHX_HOST is missing.
+      """
+
   port = String.to_integer(System.get_env("PORT") || "4000")
 
   config :joker_cynic, JokerCynic.Repo,

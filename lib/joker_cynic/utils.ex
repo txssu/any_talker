@@ -15,4 +15,10 @@ defmodule JokerCynic.Utils do
   rescue
     _error -> :error
   end
+
+  def get_env_and_transform(name, transformer) do
+    if value = System.get_env(name) do
+      transformer.(value)
+    end
+  end
 end
