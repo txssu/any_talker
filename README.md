@@ -1,18 +1,17 @@
 # JokerCynic
 
-To start your Phoenix server:
+## Envs
 
-  * Run `mix setup` to install and setup dependencies
-  * Start Phoenix endpoint with `mix phx.server` or inside IEx with `iex -S mix phx.server`
+| Environment | Variable                | Required | Description                                         |
+|-------------|-------------------------|----------|-----------------------------------------------------|
+| DEV         | `OPENAI_URL`            | No       | URL for OpenAI API                                  |
+| DEV         | `OPENAI_KEY`            | Yes      | API key for OpenAI                                  |
+| DEV         | `OPENAI_PROXY_URL`      | No       | Proxy URL for OpenAI API                            |
+| DEV         | `TELEGRAM_BOT_OWNER_ID` | No       | Telegram Bot Owner ID                               |
+| DEV         | `TELEGRAM_BOT_TOKEN`    | Yes      | Token for Telegram Bot                              |
+| PROD        | `DATABASE_URL`          | Yes      | Production Database URL                             |
+| PROD        | `SECRET_KEY_BASE`       | Yes      | You can generate one by calling: mix phx.gen.secret |
+| PROD        | `PHX_HOST`              | Yes      | Domain for webapp                                   |
+| PROD        | `METRICS_AUTH_TOKEN`    | No       | Random string                                       |
 
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
-
-Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
-
-## Learn more
-
-  * Official website: https://www.phoenixframework.org/
-  * Guides: https://hexdocs.pm/phoenix/overview.html
-  * Docs: https://hexdocs.pm/phoenix
-  * Forum: https://elixirforum.com/c/phoenix-forum
-  * Source: https://github.com/phoenixframework/phoenix
+**Note**: In the development environment, both DEV and PROD variables are accessible.
