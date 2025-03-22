@@ -65,11 +65,6 @@ defmodule JokerCynic.AI do
       %{model: response.model}
     )
 
-    case Repo.insert(response) do
-      {:ok, _data} -> nil
-      {:error, error} -> Logger.error("OpenAIClient error.", error_details: error)
-    end
-
     :ok
   end
 end
