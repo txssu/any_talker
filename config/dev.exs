@@ -1,15 +1,6 @@
 import Config
 
 # Configure your database
-config :joker_cynic, JokerCynic.ChRepo,
-  username: "default",
-  password: "default",
-  hostname: "localhost",
-  database: "joker_cynic_prod",
-  stacktrace: true,
-  show_sensitive_data_on_connection_error: true,
-  pool_size: 10
-
 config :joker_cynic, JokerCynic.PromEx,
   grafana: [
     folder_name: "JokerCynic",

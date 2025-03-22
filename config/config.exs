@@ -17,8 +17,6 @@ config :esbuild,
     env: %{"NODE_PATH" => Path.expand("../deps", __DIR__)}
   ]
 
-config :joker_cynic, JokerCynic.ChRepo, priv: "priv/ch_repo"
-
 # Configures the mailer
 #
 # By default it uses the "Local" adapter which stores the emails
@@ -51,7 +49,7 @@ config :joker_cynic, Oban,
   ]
 
 config :joker_cynic,
-  ecto_repos: [JokerCynic.Repo, JokerCynic.ChRepo],
+  ecto_repos: [JokerCynic.Repo],
   generators: [timestamp_type: :utc_datetime]
 
 # Configures Elixir's Logger

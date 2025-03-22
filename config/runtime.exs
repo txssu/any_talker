@@ -52,16 +52,6 @@ if config_env() == :prod do
   host = System.get_env("PHX_HOST") || "example.com"
   port = String.to_integer(System.get_env("PORT") || "4000")
 
-  config :joker_cynic, JokerCynic.ChRepo,
-    # ssl: true,
-    username: System.get_env("WAREHOUSE_USERNAME"),
-    password: System.get_env("WAREHOUSE_PASSWORD"),
-    hostname: System.get_env("WAREHOUSE_HOSTNAME"),
-    database: System.get_env("WAREHOUSE_DATABASE"),
-    pool_size: String.to_integer(System.get_env("WAREHOUSE_POOL_SIZE") || "10"),
-    socket_options: maybe_ipv6,
-    start_apps_before_migration: [:logger_json]
-
   config :joker_cynic, JokerCynic.Repo,
     # ssl: true,
     url: database_url,

@@ -1,15 +1,5 @@
 import Config
 
-alias Ecto.Adapters.SQL.Sandbox
-
-config :joker_cynic, JokerCynic.ChRepo,
-  username: "default",
-  password: "default",
-  hostname: "localhost",
-  database: "joker_cynic_test#{System.get_env("MIX_TEST_PARTITION")}",
-  pool: Sandbox,
-  pool_size: System.schedulers_online() * 2
-
 config :joker_cynic, JokerCynic.Mailer, adapter: Swoosh.Adapters.Test
 config :joker_cynic, JokerCynic.PromEx, disabled: true
 
@@ -23,7 +13,7 @@ config :joker_cynic, JokerCynic.Repo,
   password: "postgres",
   hostname: "localhost",
   database: "joker_cynic_test#{System.get_env("MIX_TEST_PARTITION")}",
-  pool: Sandbox,
+  pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: System.schedulers_online() * 2
 
 # We don't run a server during test. If one is required,

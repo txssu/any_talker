@@ -11,7 +11,6 @@ defmodule JokerCynic.Application do
       JokerCynic.PromEx,
       JokerCynicWeb.Telemetry,
       JokerCynic.Repo,
-      JokerCynic.ChRepo,
       {DNSCluster, query: Application.get_env(:joker_cynic, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: JokerCynic.PubSub},
       JokerCynic.RateLimit,

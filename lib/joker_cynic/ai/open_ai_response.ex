@@ -1,22 +1,17 @@
 defmodule JokerCynic.AI.OpenAIResponse do
   @moduledoc false
-  use Ecto.Schema
+  use TypedStruct
 
-  @type t() :: %__MODULE__{}
+  require Logger
 
-  @primary_key false
-  schema "ai_responses" do
-    field :message_id, Ch, type: "Int64"
-    field :chat_id, Ch, type: "Int64"
-
-    field :user_id, Ch, type: "Int64"
-
-    field :text, Ch, type: "String"
-    field :prompt_tokens, Ch, type: "Int64"
-    field :completion_tokens, Ch, type: "Int64"
-    field :model, Ch, type: "String"
-
-    timestamps(type: :utc_datetime)
+  typedstruct do
+    field :message_id, integer()
+    field :chat_id, integer()
+    field :user_id, integer()
+    field :text, String.t()
+    field :prompt_tokens, integer()
+    field :completion_tokens, integer()
+    field :model, String.t()
   end
 
   @spec cast(map()) :: {:ok, t()} | :error
