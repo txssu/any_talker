@@ -21,8 +21,7 @@ defmodule JokerCynic.AI do
         insert_response(message, open_ai_response)
         {open_ai_response.text, &add_reply(messages, &1, &2)}
 
-      {:error, error} ->
-        Logger.error("OpenAIClient error.", error_details: error)
+      {:error, _error} ->
         nil
     end
   end
