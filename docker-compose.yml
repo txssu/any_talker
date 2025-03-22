@@ -7,10 +7,6 @@ x-app-common: &app-common
     PHX_HOST: ${PHX_HOST:-localhost}
     TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN} 
     TELEGRAM_BOT_OWNER_ID: ${TELEGRAM_BOT_OWNER_ID}
-    WAREHOUSE_USERNAME: default
-    WAREHOUSE_PASSWORD: default
-    WAREHOUSE_HOSTNAME: warehouse
-    WAREHOUSE_DATABASE: joker_cynic_prod
     METRICS_AUTH_TOKEN: my-super-secret
     OPENAI_URL: ${OPENAI_URL}
     OPENAI_KEY: ${OPENAI_KEY}
@@ -77,8 +73,6 @@ services:
     depends_on:
       database:
         condition: service_healthy
-      warehouse:
-        condition: service_healthy
       promtail:
         condition: service_started
 
@@ -92,14 +86,11 @@ services:
         condition: service_healthy
       promtail:
         condition: service_started
-      warehouse:
-        condition: service_healthy
     ports:
       - "4000:4000"
 
 volumes:
   database:
-  warehouse:
   prom_data:
   logs:
 

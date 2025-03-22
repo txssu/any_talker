@@ -17,7 +17,12 @@ config :esbuild,
     env: %{"NODE_PATH" => Path.expand("../deps", __DIR__)}
   ]
 
-config :joker_cynic, JokerCynic.ChRepo, priv: "priv/ch_repo"
+config :joker_cynic, JokerCynic.AI.ContextStorage,
+  gc_interval: :timer.hours(12),
+  max_size: 1_000_000,
+  allocated_memory: 2_000_000_000,
+  gc_cleanup_min_timeout: :timer.seconds(10),
+  gc_cleanup_max_timeout: :timer.minutes(10)
 
 # Configures the mailer
 #
@@ -51,7 +56,7 @@ config :joker_cynic, Oban,
   ]
 
 config :joker_cynic,
-  ecto_repos: [JokerCynic.Repo, JokerCynic.ChRepo],
+  ecto_repos: [JokerCynic.Repo],
   generators: [timestamp_type: :utc_datetime]
 
 # Configures Elixir's Logger
