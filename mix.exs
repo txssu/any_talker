@@ -70,7 +70,8 @@ defmodule JokerCynic.MixProject do
       # Telegram
       {:ex_gram, "~> 0.54"},
       {:tesla, "~> 1.2"},
-      {:hackney, "~> 1.12"},
+      {:hackney, "~> 1.21"},
+      {:mint, "~> 1.7"},
       # Code quality
       {:styler, "~> 1.2", only: [:dev, :test], runtime: false},
       {:tailwind_formatter, "~> 0.4.0", only: [:dev, :test], runtime: false},
