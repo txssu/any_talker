@@ -2,6 +2,8 @@ defmodule JokerCynic.AI.OpenAIClient do
   @moduledoc false
   alias JokerCynic.AI.OpenAIResponse
 
+  require Logger
+
   @type message :: %{role: String.t(), content: String.t()}
 
   @spec completion([message()], Keyword.t()) :: {:error, any()} | {:ok, OpenAIResponse.t()}
@@ -20,8 +22,12 @@ defmodule JokerCynic.AI.OpenAIClient do
 
   defp cast_response(data) do
     case OpenAIResponse.cast(data) do
-      :error -> {:error, :cast_error}
-      ok -> ok
+      :error ->
+        Logger.error("OpenAIResponseCastError", response: data)
+        {:error, :cast_error}
+
+      ok ->
+        ok
     end
   end
 
