@@ -4,7 +4,6 @@ defmodule JokerCynic.AI do
   alias JokerCynic.AI.Message
   alias JokerCynic.AI.OpenAIClient
   alias JokerCynic.Cache
-  alias JokerCynic.Repo
 
   require Logger
 
