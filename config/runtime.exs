@@ -1,5 +1,7 @@
 import Config
 
+alias JokerCynic.Utils
+
 # config/runtime.exs is executed for all environments, including
 # during releases. It is executed after compilation and before the
 # system starts, so it is typically used to load production configuration
@@ -22,7 +24,8 @@ end
 
 config :joker_cynic, JokerCynic.AI.OpenAIClient,
   api_url: System.get_env("OPENAI_URL"),
-  api_key: System.get_env("OPENAI_KEY")
+  api_key: System.get_env("OPENAI_KEY"),
+  proxy_url: "OPENAI_PROXY_URL" |> System.get_env() |> Utils.parse_proxy_config()
 
 config :joker_cynic, JokerCynicBot.Token, token: System.get_env("TELEGRAM_BOT_TOKEN")
 config :joker_cynic, owner_id: "TELEGRAM_BOT_OWNER_ID" |> System.get_env() |> String.to_integer()

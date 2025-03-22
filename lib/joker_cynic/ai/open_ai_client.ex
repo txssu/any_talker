@@ -31,26 +31,30 @@ defmodule JokerCynic.AI.OpenAIClient do
   end
 
   defp api_url do
-    :joker_cynic
-    |> Application.get_env(__MODULE__)
-    |> Keyword.fetch!(:api_url)
+    fetch_env(:api_url)
   end
 
   defp api_key do
-    token =
-      :joker_cynic
-      |> Application.get_env(__MODULE__)
-      |> Keyword.fetch!(:api_key)
+    token = fetch_env(:api_key)
 
     "Bearer #{token}"
   end
 
   defp client do
-    Tesla.client([
-      {Tesla.Middleware.BaseUrl, api_url()},
-      {Tesla.Middleware.Headers, [{"authorization", api_key()}]},
-      Tesla.Middleware.JSON,
-      {Tesla.Middleware.Timeout, timeout: 30_000}
-    ])
+    Tesla.client(
+      [
+        {Tesla.Middleware.BaseUrl, api_url()},
+        {Tesla.Middleware.Headers, [{"authorization", api_key()}]},
+        Tesla.Middleware.JSON,
+        {Tesla.Middleware.Timeout, timeout: 30_000}
+      ],
+      {Tesla.Adapter.Mint, proxy: fetch_env(:proxy_url)}
+    )
+  end
+
+  defp fetch_env(key) do
+    :joker_cynic
+    |> Application.get_env(__MODULE__)
+    |> Keyword.fetch!(key)
   end
 end
