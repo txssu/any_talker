@@ -37,20 +37,6 @@ services:
       timeout: 5s
       retries: 10
 
-  warehouse:
-    image: "clickhouse/clickhouse-server"
-    environment:
-      CLICKHOUSE_PASSWORD: default
-      CLICKHOUSE_DB: joker_cynic_prod
-    volumes:
-      - warehouse:/var/lib/clickhouse/
-    restart: unless-stopped
-    healthcheck:
-      test: wget --no-verbose --tries=1 --spider http://localhost:8123/ping || exit 1
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
   loki:
     image: grafana/loki:latest
     ports:
