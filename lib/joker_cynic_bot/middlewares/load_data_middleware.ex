@@ -12,15 +12,21 @@ defmodule JokerCynicBot.LoadDataMiddleware do
         } = context,
         _options
       ) do
-    {:ok, user} =
+    upsert_result =
       message_user
       |> Map.from_struct()
       |> Accounts.upsert_user(~w[username first_name last_name]a)
 
+    maybe_user =
+      case upsert_result do
+        {:ok, user} -> user
+        _err -> nil
+      end
+
     chat = Settings.get_chat_config(message_chat.id)
 
     context
-    |> add_extra(:user, user)
+    |> add_extra(:user, maybe_user)
     |> add_extra(:chat, chat)
   end
 
