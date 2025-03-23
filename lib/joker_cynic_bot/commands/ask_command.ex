@@ -14,21 +14,11 @@ defmodule JokerCynicBot.AskCommand do
          :ok <- validate_rate("ask:#{message.from.id}") do
       reply(reply, message, reply.context.bot_info.id)
     else
-      {:error, :not_group} ->
-        not_group_reply(reply)
-
-      {:error, :not_enabled} ->
-        feature_toggle_reply(reply)
-
-      {:error, :empty_text} ->
-        usage_reply(reply)
-
-      {:error, :rate_limit, time_left_ms} ->
-        rate_limit_reply(time_left_ms, reply)
+      error -> error_reply(error, reply)
     end
   end
 
-  defp not_group_reply(reply) do
+  defp error_reply({:error, :not_group}, reply) do
     text = """
     разговаривать приватно с серой массой — всё равно что обсуждать "Войну и мир" с шулерами, господин, я предпочитаю лишь публичные трибуны для демонстрации своего величия.
     (команда доступна только в чатах)
@@ -37,18 +27,18 @@ defmodule JokerCynicBot.AskCommand do
     %Reply{reply | text: text}
   end
 
-  defp feature_toggle_reply(reply) do
+  defp error_reply({:error, :not_enabled}, reply) do
     text =
       "Я тут, чтобы наслаждаться своим внутренним fonk, а не выдавать поток слов.\n(в этом чате команда недоступна)"
 
     %Reply{reply | text: text}
   end
 
-  defp usage_reply(reply) do
+  defp error_reply({:error, :empty_text}, reply) do
     %Reply{reply | text: "Используй: /ask текст-вопроса"}
   end
 
-  defp rate_limit_reply(time_left_ms, reply) do
+  defp error_reply({:error, :rate_limit, time_left_ms}, reply) do
     hours = div(time_left_ms, 3_600_000)
     minutes = div(rem(time_left_ms, 3_600_000), 60_000)
 
