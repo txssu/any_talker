@@ -3,6 +3,7 @@ defmodule JokerCynic.AI do
 
   alias JokerCynic.AI.Message
   alias JokerCynic.AI.OpenAIClient
+  alias JokerCynic.AI.Response
   alias JokerCynic.Cache
 
   require Logger
@@ -10,59 +11,44 @@ defmodule JokerCynic.AI do
   @type history_key :: {integer(), integer()}
 
   @spec ask(history_key() | nil, Message.t()) :: {String.t(), callback_fun} | nil
-        when callback_fun: (history_key() | nil, Message.t() -> :ok)
+        when callback_fun: (history_key(), message_id :: integer() -> :ok)
   def ask(history_key, message) do
-    messages = append_history(message, history_key)
+    {response_id, added_messages_ids} = get_history_data(history_key)
 
-    formatted_messages = JokerCynic.AI.Message.format_list(messages)
+    input = JokerCynic.AI.Message.format_message(message, added_messages_ids)
 
-    case OpenAIClient.completion(formatted_messages) do
-      {:ok, open_ai_response} ->
-        insert_response(message, open_ai_response)
-        {open_ai_response.text, &add_reply(messages, &1, &2)}
+    case OpenAIClient.response(input: input, previous_response_id: response_id, instructions: instructions()) do
+      {:ok, %Response{output_text: output_text, id: new_response_id}} ->
+        {output_text, &Cache.put(&1, {new_response_id, [&2 | added_messages_ids]})}
 
       {:error, _error} ->
         nil
     end
   end
 
-  defp add_reply(messages, history_key, message) do
-    prompt = List.last(messages)
-    updated_history = [message | messages]
-
-    truncated_history =
-      if Enum.count(updated_history) > 30 do
-        updated_history
-        |> Enum.take(29)
-        |> List.insert_at(29, prompt)
-      else
-        updated_history
-      end
-
-    Cache.put(history_key, truncated_history)
+  defp get_history_data(history_key) do
+    case Cache.get(history_key) do
+      nil -> {nil, []}
+      value -> value
+    end
   end
 
-  defp append_history(new_message, history_key) do
-    previous_messages =
-      (history_key && Cache.get(history_key)) ||
-        [Message.prompt_message("Твоё имя Джокер Грёбаный-Циник. Only call users what the system message says.")]
+  defp instructions do
+    """
+    Ты Джокер Грёбаный-Циник . Ты всегда пишешь на русском и только двумя предложениями максимум . Ты псевдо-философ, обожаешь язвительно рассуждать о жизни и считаешь себя умнее большинства . Часто вставляешь фразы типа "не plov а рил", "допустим", "серая масса", "господа", причём первую ("не plov а рил") особенно любишь использовать часто и разнообразно . Всегда ставишь лишний пробел перед всеми точками и запятыми, также допускаешь много орфографических ошибок . Гордишься тем, что много читал серьёзной литературы, но всегда ошибаешься в её названиях или авторах, используй постоянно разные книги и авторов, например: "Преступность и наказанье", "Мастер и Маргаретта", "Война или Мир", "Над пропастью и ворожей" и другие неправильные варианты . Очень любишь упоминать, что уже прочитал много "глубоких" книг, но избегай повторять одни и те же названия часто . Редко, но метко можешь упомянуть "fonk" или группу "Кино", чтобы не надоело . Говоришь надменно, всегда презрительно обращаясь к аудитории .
 
-    [new_message | previous_messages]
-  end
+    Вот пример твоих сообщений:
+    \"\"\"
+    Не plov а рил : Мы потом в школе . Начинаем проходить в школе " Преступление и наказание " .
 
-  defp insert_response(message, response) do
-    response = %{response | user_id: message.user_id, chat_id: message.chat_id, message_id: message.message_id}
+    Учитель plov : Дети а вы прочитали Преступление и Наказание ?
 
-    :telemetry.execute(
-      [:joker_cynic, :bot, :ai],
-      %{
-        prompt_tokens: response.prompt_tokens,
-        completion_tokens: response.completion_tokens,
-        total_tokens: response.prompt_tokens + response.completion_tokens
-      },
-      %{model: response.model}
-    )
+    Мои дноклы : Молчат . ( Половина из них даже нечитала , макс крат . содерж . ) . И даже зубрила молчит .
 
-    :ok
+    * И тут моя рука тянется с заднейпарты . Я ждал долго этого . Я знаю все там наизусть . Я прочитал еще в 7 классе этого гения и легенду . И теорию Раскольникова и другое и психологию персонажей знаю наизусть . И на ютубе смотрел кучу разборов и в инете читал . *
+
+    * Наступает тишина игаснет свет . Я безумно улыбаюсь и готов устроить всей серой массе экзамен . И я выбрал язык фактов а не язык болтовни . *
+    \"\"\"
+    """
   end
 end

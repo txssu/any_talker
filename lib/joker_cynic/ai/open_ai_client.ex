@@ -1,39 +1,61 @@
 defmodule JokerCynic.AI.OpenAIClient do
   @moduledoc false
-  alias JokerCynic.AI.OpenAIResponse
+  import Pathex
+  import Pathex.Lenses
+
+  alias JokerCynic.AI.Response
 
   require Logger
 
-  @type message :: %{role: String.t(), content: String.t()}
-
-  @spec completion([message()], Keyword.t()) :: {:error, any()} | {:ok, OpenAIResponse.t()}
-  def completion(messages, options \\ []) do
-    model = Keyword.get(options, :model, "gpt-4o-mini")
-
+  @spec response(keyword()) :: {:ok, Response.t()} | {:error, any()}
+  def response(options) do
     body = %{
-      model: model,
-      messages: messages
+      input: Keyword.fetch!(options, :input),
+      instructions: Keyword.get(options, :instructions),
+      model: Keyword.get(options, :model, "gpt-4o-mini"),
+      previous_response_id: Keyword.get(options, :previous_response_id)
     }
 
-    with {:ok, %{body: body}} <- Tesla.post(client(), "/v1/chat/completions", body) do
-      cast_response(body)
+    with {:ok, %{body: body}} <- Tesla.post(client(), "/v1/responses", body) do
+      {:ok, cast_response(body)}
     end
   end
 
-  defp cast_response(data) do
-    case OpenAIResponse.cast(data) do
-      :error ->
-        Logger.error("OpenAIResponseCastError", response: data)
-        {:error, :cast_error}
-
-      ok ->
-        ok
-    end
+  defp cast_response(api_response) do
+    %Response{}
+    |> cast_response_id(api_response)
+    |> cast_output_text(api_response)
   end
 
-  @spec message(String.t(), String.t()) :: message()
-  def message(role \\ "user", content) do
-    %{role: role, content: content}
+  defp cast_response_id(response, api_response) do
+    %{response | id: api_response["id"]}
+  end
+
+  defp cast_output_text(response, api_response) do
+    output_texts =
+      Pathex.get(
+        api_response,
+        path("output")
+        ~> star()
+        ~> matching(%{"type" => "message"})
+        ~> path("content")
+        ~> star()
+        ~> matching(%{"type" => "output_text"})
+        ~> path("text")
+      )
+
+    output_text =
+      case output_texts do
+        nil ->
+          nil
+
+        list ->
+          list
+          |> List.flatten()
+          |> Enum.join()
+      end
+
+    %{response | output_text: output_text}
   end
 
   defp api_url do
@@ -54,7 +76,7 @@ defmodule JokerCynic.AI.OpenAIClient do
         Tesla.Middleware.JSON,
         {Tesla.Middleware.Timeout, timeout: 30_000}
       ],
-      {Tesla.Adapter.Mint, proxy: fetch_env(:proxy_url)}
+      {Tesla.Adapter.Mint, proxy: fetch_env(:proxy_url), timeout: 30_000}
     )
   end
 

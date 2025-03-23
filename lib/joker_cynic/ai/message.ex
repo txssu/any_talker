@@ -31,29 +31,14 @@ defmodule JokerCynic.AI.Message do
     }
   end
 
-  @spec prompt_message(String.t()) :: t()
-  def prompt_message(text) do
-    %__MODULE__{
-      role: :system,
-      text: text
-    }
-  end
-
-  @spec format_list([t()]) :: [%{role: role, content: String.t()}]
-  def format_list(messages) when is_list(messages) do
-    messages_ids = Enum.map(messages, & &1.message_id)
-
-    messages
-    |> Enum.flat_map(&format_message(&1, messages_ids))
-    |> Enum.reverse()
-  end
-
-  defp format_message(message, messages_ids) do
+  @spec format_message(t(), [integer()]) :: [%{role: :user | :system | :assistant, content: String.t()}]
+  def format_message(message, messages_ids) do
     []
     |> maybe_append_reply(message, messages_ids)
     |> maybe_append_quote(message)
     |> maybe_append_username(message)
     |> append_text(message)
+    |> Enum.reverse()
   end
 
   defp maybe_append_reply(result, message, messages_ids) do
