@@ -8,11 +8,15 @@ defmodule JokerCynicBot.AskCommand do
 
   @impl JokerCynicBot.Command
   def call(%Reply{message: {:command, :ask, message}} = reply) do
-    with :ok <- validate_config(reply.context.extra.chat),
+    with :ok <- validate_is_group(reply.context.extra.is_group),
+         :ok <- validate_config(reply.context.extra.chat),
          :ok <- validate_text(message.text),
          :ok <- validate_rate("ask:#{message.from.id}") do
       reply(reply, message, reply.context.bot_info.id)
     else
+      {:error, :not_group} ->
+        not_group_reply(reply)
+
       {:error, :not_enabled} ->
         feature_toggle_reply(reply)
 
@@ -22,6 +26,15 @@ defmodule JokerCynicBot.AskCommand do
       {:error, :rate_limit, time_left_ms} ->
         rate_limit_reply(time_left_ms, reply)
     end
+  end
+
+  defp not_group_reply(reply) do
+    text = """
+    разговаривать приватно с серой массой — всё равно что обсуждать "Войну и мир" с шулерами, господин, я предпочитаю лишь публичные трибуны для демонстрации своего величия.
+    (команда доступна только в чатах)
+    """
+
+    %Reply{reply | text: text}
   end
 
   defp feature_toggle_reply(reply) do
@@ -98,6 +111,9 @@ defmodule JokerCynicBot.AskCommand do
   defp history_key(%Message{chat: chat, message_id: message_id}) do
     {chat.id, message_id}
   end
+
+  defp validate_is_group(true), do: :ok
+  defp validate_is_group(_otherwise), do: {:error, :not_group}
 
   defp validate_config(%{ask_command: true}), do: :ok
   defp validate_config(_chat_config), do: {:error, :not_enabled}

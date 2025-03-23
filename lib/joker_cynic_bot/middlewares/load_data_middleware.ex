@@ -28,6 +28,7 @@ defmodule JokerCynicBot.LoadDataMiddleware do
     context
     |> add_extra(:user, maybe_user)
     |> add_extra(:chat, chat)
+    |> add_extra(:is_group, message_chat.id != message_user.id)
   end
 
   def call(context, _options) do
