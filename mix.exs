@@ -108,6 +108,7 @@ defmodule JokerCynic.MixProject do
         "credo --strict",
         "sobelow -i Config.HTTPS --skip --exit",
         "deps.unlock --check-unused",
+        "deps.audit",
         "dialyzer"
       ]
     ]
