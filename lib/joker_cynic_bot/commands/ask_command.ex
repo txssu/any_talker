@@ -86,9 +86,9 @@ defmodule JokerCynicBot.AskCommand do
   end
 
   defp adjust_params(reply_callback, message) do
-    key = history_key(message)
-    message = AI.Message.new(message.message_id, :assistant, message.text)
-    reply_callback.(key, message)
+    message
+    |> history_key()
+    |> reply_callback.(message.message_id)
   end
 
   defp history_key(nil) do
