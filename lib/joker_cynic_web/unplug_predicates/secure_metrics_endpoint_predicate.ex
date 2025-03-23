@@ -6,8 +6,6 @@ defmodule JokerCynicWeb.SecureMetricsEndpointPredicate do
   def call(conn, _opts) do
     expected_secret = metrics_token()
     match?([^expected_secret], Plug.Conn.get_req_header(conn, "authorization"))
-
-    true
   end
 
   defp metrics_token do
