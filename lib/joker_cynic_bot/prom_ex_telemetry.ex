@@ -17,23 +17,17 @@ defmodule JokerCynicBot.PromExTelemetry do
           reporter_options: [buckets: [50, 150, 400, 1000, 2_500, 10_000, 30_000]],
           unit: {:native, :millisecond}
         ),
-        token_metric(metric_prefix, :prompt_tokens),
-        token_metric(metric_prefix, :completion_tokens),
-        token_metric(metric_prefix, :total_tokens),
-        counter(metric_prefix ++ [:ai, :total_tokens, :counter],
+        sum(metric_prefix ++ [:ai, :tokens_consumption, :total],
+          event_name: [:joker_cynic, :bot, :ai],
+          measurement: :total_tokens,
+          tags: [:model]
+        ),
+        counter(metric_prefix ++ [:ai, :requests, :count],
           event_name: [:joker_cynic, :bot, :ai],
           measurement: :total_tokens,
           tags: [:model]
         )
       ]
-    )
-  end
-
-  defp token_metric(metric_prefix, name) do
-    sum(metric_prefix ++ [:ai, name, :sum],
-      event_name: [:joker_cynic, :bot, :ai],
-      measurement: name,
-      tags: [:model]
     )
   end
 end
