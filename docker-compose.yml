@@ -5,11 +5,8 @@ x-app-common: &app-common
     DATABASE_URL: "ecto://postgres:postgres@database/joker_cynic_prod"
     SECRET_KEY_BASE: "/mtcJdz/VjE4ZfwVi/RMkKevnX027sfhZTM5FKvGxu6yMv3AnGf/kCIkeRvVclAh"
     PHX_HOST: ${PHX_HOST:-localhost}
-    TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN} 
-    TELEGRAM_BOT_OWNER_ID: ${TELEGRAM_BOT_OWNER_ID}
     METRICS_AUTH_TOKEN: my-super-secret
-    OPENAI_URL: ${OPENAI_URL}
-    OPENAI_KEY: ${OPENAI_KEY}
+  env_file: .env
   logging:
     driver: "syslog"
     options:
