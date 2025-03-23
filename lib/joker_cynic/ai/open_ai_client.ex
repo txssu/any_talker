@@ -24,12 +24,14 @@ defmodule JokerCynic.AI.OpenAIClient do
   defp cast_response(api_response) do
     %Response{}
     |> cast_response_id(api_response)
+    |> cast_total_tokens(api_response)
+    |> cast_model(api_response)
     |> cast_output_text(api_response)
   end
 
-  defp cast_response_id(response, api_response) do
-    %{response | id: api_response["id"]}
-  end
+  defp cast_response_id(response, api_response), do: %{response | id: api_response["id"]}
+  defp cast_total_tokens(response, api_response), do: %{response | total_tokens: api_response["usage"]["total_tokens"]}
+  defp cast_model(response, api_response), do: %{response | model: api_response["model"]}
 
   defp cast_output_text(response, api_response) do
     output_texts =

@@ -118,68 +118,6 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 16,
-        "w": 3,
-        "x": 0,
-        "y": 13
-      },
-      "id": 3,
-      "options": {
-        "minVizHeight": 75,
-        "minVizWidth": 75,
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true,
-        "sizing": "auto"
-      },
-      "pluginVersion": "11.5.1",
-      "targets": [
-        {
-          "editorMode": "code",
-          "expr": "(\n  max_over_time(joker_cynic_prom_ex_bot_ai_prompt_tokens_sum{model=\"gpt-4o-mini-2024-07-18\"}[1d])\n  - min_over_time(joker_cynic_prom_ex_bot_ai_prompt_tokens_sum{model=\"gpt-4o-mini-2024-07-18\"}[1d])\n) * 0.0432 / 1000\n+\n(\n  max_over_time(joker_cynic_prom_ex_bot_ai_completion_tokens_sum{model=\"gpt-4o-mini-2024-07-18\"}[1d])\n  - min_over_time(joker_cynic_prom_ex_bot_ai_completion_tokens_sum{model=\"gpt-4o-mini-2024-07-18\"}[1d])\n) * 0.1728 / 1000\n",
-          "legendFormat": "__auto",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Money consumption",
-      "type": "gauge"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
             "mode": "palette-classic"
           },
           "custom": {
@@ -233,9 +171,9 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 21,
-        "x": 3,
+        "h": 10,
+        "w": 12,
+        "x": 0,
         "y": 13
       },
       "id": 4,
@@ -256,7 +194,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum by (model) (increase(joker_cynic_prom_ex_bot_ai_total_tokens_sum[$interval]))",
+          "expr": "sum by (model) (increase(joker_cynic_prom_ex_bot_ai_tokens_consumption_total[$interval]))",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -351,10 +289,10 @@
         ]
       },
       "gridPos": {
-        "h": 8,
-        "w": 21,
-        "x": 3,
-        "y": 21
+        "h": 10,
+        "w": 12,
+        "x": 12,
+        "y": 13
       },
       "id": 5,
       "options": {
@@ -374,7 +312,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum by (model) (increase(joker_cynic_prom_ex_bot_ai_total_tokens_counter[$interval]))",
+          "expr": "sum by (model) (increase(joker_cynic_prom_ex_bot_ai_requests_count[$interval]))",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
