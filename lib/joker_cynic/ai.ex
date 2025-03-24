@@ -21,7 +21,8 @@ defmodule JokerCynic.AI do
         hit_metrics(response)
         {response.output_text, &Cache.put(&1, {response.id, [&2 | added_messages_ids]})}
 
-      {:error, _error} ->
+      {:error, error} ->
+        Logger.error("OpenAiClientError", error_details: error)
         nil
     end
   end

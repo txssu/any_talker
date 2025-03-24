@@ -17,26 +17,30 @@ defmodule JokerCynic.AI.OpenAIClient do
     }
 
     with {:ok, %{body: body}} <- Tesla.post(client(), "/v1/responses", body) do
-      {:ok, cast_response(body)}
+      cast_response(body)
     end
   end
 
   defp cast_response(api_response) do
-    %Response{}
-    |> cast_response_id(api_response)
-    |> cast_total_tokens(api_response)
-    |> cast_model(api_response)
-    |> cast_output_text(api_response)
+    with {:ok, response_id} <- cast_response_id(api_response),
+         {:ok, total_tokens} <- cast_total_tokens(api_response),
+         {:ok, model} <- cast_model(api_response),
+         {:ok, output_text} <- cast_output_text(api_response) do
+      response = %Response{id: response_id, model: model, output_text: output_text, total_tokens: total_tokens}
+      {:ok, response}
+    else
+      :error -> {:error, api_response}
+    end
   end
 
-  defp cast_response_id(response, api_response), do: %{response | id: api_response["id"]}
-  defp cast_total_tokens(response, api_response), do: %{response | total_tokens: api_response["usage"]["total_tokens"]}
-  defp cast_model(response, api_response), do: %{response | model: api_response["model"]}
+  defp cast_response_id(api_response), do: check_nil(api_response["id"])
+  defp cast_total_tokens(api_response), do: check_nil(api_response["usage"]["total_tokens"])
+  defp cast_model(api_response), do: check_nil(api_response["model"])
 
-  defp cast_output_text(response, api_response) do
+  defp cast_output_text(api_response) do
     output_texts =
-      Pathex.get(
-        api_response,
+      api_response
+      |> Pathex.get(
         path("output")
         ~> star()
         ~> matching(%{"type" => "message"})
@@ -45,20 +49,17 @@ defmodule JokerCynic.AI.OpenAIClient do
         ~> matching(%{"type" => "output_text"})
         ~> path("text")
       )
+      |> List.wrap()
+      |> List.flatten()
 
-    output_text =
-      case output_texts do
-        nil ->
-          nil
-
-        list ->
-          list
-          |> List.flatten()
-          |> Enum.join()
-      end
-
-    %{response | output_text: output_text}
+    case output_texts do
+      [nil] -> :error
+      texts -> {:ok, Enum.join(texts)}
+    end
   end
+
+  defp check_nil(nil), do: :error
+  defp check_nil(value), do: {:ok, value}
 
   defp api_url do
     fetch_env(:api_url)
