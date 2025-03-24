@@ -21,6 +21,8 @@ if System.get_env("PHX_SERVER") do
   config :joker_cynic, JokerCynicWeb.Endpoint, server: true
 end
 
+config :joker_cynic, JokerCynic.AI, instructions: System.get_env("ASK_COMMAND_PROMPT")
+
 config :joker_cynic, JokerCynic.AI.OpenAIClient,
   api_url: System.get_env("OPENAI_URL", "https://api.openai.com/"),
   api_key: System.get_env("OPENAI_KEY"),
