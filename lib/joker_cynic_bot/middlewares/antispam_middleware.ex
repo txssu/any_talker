@@ -36,7 +36,7 @@ defmodule JokerCynicBot.AntispamMiddleware do
   defp clean_bot_messages(user, message) do
     if captcha = Antispam.get_captcha(user.id, message.chat.id) do
       delete_messages_ids = [captcha.join_message_id, message.message_id | captcha.message_ids]
-      ExGram.delete_messages!(captcha.chat_id, delete_messages_ids, bot: bot())
+      ExGram.delete_messages(captcha.chat_id, delete_messages_ids, bot: bot())
       Antispam.delete_captcha(captcha)
     end
   end
@@ -47,7 +47,7 @@ defmodule JokerCynicBot.AntispamMiddleware do
         context
 
       {:ok, captcha} ->
-        ExGram.delete_messages!(captcha.chat_id, [message.message_id | captcha.message_ids], bot: bot())
+        ExGram.delete_messages(captcha.chat_id, [message.message_id | captcha.message_ids], bot: bot())
         Antispam.delete_captcha(captcha)
 
         context
@@ -55,7 +55,7 @@ defmodule JokerCynicBot.AntispamMiddleware do
         |> add_extra(:middleware_reply, %Reply{context: context, text: welcome_message(message.from), markdown: true})
 
       {:error, captcha} ->
-        ExGram.ban_chat_member!(captcha.chat_id, captcha.user_id, bot: bot())
+        ExGram.ban_chat_member(captcha.chat_id, captcha.user_id, bot: bot())
         Antispam.add_message_to_delete(captcha, message.message_id)
         halt(context)
     end
