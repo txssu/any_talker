@@ -18,8 +18,10 @@ defmodule JokerCynic.Counters.NikitaCounterJob do
         end
       end
 
+    text = "[Никита](tg://user?id=#{562_754_575}), ты сегодня занялся сексом?"
+
     message =
-      ExGram.send_message!(-1_001_549_164_880, "[Никита](tg://user?id=#{632_365_722}), ты сегодня занялся сексом?",
+      ExGram.send_message!(-1_001_549_164_880, text,
         reply_markup: markup,
         parse_mode: "MarkdownV2",
         bot: JokerCynicBot.Dispatcher.bot()
@@ -27,7 +29,7 @@ defmodule JokerCynic.Counters.NikitaCounterJob do
 
     timeout_at = DateTime.add(DateTime.utc_now(), 30, :minute)
 
-    %{text: message.text, chat_id: message.chat.id, message_id: message.message_id}
+    %{text: text, chat_id: message.chat.id, message_id: message.message_id}
     |> CounterVerificationTimeoutJob.new(scheduled_at: timeout_at)
     |> Oban.insert()
 

@@ -44,7 +44,7 @@ config :joker_cynic, Oban,
   plugins: [
     {Oban.Plugins.Cron,
      crontab: [
-       {"0 23 * * *", JokerCynic.Counters.NikitaCounterJob}
+       {"0 18 * * *", JokerCynic.Counters.NikitaCounterJob}
      ]}
   ]
 

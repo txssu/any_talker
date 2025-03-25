@@ -12,6 +12,7 @@ defmodule JokerCynic.Counters.Helpers do
     ExGram.edit_message_text(new_confirmation_text,
       chat_id: chat_id,
       message_id: message_id,
+      parse_mode: "MarkdownV2",
       bot: JokerCynicBot.Dispatcher.bot()
     )
 
