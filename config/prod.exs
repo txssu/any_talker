@@ -7,6 +7,11 @@ import Config
 # before starting your production server.
 config :joker_cynic, JokerCynicWeb.Endpoint, cache_static_manifest: "priv/static/cache_manifest.json"
 
+config :joker_cynic,
+  nikita_id: 562_754_575,
+  nikita_chat_id: -1_001_549_164_880,
+  nikita_counter_timeout_min: 25
+
 # Do not print debug messages in production
 config :logger, level: :info
 
