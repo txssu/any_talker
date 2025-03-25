@@ -5,8 +5,10 @@ defmodule JokerCynic.Counters.CounterVerificationTimeoutJob do
   import JokerCynic.Counters.Helpers
 
   @impl Oban.Worker
-  def perform(%Oban.Job{args: %{"text" => text, "chat_id" => chat_id, "message_id" => message_id}}) do
-    answer_counter(chat_id, message_id, "#{text}\nВремя на ответ истекло.", "Никита. #{nikita_counter()}")
+  def perform(%Oban.Job{args: %{"message_id" => message_id}}) do
+    if not answered?(message_id) do
+      answer_counter(message_id, :timeout)
+    end
 
     :ok
   end

@@ -44,13 +44,18 @@ config :joker_cynic, Oban,
   plugins: [
     {Oban.Plugins.Cron,
      crontab: [
-       {"0 18 * * *", JokerCynic.Counters.NikitaCounterJob}
+       {"30 18 * * *", JokerCynic.Counters.NikitaCounterJob}
      ]}
   ]
 
 config :joker_cynic,
   ecto_repos: [JokerCynic.Repo],
   generators: [timestamp_type: :utc_datetime]
+
+config :joker_cynic,
+  nikita_id: 632_365_722,
+  nikita_chat_id: -1_002_634_925_169,
+  nikita_counter_timeout_min: 1
 
 # Configures Elixir's Logger
 config :logger, :default_formatter,
