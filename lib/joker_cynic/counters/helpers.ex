@@ -30,7 +30,7 @@ defmodule JokerCynic.Counters.Helpers do
       ExGram.send_message!(@nikita_chat_id, init_text(),
         reply_markup: markup,
         parse_mode: "MarkdownV2",
-        bot: JokerCynicBot.Dispatcher.bot()
+        bot: JokerCynicBot.bot()
       )
 
     mark_as_unanswered(message.message_id)
@@ -53,12 +53,12 @@ defmodule JokerCynic.Counters.Helpers do
       chat_id: @nikita_chat_id,
       message_id: message_id,
       parse_mode: "MarkdownV2",
-      bot: JokerCynicBot.Dispatcher.bot()
+      bot: JokerCynicBot.bot()
     )
 
     new_message_text = get_summary_text(summary_message_type)
 
-    ExGram.send_message(@nikita_chat_id, new_message_text, bot: JokerCynicBot.Dispatcher.bot())
+    ExGram.send_message(@nikita_chat_id, new_message_text, bot: JokerCynicBot.bot())
 
     mark_as_answered(message_id)
 

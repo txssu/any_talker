@@ -15,4 +15,6 @@ defmodule JokerCynicBot do
   defmacro __using__(which) when is_atom(which) do
     apply(__MODULE__, which, [])
   end
+
+  defdelegate bot, to: JokerCynicBot.Dispatcher
 end
