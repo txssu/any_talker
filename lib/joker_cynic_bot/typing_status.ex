@@ -37,7 +37,7 @@ defmodule JokerCynicBot.TypingStatus do
   def handle_info(:send_typing, chat_id), do: handle(chat_id)
 
   defp handle(chat_id) do
-    ExGram.send_chat_action!(chat_id, "typing", bot: JokerCynicBot.Dispatcher.bot())
+    ExGram.send_chat_action!(chat_id, "typing", bot: JokerCynicBot.bot())
     Process.send_after(self(), :send_typing, 5_000)
     {:noreply, chat_id}
   end

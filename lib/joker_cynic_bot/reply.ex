@@ -13,6 +13,7 @@ defmodule JokerCynicBot.Reply do
     field :halt, boolean(), default: false
     field :markdown, boolean(), default: false
     field :on_sent, (Message.t() -> any()) | nil
+    field :as_reply?, boolean()
 
     field :message, ExGram.Dispatcher.parsed_message() | nil
     field :context, ExGram.Cnt.t()
@@ -65,13 +66,13 @@ defmodule JokerCynicBot.Reply do
     |> maybe_add_reply_to(reply)
   end
 
-  defp add_bot(options), do: [{:bot, JokerCynicBot.Dispatcher.bot()} | options]
+  defp add_bot(options), do: [{:bot, JokerCynicBot.bot()} | options]
 
   defp maybe_add_markdown(options, %__MODULE__{markdown: true}), do: [{:parse_mode, "MarkdownV2"} | options]
   defp maybe_add_markdown(options, _reply), do: options
 
   defp maybe_add_reply_to(options, reply) do
-    if reply.context.update.message.chat.type == "private" do
+    if reply.context.update.message.chat.type == "private" or not is_nil(reply.as_reply?) do
       options
     else
       message = reply.context.update.message
