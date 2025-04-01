@@ -14,7 +14,7 @@ defmodule JokerCynicBot.AntispamMiddleware do
     end
   end
 
-  defp do_call(%{new_chat_members: %{} = new_chat_members} = message, context) do
+  defp do_call(%{new_chat_members: new_chat_members} = message, context) when is_list(new_chat_members) do
     bot_id = context.bot_info.id
 
     new_chat_members
@@ -24,7 +24,7 @@ defmodule JokerCynicBot.AntispamMiddleware do
     halt(context)
   end
 
-  defp do_call(%{left_chat_member: %{} = left_chat_member} = message, context) do
+  defp do_call(%{left_chat_member: left_chat_member} = message, context) when is_map(left_chat_member) do
     captcha = Antispam.get_captcha(left_chat_member.id, message.chat.id)
 
     if captcha.status in ~w[failed timed_out]a do
