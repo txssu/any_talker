@@ -12,8 +12,8 @@ defmodule JokerCynicBot.NikitaCounterAnswerHandler do
 
       answer_type =
         case callback_query.data do
-          "counter-yes" -> :normal
-          "counter-no" -> :lie
+          "counter-yes" -> :lie
+          "counter-no" -> :normal
         end
 
       Helpers.answer_counter(message.message_id, :nikita, answer_type)
