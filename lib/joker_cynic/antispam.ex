@@ -86,11 +86,15 @@ defmodule JokerCynic.Antispam do
   defp execute(%{status: status} = captcha, options) when status in ~w[timed_out failed]a do
     ExGram.ban_chat_member(captcha.chat_id, captcha.user_id, bot: bot())
 
-    resolving_message_id = Keyword.get(options, :message_id)
-    join_message_id = if status != :timed_out, do: captcha.join_message_id
-
     messages_to_delete =
-      Enum.reject([resolving_message_id, join_message_id, captcha.captcha_message_id], &is_nil/1)
+      Enum.reject(
+        [
+          Keyword.get(options, :message_id),
+          captcha.join_message_id,
+          captcha.captcha_message_id
+        ],
+        &is_nil/1
+      )
 
     ExGram.delete_messages(captcha.chat_id, messages_to_delete, bot: bot())
     captcha
