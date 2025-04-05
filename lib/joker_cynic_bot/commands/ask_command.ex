@@ -39,17 +39,23 @@ defmodule JokerCynicBot.AskCommand do
   end
 
   defp error_reply({:error, :rate_limit, time_left_ms}, reply) do
+    %Reply{
+      reply
+      | text: "Отстань, я занят!!\n(достигнут лимит запросов, попробуй через #{format_time(time_left_ms)})"
+    }
+  end
+
+  defp format_time(time_left_ms) do
     hours = div(time_left_ms, 3_600_000)
     minutes = div(rem(time_left_ms, 3_600_000), 60_000)
 
-    hour_word = pluralize(hours, "час", "часа", "часов")
-    minute_word = pluralize(minutes, "минута", "минуты", "минут")
-
-    text =
-      "Отстань, я занят!!\n(достигнут лимит запросов, попробуй через #{hours} #{hour_word} #{minutes} #{minute_word})"
-
-    %Reply{reply | text: text}
+    [format_unit(hours, "час", "часа", "часов"), format_unit(minutes, "минута", "минуты", "минут")]
+    |> Enum.reject(&is_nil/1)
+    |> Enum.join(" ")
   end
+
+  defp format_unit(0, _singular, _few, _many), do: nil
+  defp format_unit(n, singular, few, many), do: "#{n} #{pluralize(n, singular, few, many)}"
 
   defp reply(reply, message, bot_id) do
     parsed_message = parse_message(message, bot_id)
@@ -113,8 +119,8 @@ defmodule JokerCynicBot.AskCommand do
 
   defp validate_rate(user_id) do
     key = "ask:#{user_id}"
-    scale = :timer.hours(3)
-    limit = 8
+    scale = :timer.hours(2)
+    limit = 10
 
     case JokerCynic.RateLimit.hit(key, scale, limit) do
       {:allow, _count} ->
