@@ -73,6 +73,7 @@ defmodule JokerCynic.MixProject do
       {:tesla, "~> 1.2"},
       {:hackney, "~> 1.21"},
       {:mint, "~> 1.7"},
+      {:tzdata, "~> 1.1"},
       # Code quality
       {:styler, "~> 1.2", only: [:dev, :test], runtime: false},
       {:tailwind_formatter, "~> 0.4.0", only: [:dev, :test], runtime: false},
