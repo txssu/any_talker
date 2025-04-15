@@ -12,7 +12,7 @@ defmodule JokerCynic.AI.OpenAIClient do
     body = %{
       input: Keyword.fetch!(options, :input),
       instructions: Keyword.get(options, :instructions),
-      model: Keyword.get(options, :model, "gpt-4o-mini"),
+      model: Keyword.get(options, :model, "gpt-4.1-mini"),
       previous_response_id: Keyword.get(options, :previous_response_id)
     }
 
