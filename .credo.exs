@@ -110,7 +110,6 @@
           {Credo.Check.Readability.VariableNames, []},
           {Credo.Check.Readability.WithSingleClause, []},
           {Credo.Check.Readability.AliasAs, []},
-          {Credo.Check.Readability.BlockPipe, []},
           {Credo.Check.Readability.ImplTrue, []},
           {Credo.Check.Readability.MultiAlias, []},
           {Credo.Check.Readability.NestedFunctionCalls, []},
@@ -184,6 +183,7 @@
           {Credo.Check.Warning.UnsafeToAtom, []}
         ],
         disabled: [
+          {Credo.Check.Readability.BlockPipe, []},
           {Credo.Check.Refactor.ModuleDependencies, []}
         ]
       }

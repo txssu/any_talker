@@ -6,7 +6,6 @@
 |-------------|-------------------------|----------|-----------------------------------------------------|
 | DEV         | `OPENAI_URL`            | No       | URL for OpenAI API                                  |
 | DEV         | `OPENAI_KEY`            | Yes      | API key for OpenAI                                  |
-| DEV         | `OPENAI_PROXY_URL`      | No       | Proxy URL for OpenAI API                            |
 | DEV         | `TELEGRAM_BOT_OWNER_ID` | No       | Telegram Bot Owner ID                               |
 | DEV         | `TELEGRAM_BOT_TOKEN`    | Yes      | Token for Telegram Bot                              |
 | PROD        | `DATABASE_URL`          | Yes      | Production Database URL                             |

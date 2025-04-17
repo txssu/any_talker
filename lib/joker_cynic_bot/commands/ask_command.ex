@@ -3,7 +3,9 @@ defmodule JokerCynicBot.AskCommand do
   use JokerCynicBot, :command
 
   alias ExGram.Model.Message
+  alias ExGram.Model.PhotoSize
   alias JokerCynic.AI
+  alias JokerCynicBot.Attachments
   alias JokerCynicBot.Reply
 
   defguard not_empty_string(s) when is_binary(s) and s != ""
@@ -14,7 +16,7 @@ defmodule JokerCynicBot.AskCommand do
 
     with :ok <- validate_is_group(reply.context.extra.is_group),
          :ok <- validate_config(reply.context.extra.chat),
-         :ok <- validate_text(message, bot_id),
+         :ok <- validate_not_empty(message, bot_id),
          :ok <- validate_rate("ask:#{message.from.id}") do
       reply(reply, message, reply.context.bot_info.id)
     else
@@ -81,8 +83,8 @@ defmodule JokerCynicBot.AskCommand do
     {reply_text, &adjust_params(reply_callback, &1)}
   end
 
-  defp parse_message(%Message{text: text, caption: caption} = message, bot_id)
-       when not_empty_string(text) or not_empty_string(caption) do
+  defp parse_message(%Message{text: t, caption: c, photo: p} = message, bot_id)
+       when not_empty_string(t) or not_empty_string(c) or not is_nil(p) do
     message
     |> build_message(bot_id)
     |> add_reply(message, bot_id)
@@ -99,7 +101,8 @@ defmodule JokerCynicBot.AskCommand do
       username: message.from.first_name,
       user_id: message.from.id,
       message_id: message.message_id,
-      chat_id: message.chat.id
+      chat_id: message.chat.id,
+      image_url: get_image_url(message)
     )
   end
 
@@ -117,10 +120,19 @@ defmodule JokerCynicBot.AskCommand do
     reply =
       AI.Message.new(original_reply.message_id, role, message_text,
         username: original_reply.from.first_name,
-        quote: quote_text
+        quote: quote_text,
+        image_url: get_image_url(original_reply)
       )
 
     %{result | reply: reply}
+  end
+
+  defp get_image_url(%Message{photo: nil}), do: nil
+
+  defp get_image_url(%Message{photo: photos}) do
+    %PhotoSize{file_id: photo_id} = Attachments.best_fit_photo(photos)
+
+    Attachments.get_file_link(photo_id)
   end
 
   defp adjust_params(reply_callback, message) do
@@ -143,15 +155,15 @@ defmodule JokerCynicBot.AskCommand do
   defp validate_config(%{ask_command: true}), do: :ok
   defp validate_config(_chat_config), do: {:error, :not_enabled}
 
-  defp validate_text(%Message{text: t}, _bot_id) when not_empty_string(t), do: :ok
+  defp validate_not_empty(%Message{text: t}, _bot_id) when not_empty_string(t), do: :ok
 
-  defp validate_text(%Message{reply_to_message: %Message{from: %{id: bot_id}}}, bot_id), do: {:error, :empty_text}
+  defp validate_not_empty(%Message{reply_to_message: %Message{from: %{id: bot_id}}}, bot_id), do: {:error, :empty_text}
 
-  defp validate_text(%Message{reply_to_message: %Message{text: t, caption: c}}, _bot_id)
-       when not_empty_string(t) or not_empty_string(c),
+  defp validate_not_empty(%Message{reply_to_message: %Message{text: t, caption: c, photo: p}}, _bot_id)
+       when not_empty_string(t) or not_empty_string(c) or not is_nil(p),
        do: :ok
 
-  defp validate_text(_otherwise, _bot_id), do: {:error, :empty_text}
+  defp validate_not_empty(_otherwise, _bot_id), do: {:error, :empty_text}
 
   defp validate_rate(user_id) do
     key = "ask:#{user_id}"
