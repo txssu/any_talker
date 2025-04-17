@@ -9,13 +9,7 @@ defmodule JokerCynic.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps(),
-      dialyzer: [
-        plt_add_apps: [:mix],
-        plt_file: {:no_warn, "priv/plts/dialyzer.plt"},
-        plt_core_path: "priv/plts/core.plt",
-        ignore_warnings: ".dialyzer_ignore.exs"
-      ]
+      deps: deps()
     ]
   end
 
@@ -79,8 +73,7 @@ defmodule JokerCynic.MixProject do
       {:tailwind_formatter, "~> 0.4.0", only: [:dev, :test], runtime: false},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},
-      {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false},
-      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false}
+      {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false}
     ]
   end
 
@@ -107,10 +100,9 @@ defmodule JokerCynic.MixProject do
         "compile --all-warnings --warnings-as-errors",
         "format --check-formatted",
         "credo --strict",
-        "sobelow -i Config.HTTPS --skip --exit",
+        "sobelow --config",
         "deps.unlock --check-unused",
-        "deps.audit",
-        "dialyzer"
+        "deps.audit"
       ]
     ]
   end

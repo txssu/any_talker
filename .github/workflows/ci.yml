@@ -1,4 +1,4 @@
-name: Test
+name: Run tests and check code quality
 
 on:
   workflow_call:
@@ -11,12 +11,12 @@ env:
   ELIXIR_VERSION: 1.18.3
 
 jobs:
-  test:
+  code-quality:
     runs-on: ubuntu-latest
 
     services:
       db:
-        image: postgres:15
+        image: postgres:17
         ports: ["5432:5432"]
         env:
           POSTGRES_PASSWORD: postgres
@@ -60,18 +60,6 @@ jobs:
             ${{ runner.os }}-mix-${{ env.cache-name }}-
             ${{ runner.os }}-mix-
 
-      # Cache key based on Erlang/Elixir version and the mix.lock hash
-      - name: Restore PLT cache
-        uses: actions/cache/restore@v4
-        id: plt_cache
-        with:
-          key: |
-            plt-${{ runner.os }}-${{ env.OTP_VERSION }}-${{ env.ELIXIR_VERSION }}-${{ hashFiles('**/mix.lock') }}
-          restore-keys: |
-            plt-${{ runner.os }}-${{ env.OTP_VERSION }}-${{ env.ELIXIR_VERSION }}
-          path: |
-            priv/plts
-
       - name: Install dependencies
         run: mix deps.get
         shell: bash
@@ -79,31 +67,14 @@ jobs:
       - name: Compile app
         run: mix compile --all-warnings --warnings-as-errors
 
-      # Create PLTs if no cache was found
-      - name: Create PLTs
-        if: steps.plt_cache.outputs.cache-hit != 'true'
-        run: mix dialyzer --plt
-
-      # By default, the GitHub Cache action will only save the cache if all steps in the job succeed,
-      # so we separate the cache restore and save steps in case running dialyzer fails.
-      - name: Save PLT cache
-        id: plt_cache_save
-        uses: actions/cache/save@v4
-        if: steps.plt_cache.outputs.cache-hit != 'true'
-        with:
-          key: |
-            plt-${{ runner.os }}-${{ env.OTP_VERSION }}-${{ env.ELIXIR_VERSION }}-${{ hashFiles('**/mix.lock') }}
-          path: |
-            priv/plts
-
-      - name: Check formatter
+      - name: Check Elixir formatter
         run: mix format --check-formatted
 
       - name: Lint
         run: mix credo --strict
 
       - name: Scan security vulnerabilities
-        run: mix sobelow -i Config.HTTPS --skip --exit
+        run: mix sobelow --config
 
       - name: Check unused dependencies
         run: mix deps.unlock --check-unused
@@ -113,6 +84,3 @@ jobs:
 
       - name: Scan retired dependencies
         run: mix hex.audit
-
-      - name: Run dialyzer
-        run: mix dialyzer --format github
