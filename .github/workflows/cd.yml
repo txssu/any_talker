@@ -9,13 +9,13 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  run-ci:
+  code-quality:
     uses: ./.github/workflows/ci.yml
 
   build-and-push-image:
     name: Build and publish image
     needs:
-      - run-ci
+      - code-quality
     runs-on: ubuntu-latest
     permissions:
       contents: read
