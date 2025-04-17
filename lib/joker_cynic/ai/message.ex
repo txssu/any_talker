@@ -15,6 +15,8 @@ defmodule JokerCynic.AI.Message do
 
     field :reply, t() | nil
     field :quote, String.t() | nil
+
+    field :image_url, String.t() | nil
   end
 
   @spec new(integer(), role(), String.t(), keyword()) :: t()
@@ -27,7 +29,8 @@ defmodule JokerCynic.AI.Message do
       reply: options[:reply],
       quote: options[:quote],
       user_id: options[:user_id],
-      chat_id: options[:chat_id]
+      chat_id: options[:chat_id],
+      image_url: options[:image_url]
     }
   end
 
@@ -37,7 +40,7 @@ defmodule JokerCynic.AI.Message do
     |> maybe_append_reply(message, messages_ids)
     |> maybe_append_quote(message)
     |> maybe_append_username(message)
-    |> append_text(message)
+    |> append_content(message)
     |> Enum.reverse()
   end
 
@@ -47,7 +50,7 @@ defmodule JokerCynic.AI.Message do
     if reply && reply.message_id not in messages_ids do
       result
       |> maybe_append_username(reply)
-      |> append_text(reply)
+      |> append_content(reply)
     else
       result
     end
@@ -68,9 +71,24 @@ defmodule JokerCynic.AI.Message do
     end
   end
 
-  defp append_text(result, message) do
-    append(result, %{role: message.role, content: message.text})
+  defp append_content(result, message) do
+    append(result, %{role: message.role, content: build_content(message)})
   end
+
+  defp build_content(message) do
+    []
+    |> build_content_text(message)
+    |> build_content_image(message)
+    |> Enum.reverse()
+  end
+
+  defp build_content_text(content, %__MODULE__{text: nil}), do: content
+  defp build_content_text(content, %__MODULE__{text: t}), do: append(content, %{type: "input_text", text: t})
+
+  defp build_content_image(content, %__MODULE__{image_url: nil}), do: content
+
+  defp build_content_image(content, %__MODULE__{image_url: u}),
+    do: append(content, %{type: "input_image", image_url: u})
 
   defp append(list, elem) do
     [elem | list]

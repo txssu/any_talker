@@ -72,11 +72,6 @@ defmodule JokerCynic.AI.OpenAIClient do
   end
 
   defp client do
-    options =
-      [timeout: 30_000]
-      |> Keyword.put(:proxy, fetch_env(:proxy_url))
-      |> Enum.filter(&elem(&1, 1))
-
     Tesla.client(
       [
         {Tesla.Middleware.BaseUrl, api_url()},
@@ -84,7 +79,7 @@ defmodule JokerCynic.AI.OpenAIClient do
         Tesla.Middleware.JSON,
         {Tesla.Middleware.Timeout, timeout: 30_000}
       ],
-      {Tesla.Adapter.Mint, options}
+      {Tesla.Adapter.Hackney, recv_timeout: 30_000}
     )
   end
 
