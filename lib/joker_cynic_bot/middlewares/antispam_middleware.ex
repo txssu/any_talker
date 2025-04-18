@@ -4,8 +4,6 @@ defmodule JokerCynicBot.AntispamMiddleware do
 
   alias JokerCynic.Antispam
 
-  @type t :: ExGram.Model.Message.t()
-
   @spec call(ExGram.Cnt.t(), any()) :: ExGram.Cnt.t()
   def call(context, _options) do
     case context.extra.chat do
