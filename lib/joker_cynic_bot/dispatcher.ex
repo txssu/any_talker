@@ -11,6 +11,7 @@ defmodule JokerCynicBot.Dispatcher do
 
   middleware(JokerCynicBot.AddTelemetryDataMiddleware)
   middleware(JokerCynicBot.SaveUpdateMiddleware)
+  middleware(JokerCynicBot.CaptionToTextMiddleware)
   middleware(ExGram.Middleware.IgnoreUsername)
   middleware(JokerCynicBot.LoadDataMiddleware)
   middleware(JokerCynicBot.AntispamMiddleware)
