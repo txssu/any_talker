@@ -56,6 +56,13 @@ defmodule JokerCynicBot.Dispatcher do
     JokerCynicBot.TypingStatus.with_typing(&JokerCynicBot.AskCommand.call/1, reply)
   end
 
+  # Fast ban @DickGrowerBot
+  # Move to Antispam in future
+  defp execute_command(%{context: %{update: %{message: %{via_bot: %{id: 6_465_471_545}} = message}}} = reply, _msg) do
+    ExGram.delete_message(message.chat.id, message.message_id, bot: bot())
+    %Reply{reply | halt: true}
+  end
+
   defp execute_command(reply, _msg) do
     %Reply{reply | halt: true}
   end
