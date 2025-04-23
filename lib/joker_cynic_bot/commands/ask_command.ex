@@ -168,7 +168,7 @@ defmodule JokerCynicBot.AskCommand do
   defp validate_rate(user_id) do
     key = "ask:#{user_id}"
     scale = :timer.hours(2)
-    limit = 10
+    limit = 100
 
     case JokerCynic.RateLimit.hit(key, scale, limit) do
       {:allow, _count} ->
