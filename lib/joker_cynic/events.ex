@@ -1,7 +1,8 @@
 defmodule JokerCynic.Events do
   @moduledoc false
 
-  alias JokerCynic.Events.SentMessage
+  alias ExGram.Model.Message
+  alias JokerCynic.Events
   alias JokerCynic.Events.Update
   alias JokerCynic.Repo
 
@@ -19,10 +20,18 @@ defmodule JokerCynic.Events do
     :ok
   end
 
-  @spec save_sent_message(integer() | String.t(), map()) :: {:ok, SentMessage.t()}
-  def save_sent_message(id, message) do
-    value = remove_deep_nils(message)
-    Repo.insert(%SentMessage{id: id, value: value})
+  @spec save_new_message(Message.t()) :: :ok
+  def save_new_message(%Message{message_id: message_id, chat: %{id: chat_id}} = message) do
+    content = remove_deep_nils(message)
+
+    %Events.Message{message_id: message_id, chat_id: chat_id, content: content, direction: :received}
+    |> Ecto.Changeset.change()
+    # Ignore already saved received messages.
+    # Telegram sends updates again if bot can't process them.
+    |> Ecto.Changeset.unique_constraint(:id, name: "messages_pkey")
+    |> Repo.insert()
+
+    :ok
   end
 
   defp remove_deep_nils(map) when is_map(map) do
