@@ -10,8 +10,12 @@ defmodule JokerCynic.Events.Message do
     field :message_id, :integer, primary_key: true
     field :chat_id, :integer, primary_key: true
 
+    field :sent_date, :utc_datetime
+    field :from_id, :integer
+    field :text, :string
+    field :source, Ecto.Enum, values: ~w[telegram]a
+
     field :content, :map
-    field :direction, Ecto.Enum, values: ~w[received sent]a
 
     timestamps(type: :utc_datetime, updated_at: false)
   end
