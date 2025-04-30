@@ -21,15 +21,25 @@ defmodule JokerCynic.Events do
   end
 
   @spec save_new_message(Message.t()) :: :ok
-  def save_new_message(%Message{message_id: message_id, chat: %{id: chat_id}} = message) do
-    content = remove_deep_nils(message)
+  def save_new_message(%Message{} = message) do
+    utc_datetime = DateTime.from_unix!(message.date)
 
-    %Events.Message{message_id: message_id, chat_id: chat_id, content: content, direction: :received}
+    %Events.Message{
+      message_id: message.message_id,
+      chat_id: message.chat.id,
+      source: :telegram,
+      from_id: message.from.id,
+      text: message.text,
+      sent_date: utc_datetime
+    }
     |> Ecto.Changeset.change()
-    # Ignore already saved received messages.
+    # Set new data for already saved received messages.
     # Telegram sends updates again if bot can't process them.
-    |> Ecto.Changeset.unique_constraint(:id, name: "messages_pkey")
-    |> Repo.insert()
+    |> Ecto.Changeset.unique_constraint(:message_id_chat_id, name: "messages_pkey")
+    |> Repo.insert(
+      conflict_target: [:message_id, :chat_id],
+      on_conflict: {:replace_all_except, [:message_id, :chat_id]}
+    )
 
     :ok
   end
