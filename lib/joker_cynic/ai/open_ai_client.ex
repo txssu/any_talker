@@ -71,7 +71,15 @@ defmodule JokerCynic.AI.OpenAIClient do
     "Bearer #{token}"
   end
 
+  defp proxy_uri do
+    fetch_env(:proxy_uri)
+  end
+
   defp client do
+    proxy_opts = if(uri = proxy_uri(), do: {:proxy, uri})
+
+    adapter_opts = Enum.reject([{:recv_timeout, 30_000}, proxy_opts], &is_nil/1)
+
     Tesla.client(
       [
         {Tesla.Middleware.BaseUrl, api_url()},
@@ -79,7 +87,7 @@ defmodule JokerCynic.AI.OpenAIClient do
         Tesla.Middleware.JSON,
         {Tesla.Middleware.Timeout, timeout: 30_000}
       ],
-      {Tesla.Adapter.Hackney, recv_timeout: 30_000}
+      {Tesla.Adapter.Hackney, adapter_opts}
     )
   end
 

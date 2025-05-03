@@ -23,7 +23,8 @@ end
 
 config :joker_cynic, JokerCynic.AI.OpenAIClient,
   api_url: System.get_env("OPENAI_URL", "https://api.openai.com/"),
-  api_key: System.get_env("OPENAI_KEY")
+  api_key: System.get_env("OPENAI_KEY"),
+  proxy_uri: System.get_env("OPENAI_PROXY_URL")
 
 config :joker_cynic, JokerCynicBot.Token, token: System.get_env("TELEGRAM_BOT_TOKEN")
 config :joker_cynic, owner_id: get_env_and_transform("TELEGRAM_BOT_OWNER_ID", &String.to_integer/1)
