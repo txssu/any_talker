@@ -6,7 +6,11 @@ defmodule JokerCynicBot.PrivacyCommand do
 
   @impl JokerCynicBot.Command
   def call(reply) do
-    %Reply{reply | text: privacy_policy(), direct_message_only: true}
+    %Reply{
+      reply
+      | text: privacy_policy(),
+        for_dm: true
+    }
   end
 
   defp privacy_policy do

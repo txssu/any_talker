@@ -9,11 +9,11 @@ defmodule JokerCynicBot.Reply do
 
   typedstruct do
     field :text, String.t()
-    field :direct_message_only, boolean(), default: false
     field :halt, boolean(), default: false
     field :markdown, boolean(), default: false
     field :on_sent, (Message.t() -> any()) | nil
     field :as_reply?, boolean()
+    field :for_dm, boolean(), default: false
 
     field :message, ExGram.Dispatcher.parsed_message() | nil
     field :context, ExGram.Cnt.t()
@@ -28,34 +28,66 @@ defmodule JokerCynicBot.Reply do
   def execute(%__MODULE__{} = reply) do
     reply
     |> check_halt()
-    |> check_direct_message_only()
+    |> check_for_dm()
     |> send_reply()
   end
 
   defp check_halt(%__MODULE__{halt: true} = reply), do: {:halt, reply}
   defp check_halt(%__MODULE__{halt: false} = reply), do: {:cont, reply}
 
-  defp check_direct_message_only({:halt, reply}), do: {:halt, reply}
+  defp check_for_dm({:halt, reply}), do: {:halt, reply}
 
-  defp check_direct_message_only({:cont, %__MODULE__{} = reply}) do
-    if not reply.direct_message_only or reply.context.update.message.chat.type == "private" do
+  defp check_for_dm({:cont, %__MODULE__{for_dm: true} = reply}) do
+    if dm?(reply) do
+      # Already in DM, proceed normally
       {:cont, reply}
     else
-      {:halt, reply}
+      # In group chat, send content to DM and notify in group
+      send_to_dm(reply)
     end
+  end
+
+  defp check_for_dm({:cont, reply}), do: {:cont, reply}
+
+  defp send_to_dm(reply) do
+    user_id = reply.context.update.message.from.id
+
+    case do_send_message(user_id, reply.text, reply) do
+      :ok -> {:cont, %__MODULE__{reply | text: dm_success_message()}}
+      :error -> {:cont, %__MODULE__{reply | text: dm_error_message()}}
+    end
+  end
+
+  defp dm?(%__MODULE__{context: context}) do
+    context.update.message.chat.type == "private"
+  end
+
+  defp dm_success_message do
+    "Ответ отправлен в личные сообщения."
+  end
+
+  defp dm_error_message do
+    "Не удалось отправить сообщение в личные сообщения. Пожалуйста, разблокируйте бота и начните с ним диалог командой /start."
   end
 
   defp send_reply({:halt, %__MODULE__{}}), do: :ok
 
   defp send_reply({:cont, %__MODULE__{context: context, text: text} = reply}) do
-    case ExGram.send_message(context.update.message.chat.id, text, send_options(reply)) do
+    chat_id = context.update.message.chat.id
+    do_send_message(chat_id, text, reply)
+    :ok
+  end
+
+  defp do_send_message(chat_id, text, reply) do
+    case ExGram.send_message(chat_id, text, send_options(reply)) do
       {:ok, message} ->
         JokerCynic.Events.save_new_message(message)
         if reply.on_sent, do: reply.on_sent.(message)
         :ok
 
       {:error, error} ->
-        Logger.error("Error sending message: #{error.message}")
+        Logger.error("Error sending message: #{inspect(error)}")
+        :error
     end
   end
 
