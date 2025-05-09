@@ -8,6 +8,7 @@ defmodule JokerCynicBot.Dispatcher do
 
   command("privacy", description: "Политика конфиденциальности")
   command("ask", description: "Задать вопрос мудрецу")
+  command("v", description: "Версия бота")
 
   middleware(JokerCynicBot.AddTelemetryDataMiddleware)
   middleware(JokerCynicBot.SaveUpdateMiddleware)
@@ -54,6 +55,10 @@ defmodule JokerCynicBot.Dispatcher do
 
   defp execute_command(reply, {:command, :ask, _msg}) do
     JokerCynicBot.TypingStatus.with_typing(&JokerCynicBot.AskCommand.call/1, reply)
+  end
+
+  defp execute_command(reply, {:command, :v, _msg}) do
+    JokerCynicBot.VCommand.call(reply)
   end
 
   # Fast ban @DickGrowerBot
