@@ -6,39 +6,44 @@ defmodule JokerCynic.Statistics do
   import Ecto.Query
 
   alias JokerCynic.Accounts.User
+  alias JokerCynic.Events.Message
   alias JokerCynic.Repo
 
   @doc """
   Gets the top N message authors for a given time range.
 
   ## Parameters
-    * start_date - The start date for the time range (inclusive)
-    * end_date - The end date for the time range (inclusive)
-    * limit - The maximum number of authors to return (defaults to 3)
+    * start_date — inclusive start of the time range
+    * end_date — inclusive end of the time range
+    * chat_id — ID of the chat to filter messages by
+    * limit — maximum number of authors to return (defaults to 3)
 
   ## Returns
-    A list of maps with:
-    * from_id - The user ID of the message author
-    * message_count - The number of messages sent by the author
-    * user - User information if available
+  A list of maps with keys:
+    * :from_id — user ID of the author
+    * :message_count — number of messages they’ve sent
+    * :user — the `%JokerCynic.Accounts.User{}` struct for that author
   """
-  @spec get_top_message_authors(DateTime.t(), DateTime.t(), pos_integer()) :: [map()]
-  def get_top_message_authors(start_date, end_date, limit \\ 3) do
+  @spec get_top_message_authors(DateTime.t(), DateTime.t(), integer(), pos_integer()) :: [map()]
+  def get_top_message_authors(start_date, end_date, chat_id, limit \\ 3) do
     query =
-      from m in "messages",
-        where: m.sent_date >= ^start_date and m.sent_date <= ^end_date,
-        group_by: m.from_id,
-        select: %{from_id: m.from_id, message_count: count(m.message_id)},
-        order_by: [desc: count(m.message_id)],
+      from m in Message,
+        join: u in User,
+        on: u.id == m.from_id,
+        where:
+          m.sent_date >= ^start_date and
+            m.sent_date <= ^end_date and
+            m.chat_id == ^chat_id,
+        group_by: [u.id, m.from_id],
+        select: %{
+          from_id: m.from_id,
+          message_count: count(m.from_id),
+          user: u
+        },
+        order_by: [desc: count(m.from_id)],
         limit: ^limit
 
-    authors = Repo.all(query)
-
-    # Get user information for each author
-    Enum.map(authors, fn author ->
-      user = Repo.one(from u in User, where: u.id == ^author.from_id, select: u)
-      Map.put(author, :user, user)
-    end)
+    Repo.all(query)
   end
 
   @doc """
@@ -50,13 +55,13 @@ defmodule JokerCynic.Statistics do
   ## Returns
     A list of maps as per `get_top_message_authors/3`.
   """
-  @spec get_top_message_authors_today(pos_integer()) :: [map()]
-  def get_top_message_authors_today(limit \\ 3) do
+  @spec get_top_message_authors_today(pos_integer(), pos_integer()) :: [map()]
+  def get_top_message_authors_today(chat_id, limit \\ 3) do
     # Get today's date in UTC at midnight (00:00:00)
     today_start = DateTime.new!(Date.utc_today(), ~T[00:00:00.000], "Etc/UTC")
     # End of the day is just before midnight (23:59:59.999)
     today_end = DateTime.new!(Date.utc_today(), ~T[23:59:59.999], "Etc/UTC")
 
-    get_top_message_authors(today_start, today_end, limit)
+    get_top_message_authors(today_start, today_end, chat_id, limit)
   end
 end
