@@ -8,11 +8,12 @@ defmodule JokerCynicBot.StatCommand do
   alias JokerCynicBot.Reply
 
   @impl JokerCynicBot.Command
-  def call(reply) do
-    top_authors = Statistics.get_top_message_authors_today(3)
+  def call(%Reply{} = reply) do
+    {:command, :stat, message} = reply.message
+    top_authors = Statistics.get_top_message_authors_today(message.chat.id, 5)
 
     text = format_response(top_authors)
-    %Reply{reply | text: text, markdown: true}
+    %Reply{reply | text: text, for_dm: true, markdown: true}
   end
 
   defp format_response([]) do

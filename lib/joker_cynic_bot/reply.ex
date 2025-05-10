@@ -3,6 +3,8 @@ defmodule JokerCynicBot.Reply do
 
   use TypedStruct
 
+  import JokerCynicBot.MarkdownUtils
+
   alias ExGram.Model.Message
 
   require Logger
@@ -53,8 +55,8 @@ defmodule JokerCynicBot.Reply do
     user_id = reply.context.update.message.from.id
 
     case do_send_message(user_id, reply.text, reply) do
-      :ok -> {:cont, %__MODULE__{reply | text: dm_success_message()}}
-      :error -> {:cont, %__MODULE__{reply | text: dm_error_message()}}
+      :ok -> {:cont, %__MODULE__{reply | text: dm_success_message(), markdown: true}}
+      :error -> {:cont, %__MODULE__{reply | text: dm_error_message(), markdown: true}}
     end
   end
 
@@ -63,11 +65,11 @@ defmodule JokerCynicBot.Reply do
   end
 
   defp dm_success_message do
-    "Ответ отправлен в личные сообщения."
+    ~i"Ответ отправлен в личные сообщения\."
   end
 
   defp dm_error_message do
-    "Не удалось отправить сообщение в личные сообщения. Пожалуйста, разблокируйте бота и начните с ним диалог командой /start."
+    ~i"Не удалось отправить сообщение в личные сообщения\. Пожалуйста, разблокируйте бота и начните с ним диалог командой /start\."
   end
 
   defp send_reply({:halt, %__MODULE__{}}), do: :ok
