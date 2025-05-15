@@ -13,7 +13,9 @@ defmodule JokerCynic.Events.Message do
     field :sent_date, :utc_datetime
     field :from_id, :integer
     field :text, :string
-    field :source, Ecto.Enum, values: ~w[telegram]a
+    field :source, Ecto.Enum, values: ~w[telegram export]a
+
+    field :name_from_import, :string
 
     field :content, :map
 
