@@ -6,6 +6,8 @@ defmodule AnyTalker.Events do
   alias AnyTalker.Repo
   alias ExGram.Model.Message
 
+  @postgres_max_params 65_535
+
   def save_update(id, update) do
     value = remove_deep_nils(update)
 
@@ -38,6 +40,40 @@ defmodule AnyTalker.Events do
       conflict_target: [:message_id, :chat_id],
       on_conflict: {:replace_all_except, [:message_id, :chat_id]}
     )
+
+    :ok
+  end
+
+  def save_imported_messages(messages) do
+    messages
+    |> Stream.map(fn %Events.Message{} = m ->
+      %{
+        message_id: m.message_id,
+        chat_id: m.chat_id,
+        source: m.source,
+        from_id: m.from_id,
+        text: m.text,
+        sent_date: m.sent_date,
+        name_from_import: m.name_from_import,
+        inserted_at: DateTime.utc_now(:second)
+      }
+    end)
+    # because of maps with 8 keys
+    |> Stream.chunk_every(floor(@postgres_max_params / 8))
+    |> Stream.map(fn batch ->
+      {c, _} =
+        Repo.insert_all(
+          Events.Message,
+          batch,
+          # ignore duplicates
+          on_conflict: :nothing,
+          conflict_target: [:message_id, :chat_id]
+        )
+
+      c
+    end)
+    |> Enum.to_list()
+    |> IO.inspect(limit: :infinity)
 
     :ok
   end
