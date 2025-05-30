@@ -30,22 +30,22 @@ defmodule JokerCynicBot.AskCommand do
     (команда доступна только в чатах)
     """
 
-    %Reply{reply | text: text}
+    %{reply | text: text}
   end
 
   defp error_reply({:error, :not_enabled}, reply) do
     text =
       "Я тут, чтобы наслаждаться своим внутренним fonk, а не выдавать поток слов.\n(в этом чате команда недоступна)"
 
-    %Reply{reply | text: text}
+    %{reply | text: text}
   end
 
   defp error_reply({:error, :empty_text}, reply) do
-    %Reply{reply | text: "Не вижу вопроса!"}
+    %{reply | text: "Не вижу вопроса!"}
   end
 
   defp error_reply({:error, :rate_limit, time_left_ms}, reply) do
-    %Reply{
+    %{
       reply
       | text: "Отстань, я занят!!\n(достигнут лимит запросов, попробуй через #{format_time(time_left_ms)})"
     }
@@ -72,7 +72,7 @@ defmodule JokerCynicBot.AskCommand do
       |> AI.ask(parsed_message)
       |> handle_ask_response()
 
-    %Reply{reply | text: reply_text, on_sent: reply_callback}
+    %{reply | text: reply_text, on_sent: reply_callback}
   end
 
   defp handle_ask_response(nil) do
@@ -167,7 +167,7 @@ defmodule JokerCynicBot.AskCommand do
 
   defp validate_rate(user_id) do
     key = "ask:#{user_id}"
-    scale = :timer.hours(2)
+    scale = to_timeout(hour: 2)
     limit = 10
 
     case JokerCynic.RateLimit.hit(key, scale, limit) do

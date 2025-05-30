@@ -57,7 +57,7 @@ defmodule JokerCynicWeb.WebApp.ChatLive do
         {:ok, new_config} ->
           {:noreply, assign_chat_config(socket, new_config)}
 
-        {:error, _} ->
+        {:error, _changeset} ->
           {:noreply, assign_chat_config(socket, chat_config)}
       end
     else

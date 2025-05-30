@@ -19,6 +19,6 @@ defmodule JokerCynicBot.NikitaCounterAnswerHandler do
       Helpers.answer_counter(message.message_id, :nikita, answer_type)
     end
 
-    %Reply{reply | halt: true}
+    %{reply | halt: true}
   end
 end
