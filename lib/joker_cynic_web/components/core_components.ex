@@ -605,7 +605,7 @@ defmodule JokerCynicWeb.CoreComponents do
   attr :class, :string, default: nil
 
   @spec icon(map()) :: Rendered.t()
-  def icon(%{name: "hero-" <> _} = assigns) do
+  def icon(%{name: "hero-" <> _name} = assigns) do
     ~H"""
     <span class={[@name, @class]} />
     """

@@ -55,8 +55,8 @@ defmodule JokerCynicBot.Reply do
     user_id = reply.context.update.message.from.id
 
     case do_send_message(user_id, reply.text, reply) do
-      :ok -> {:cont, %__MODULE__{reply | text: dm_success_message(), markdown: true}}
-      :error -> {:cont, %__MODULE__{reply | text: dm_error_message(), markdown: true}}
+      :ok -> {:cont, %{reply | text: dm_success_message(), markdown: true}}
+      :error -> {:cont, %{reply | text: dm_error_message(), markdown: true}}
     end
   end
 

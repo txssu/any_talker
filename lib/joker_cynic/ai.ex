@@ -15,7 +15,7 @@ defmodule JokerCynic.AI do
     {response_id, added_messages_ids} = get_history_data(history_key)
 
     with {:ok, final_message} <- JokerCynic.AI.Attachments.download_message_image(message),
-         input = JokerCynic.AI.Message.format_message(final_message, added_messages_ids),
+         input = Message.format_message(final_message, added_messages_ids),
          {:ok, response} <-
            OpenAIClient.response(input: input, previous_response_id: response_id, instructions: instructions()) do
       hit_metrics(response)

@@ -2,11 +2,9 @@ defmodule JokerCynicBot.PrivacyCommand do
   @moduledoc false
   use JokerCynicBot, :command
 
-  alias JokerCynicBot.Reply
-
   @impl JokerCynicBot.Command
   def call(reply) do
-    %Reply{
+    %{
       reply
       | text: privacy_policy(),
         for_dm: true

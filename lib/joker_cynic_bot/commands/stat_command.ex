@@ -13,7 +13,7 @@ defmodule JokerCynicBot.StatCommand do
     top_authors = Statistics.get_top_message_authors_today(message.chat.id, 5)
 
     text = format_response(top_authors)
-    %Reply{reply | text: text, for_dm: true, markdown: true}
+    %{reply | text: text, for_dm: true, markdown: true}
   end
 
   defp format_response([]) do
