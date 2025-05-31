@@ -1,4 +1,4 @@
-defmodule JokerCynic.Repo.Migrations.AddObanJobsTable do
+defmodule AnyTalker.Repo.Migrations.AddObanJobsTable do
   use Ecto.Migration
 
   def up do

@@ -1,9 +1,9 @@
-defmodule JokerCynic.MixProject do
+defmodule AnyTalker.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :joker_cynic,
+      app: :any_talker,
       version: "0.1.0",
       elixir: "~> 1.18",
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -18,7 +18,7 @@ defmodule JokerCynic.MixProject do
   # Type `mix help compile.app` for more information.
   def application do
     [
-      mod: {JokerCynic.Application, []},
+      mod: {AnyTalker.Application, []},
       extra_applications: [:logger, :runtime_tools, :os_mon]
     ]
   end
@@ -90,10 +90,10 @@ defmodule JokerCynic.MixProject do
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
-      "assets.build": ["tailwind joker_cynic", "esbuild joker_cynic"],
+      "assets.build": ["tailwind any_talker", "esbuild any_talker"],
       "assets.deploy": [
-        "tailwind joker_cynic --minify",
-        "esbuild joker_cynic --minify",
+        "tailwind any_talker --minify",
+        "esbuild any_talker --minify",
         "phx.digest"
       ],
       ci: [

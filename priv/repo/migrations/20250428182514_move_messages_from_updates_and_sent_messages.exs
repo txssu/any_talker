@@ -1,4 +1,4 @@
-defmodule JokerCynic.Repo.Migrations.MoveMessagesFromUpdatesAndSentMessages do
+defmodule AnyTalker.Repo.Migrations.MoveMessagesFromUpdatesAndSentMessages do
   use Ecto.Migration
 
   @disable_migration_lock true

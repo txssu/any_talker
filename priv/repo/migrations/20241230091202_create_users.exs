@@ -1,4 +1,4 @@
-defmodule JokerCynic.Repo.Migrations.CreateUsers do
+defmodule AnyTalker.Repo.Migrations.CreateUsers do
   use Ecto.Migration
 
   def change do

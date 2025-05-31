@@ -1,4 +1,4 @@
-defmodule JokerCynic.Repo.Migrations.MessageJsonToColumns do
+defmodule AnyTalker.Repo.Migrations.MessageJsonToColumns do
   use Ecto.Migration
 
   def up do

@@ -95,7 +95,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "sum by(le) (rate(joker_cynic_prom_ex_bot_handle_time_bucket[$interval]))",
+          "expr": "sum by(le) (rate(any_talker_prom_ex_bot_handle_time_bucket[$interval]))",
           "format": "heatmap",
           "fullMetaSearch": false,
           "hide": false,
@@ -194,7 +194,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum by (model) (increase(joker_cynic_prom_ex_bot_ai_tokens_consumption_total[$interval]))",
+          "expr": "sum by (model) (increase(any_talker_prom_ex_bot_ai_tokens_consumption_total[$interval]))",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -268,9 +268,7 @@
               "id": "byNames",
               "options": {
                 "mode": "exclude",
-                "names": [
-                  "gpt-4o-mini-2024-07-18"
-                ],
+                "names": ["gpt-4o-mini-2024-07-18"],
                 "prefix": "All except:",
                 "readOnly": true
               }
@@ -312,7 +310,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum by (model) (increase(joker_cynic_prom_ex_bot_ai_requests_count[$interval]))",
+          "expr": "sum by (model) (increase(any_talker_prom_ex_bot_ai_requests_count[$interval]))",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -325,11 +323,7 @@
   "preload": false,
   "refresh": "5s",
   "schemaVersion": 40,
-  "tags": [
-    "PromEx",
-    "joker_cynic",
-    "Bot"
-  ],
+  "tags": ["PromEx", "any_talker", "Bot"],
   "templating": {
     "list": [
       {
@@ -390,16 +384,10 @@
     "to": "now"
   },
   "timepicker": {
-    "refresh_intervals": [
-      "5s",
-      "10s",
-      "30s",
-      "1m",
-      "5m"
-    ]
+    "refresh_intervals": ["5s", "10s", "30s", "1m", "5m"]
   },
   "timezone": "",
-  "title": "JokerCynic - PromEx Bot Dashboard",
+  "title": "AnyTalker - PromEx Bot Dashboard",
   "version": 18,
   "weekStart": ""
 }

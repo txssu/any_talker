@@ -1,4 +1,4 @@
-defmodule JokerCynic.Repo.Migrations.CreateChatConfigs do
+defmodule AnyTalker.Repo.Migrations.CreateChatConfigs do
   use Ecto.Migration
 
   def change do

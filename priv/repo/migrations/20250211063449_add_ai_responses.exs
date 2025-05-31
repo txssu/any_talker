@@ -1,4 +1,4 @@
-defmodule JokerCynic.Repo.Migrations.AddAiResponses do
+defmodule AnyTalker.Repo.Migrations.AddAiResponses do
   use Ecto.Migration
 
   def change do

@@ -1,4 +1,4 @@
-defmodule JokerCynic.Repo.Migrations.MoveEventsToClickhouse do
+defmodule AnyTalker.Repo.Migrations.MoveEventsToClickhouse do
   use Ecto.Migration
 
   def change do

@@ -1,9 +1,9 @@
 import Config
 
 # Configure your database
-config :joker_cynic, JokerCynic.PromEx,
+config :any_talker, AnyTalker.PromEx,
   grafana: [
-    folder_name: "JokerCynic",
+    folder_name: "AnyTalker",
     host: "http://localhost:3000",
     username: "admin",
     password: "grafana",
@@ -11,11 +11,11 @@ config :joker_cynic, JokerCynic.PromEx,
   ],
   metrics_server: :disabled
 
-config :joker_cynic, JokerCynic.Repo,
+config :any_talker, AnyTalker.Repo,
   username: "postgres",
   password: "postgres",
   hostname: "localhost",
-  database: "joker_cynic_dev",
+  database: "any_talker_dev",
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
@@ -26,7 +26,7 @@ config :joker_cynic, JokerCynic.Repo,
 # The watchers configuration can be used to run external
 # watchers to your application. For example, we can use it
 # to bundle .js and .css sources.
-config :joker_cynic, JokerCynicWeb.Endpoint,
+config :any_talker, AnyTalkerWeb.Endpoint,
   # Binding to loopback ipv4 address prevents access from other machines.
   # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
   http: [ip: {127, 0, 0, 1}, port: 4000],
@@ -35,8 +35,8 @@ config :joker_cynic, JokerCynicWeb.Endpoint,
   debug_errors: true,
   secret_key_base: "KHtSUJ4dL2DGbMoJj65znFmQmScoqQ6v4SLrSHhGW1IOcA+LTy9nuI0GO3rvhyU7",
   watchers: [
-    esbuild: {Esbuild, :install_and_run, [:joker_cynic, ~w(--sourcemap=inline --watch)]},
-    tailwind: {Tailwind, :install_and_run, [:joker_cynic, ~w(--watch)]}
+    esbuild: {Esbuild, :install_and_run, [:any_talker, ~w(--sourcemap=inline --watch)]},
+    tailwind: {Tailwind, :install_and_run, [:any_talker, ~w(--watch)]}
   ]
 
 # ## SSL Support
@@ -63,19 +63,19 @@ config :joker_cynic, JokerCynicWeb.Endpoint,
 # different ports.
 
 # Watch static and templates for browser reloading.
-config :joker_cynic, JokerCynicWeb.Endpoint,
+config :any_talker, AnyTalkerWeb.Endpoint,
   live_reload: [
     patterns: [
       ~r"priv/static/(?!uploads/).*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",
-      ~r"lib/joker_cynic_web/(controllers|live|components)/.*(ex|heex)$"
+      ~r"lib/any_talker_web/(controllers|live|components)/.*(ex|heex)$"
     ]
   ]
 
-config :joker_cynic, :metrics_auth_token, "Bearer my-super-secret"
+config :any_talker, :metrics_auth_token, "Bearer my-super-secret"
 
 # Enable dev routes for dashboard and mailbox
-config :joker_cynic, dev_routes: true
+config :any_talker, dev_routes: true
 
 # Initialize plugs at runtime for faster development compilation
 config :phoenix, :plug_init_mode, :runtime
