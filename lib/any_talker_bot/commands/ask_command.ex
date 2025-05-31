@@ -3,6 +3,7 @@ defmodule AnyTalkerBot.AskCommand do
   use AnyTalkerBot, :command
 
   alias AnyTalker.AI
+  alias AnyTalker.GlobalConfig
   alias AnyTalkerBot.Attachments
   alias AnyTalkerBot.Reply
   alias ExGram.Model.Message
@@ -167,8 +168,8 @@ defmodule AnyTalkerBot.AskCommand do
 
   defp validate_rate(user_id) do
     key = "ask:#{user_id}"
-    scale = to_timeout(hour: 2)
-    limit = 10
+    scale = GlobalConfig.get(:ask_rate_limit_scale_ms)
+    limit = GlobalConfig.get(:ask_rate_limit)
 
     case AnyTalker.RateLimit.hit(key, scale, limit) do
       {:allow, _count} ->

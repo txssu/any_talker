@@ -12,7 +12,7 @@ defmodule AnyTalker.AI.OpenAIClient do
     body = %{
       input: Keyword.fetch!(options, :input),
       instructions: Keyword.get(options, :instructions),
-      model: Keyword.get(options, :model, "gpt-4.1-mini"),
+      model: Keyword.fetch!(options, :model),
       previous_response_id: Keyword.get(options, :previous_response_id)
     }
 

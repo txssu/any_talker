@@ -4,6 +4,7 @@ defmodule AnyTalker.AI do
   alias AnyTalker.AI.Message
   alias AnyTalker.AI.OpenAIClient
   alias AnyTalker.Cache
+  alias AnyTalker.GlobalConfig
 
   require Logger
 
@@ -16,8 +17,14 @@ defmodule AnyTalker.AI do
 
     with {:ok, final_message} <- AnyTalker.AI.Attachments.download_message_image(message),
          input = Message.format_message(final_message, added_messages_ids),
+         model = GlobalConfig.get(:ask_model),
          {:ok, response} <-
-           OpenAIClient.response(input: input, previous_response_id: response_id, instructions: instructions()) do
+           OpenAIClient.response(
+             input: input,
+             previous_response_id: response_id,
+             model: model,
+             instructions: instructions()
+           ) do
       hit_metrics(response)
       {response.output_text, &Cache.put(&1, {response.id, [&2 | added_messages_ids]})}
     else
