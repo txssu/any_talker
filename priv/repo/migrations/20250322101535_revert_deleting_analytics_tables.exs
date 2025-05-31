@@ -1,4 +1,4 @@
-defmodule JokerCynic.Repo.Migrations.RevertDeletingAnalyticsTables do
+defmodule AnyTalker.Repo.Migrations.RevertDeletingAnalyticsTables do
   use Ecto.Migration
 
   def change do

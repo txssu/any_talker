@@ -2,7 +2,7 @@ x-app-common: &app-common
   build:
     context: .
   environment:
-    DATABASE_URL: "ecto://postgres:postgres@database/joker_cynic_prod"
+    DATABASE_URL: "ecto://postgres:postgres@database/any_talker_prod"
     SECRET_KEY_BASE: "/mtcJdz/VjE4ZfwVi/RMkKevnX027sfhZTM5FKvGxu6yMv3AnGf/kCIkeRvVclAh"
     PHX_HOST: ${PHX_HOST:-localhost}
     METRICS_AUTH_TOKEN: my-super-secret
@@ -19,7 +19,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: joker_cynic_prod
+      POSTGRES_DB: any_talker_prod
       PGDATA: /data/postgres
     volumes:
       - database:/data/postgres
@@ -47,7 +47,7 @@ services:
   prometheus:
     image: prom/prometheus
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
+      - "--config.file=/etc/prometheus/prometheus.yml"
     restart: unless-stopped
     volumes:
       - ./docker/prometheus:/etc/prometheus

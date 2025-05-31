@@ -1,4 +1,4 @@
-defmodule JokerCynic.Repo.Migrations.AddChatTitleToConfig do
+defmodule AnyTalker.Repo.Migrations.AddChatTitleToConfig do
   use Ecto.Migration
 
   def change do

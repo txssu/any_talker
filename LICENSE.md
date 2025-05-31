@@ -8,7 +8,7 @@ Permission is hereby granted to any person obtaining a copy of this software and
 2. **Distribution**:
    - Any distributed copies or derivatives of the Software must retain this license and include the original copyright notice.
    - All rights to any modifications or derivative works remain with Joker's Asylum. Modified versions of the Software may not be distributed to any third party and must be returned exclusively to Joker's Asylum.
-   - All modifications must be submitted to the original repository via a pull request on GitHub: https://github.com/Joker-Asylum/joker_cynic. Forks with modifications are allowed to be kept only while the pull request remains open. The fork must be deleted within 14 days after the pull request is closed or merged to ensure compliance with this license.
+   - All modifications must be submitted to the original repository via a pull request on GitHub: https://github.com/Joker-Asylum/any_talker. Forks with modifications are allowed to be kept only while the pull request remains open. The fork must be deleted within 14 days after the pull request is closed or merged to ensure compliance with this license.
 
 3. **No Warranty**:
    - THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
@@ -19,4 +19,3 @@ Permission is hereby granted to any person obtaining a copy of this software and
 By using, copying, or modifying this software, you agree to comply with these terms. Any violation of this license may result in legal action.
 
 Joker's Asylum
-

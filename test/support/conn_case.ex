@@ -1,4 +1,4 @@
-defmodule JokerCynicWeb.ConnCase do
+defmodule AnyTalkerWeb.ConnCase do
   @moduledoc """
   This module defines the test case to be used by
   tests that require setting up a connection.
@@ -11,7 +11,7 @@ defmodule JokerCynicWeb.ConnCase do
   we enable the SQL sandbox, so changes done to the database
   are reverted at the end of every test. If you are using
   PostgreSQL, you can even run database tests asynchronously
-  by setting `use JokerCynicWeb.ConnCase, async: true`, although
+  by setting `use AnyTalkerWeb.ConnCase, async: true`, although
   this option is not recommended for other databases.
   """
 
@@ -19,14 +19,14 @@ defmodule JokerCynicWeb.ConnCase do
 
   using do
     quote do
-      use JokerCynicWeb, :verified_routes
+      use AnyTalkerWeb, :verified_routes
 
       # Import conveniences for testing with connections
-      import JokerCynicWeb.ConnCase
+      import AnyTalkerWeb.ConnCase
       import Phoenix.ConnTest
       import Plug.Conn
       # The default endpoint for testing
-      @endpoint JokerCynicWeb.Endpoint
+      @endpoint AnyTalkerWeb.Endpoint
     end
   end
 

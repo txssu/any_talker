@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" class="[scrollbar-gutter:stable]">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="csrf-token" content={get_csrf_token()} />
+    <.live_title default="AnyTalker">
+      {assigns[:page_title]}
+    </.live_title>
+    <script src="https://telegram.org/js/telegram-web-app.js?56">
+    </script>
+    <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
+    <%= if assigns[:auth] do %>
+      <script defer phx-track-static type="text/javascript" src={~p"/assets/telegram.js"}>
+      </script>
+    <% else %>
+      <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}>
+      </script>
+    <% end %>
+  </head>
+  <body class="bg-tg-secondary-bg text-tg-text">
+    <div class="pt-tg-safe-top pb-tg-safe-bottom pl-tg-safe-left pr-tg-safe-right">
+      <div class="p-4">
+        {@inner_content}
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,4 +1,4 @@
-defmodule JokerCynic.Repo.Migrations.CreateUpdates do
+defmodule AnyTalker.Repo.Migrations.CreateUpdates do
   use Ecto.Migration
 
   def change do

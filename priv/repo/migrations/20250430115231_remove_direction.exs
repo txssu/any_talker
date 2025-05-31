@@ -1,4 +1,4 @@
-defmodule JokerCynic.Repo.Migrations.RemoveDirection do
+defmodule AnyTalker.Repo.Migrations.RemoveDirection do
   use Ecto.Migration
 
   def up do

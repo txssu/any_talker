@@ -1,4 +1,4 @@
-defmodule JokerCynic.Repo.Migrations.CreateUsersCaptcha do
+defmodule AnyTalker.Repo.Migrations.CreateUsersCaptcha do
   use Ecto.Migration
 
   def change do

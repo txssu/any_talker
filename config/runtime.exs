@@ -1,5 +1,5 @@
+import AnyTalker.Utils
 import Config
-import JokerCynic.Utils
 
 # config/runtime.exs is executed for all environments, including
 # during releases. It is executed after compilation and before the
@@ -13,21 +13,21 @@ import JokerCynic.Utils
 # If you use `mix release`, you need to explicitly enable the server
 # by passing the PHX_SERVER=true when you start it:
 #
-#     PHX_SERVER=true bin/joker_cynic start
+#     PHX_SERVER=true bin/any_talker start
 #
 # Alternatively, you can use `mix phx.gen.release` to generate a `bin/server`
 # script that automatically sets the env var above.
 if System.get_env("PHX_SERVER") do
-  config :joker_cynic, JokerCynicWeb.Endpoint, server: true
+  config :any_talker, AnyTalkerWeb.Endpoint, server: true
 end
 
-config :joker_cynic, JokerCynic.AI.OpenAIClient,
+config :any_talker, AnyTalker.AI.OpenAIClient,
   api_url: System.get_env("OPENAI_URL", "https://api.openai.com/"),
   api_key: System.get_env("OPENAI_KEY"),
   proxy_uri: System.get_env("OPENAI_PROXY_URL")
 
-config :joker_cynic, JokerCynicBot.Token, token: System.get_env("TELEGRAM_BOT_TOKEN")
-config :joker_cynic, owner_id: get_env_and_transform("TELEGRAM_BOT_OWNER_ID", &String.to_integer/1)
+config :any_talker, AnyTalkerBot.Token, token: System.get_env("TELEGRAM_BOT_TOKEN")
+config :any_talker, owner_id: get_env_and_transform("TELEGRAM_BOT_OWNER_ID", &String.to_integer/1)
 
 if config_env() == :prod do
   database_url =
@@ -59,14 +59,14 @@ if config_env() == :prod do
 
   port = String.to_integer(System.get_env("PORT") || "4000")
 
-  config :joker_cynic, JokerCynic.Repo,
+  config :any_talker, AnyTalker.Repo,
     # ssl: true,
     url: database_url,
     pool_size: String.to_integer(System.get_env("DATABASE_POOL_SIZE") || "10"),
     socket_options: maybe_ipv6,
     start_apps_before_migration: [:logger_json]
 
-  config :joker_cynic, JokerCynicWeb.Endpoint,
+  config :any_talker, AnyTalkerWeb.Endpoint,
     url: [host: host, port: 443, scheme: "https"],
     http: [
       # Enable IPv6 and bind on all interfaces.
@@ -78,16 +78,16 @@ if config_env() == :prod do
     ],
     secret_key_base: secret_key_base
 
-  config :joker_cynic, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
-  config :joker_cynic, :metrics_auth_token, "Bearer #{System.get_env("METRICS_AUTH_TOKEN")}"
+  config :any_talker, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
+  config :any_talker, :metrics_auth_token, "Bearer #{System.get_env("METRICS_AUTH_TOKEN")}"
 
   config :logger, :default_handler,
     formatter:
-      {JokerCynic.LogFormatterJSON,
+      {AnyTalker.LogFormatterJSON,
        [
-         redactors: [{JokerCynicBot.TokenRedactor, []}],
+         redactors: [{AnyTalkerBot.TokenRedactor, []}],
          metadata: [:error_details],
-         static_fields: [service: "joker_cynic"]
+         static_fields: [service: "any_talker"]
        ]}
 
   # ## SSL Support
@@ -95,7 +95,7 @@ if config_env() == :prod do
   # To get SSL working, you will need to add the `https` key
   # to your endpoint configuration:
   #
-  #     config :joker_cynic, JokerCynicWeb.Endpoint,
+  #     config :any_talker, AnyTalkerWeb.Endpoint,
   #       https: [
   #         ...,
   #         port: 443,
@@ -117,7 +117,7 @@ if config_env() == :prod do
   # We also recommend setting `force_ssl` in your config/prod.exs,
   # ensuring no data is ever sent via http, always redirecting to https:
   #
-  #     config :joker_cynic, JokerCynicWeb.Endpoint,
+  #     config :any_talker, AnyTalkerWeb.Endpoint,
   #       force_ssl: [hsts: true]
   #
   # Check `Plug.SSL` for all available options in `force_ssl`.
@@ -128,7 +128,7 @@ if config_env() == :prod do
   # Also, you may need to configure the Swoosh API client of your choice if you
   # are not using SMTP. Here is an example of the configuration:
   #
-  #     config :joker_cynic, JokerCynic.Mailer,
+  #     config :any_talker, AnyTalker.Mailer,
   #       adapter: Swoosh.Adapters.Mailgun,
   #       api_key: System.get_env("MAILGUN_API_KEY"),
   #       domain: System.get_env("MAILGUN_DOMAIN")
