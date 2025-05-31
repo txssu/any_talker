@@ -58,6 +58,7 @@ defmodule AnyTalker.MixProject do
       {:oban, "~> 2.17"},
       {:logger_json, "~> 6.1"},
       {:nebulex, "~> 2.6"},
+      {:decorator, "~> 1.4"},
       {:hammer, "~> 7.0"},
       {:prom_ex, "~> 1.11"},
       {:unplug, "~> 1.1.0"},
