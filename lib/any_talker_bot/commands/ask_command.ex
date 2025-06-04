@@ -66,11 +66,12 @@ defmodule AnyTalkerBot.AskCommand do
 
   defp reply(reply, message, bot_id) do
     parsed_message = parse_message(message, bot_id)
+    prompt = reply.context.extra.chat.ask_prompt || GlobalConfig.get(:ask_default_prompt)
 
     {reply_text, reply_callback} =
       message.reply_to_message
       |> history_key()
-      |> AI.ask(parsed_message)
+      |> AI.ask(parsed_message, prompt)
       |> handle_ask_response()
 
     %{reply | text: reply_text, on_sent: reply_callback}
