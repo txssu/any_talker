@@ -63,8 +63,8 @@ defmodule AnyTalker.AI do
       String.replace(prompt || GlobalConfig.get(:ask_prompt), "%{date}", today)
     end
   else
-    defp instructions(_prompt) do
-      "You are in a test environment."
+    defp instructions(prompt) do
+      prompt || "You are in a test environment."
     end
   end
 
