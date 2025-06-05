@@ -68,6 +68,7 @@ defmodule AnyTalkerWeb.TelegramComponents do
 
   attr :field, FormField
 
+  @spec textarea(map()) :: Rendered.t()
   def textarea(%{field: %FormField{} = field} = assigns) do
     assigns =
       assigns
