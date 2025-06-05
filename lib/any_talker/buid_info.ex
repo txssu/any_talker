@@ -17,12 +17,18 @@ defmodule AnyTalker.BuildInfo do
       end
     end
 
-  @external_resource git_hash_file
+  if git_hash_file do
+    @external_resource git_hash_file
+  end
 
   hash =
-    git_hash_file
-    |> File.read!()
-    |> String.slice(0, 7)
+    if git_hash_file do
+      git_hash_file
+      |> File.read!()
+      |> String.slice(0, 7)
+    else
+      "undefined"
+    end
 
   @git_short_hash hash
 
