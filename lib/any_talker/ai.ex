@@ -5,20 +5,21 @@ defmodule AnyTalker.AI do
   alias AnyTalker.AI.OpenAIClient
   alias AnyTalker.Cache
   alias AnyTalker.GlobalConfig
+  alias AnyTalker.Settings
 
   require Logger
 
   @type history_key :: {integer(), integer()}
 
-  @spec ask(history_key() | nil, Message.t(), String.t() | nil) ::
-          {String.t(), callback_fun} | nil
+  @spec ask(history_key() | nil, Message.t()) :: {String.t(), callback_fun} | nil
         when callback_fun: (history_key(), message_id :: integer() -> :ok)
-  def ask(history_key, message, prompt \\ nil) do
+  def ask(history_key, message) do
     {response_id, added_messages_ids} = get_history_data(history_key)
 
     with {:ok, final_message} <- AnyTalker.AI.Attachments.download_message_image(message),
          input = Message.format_message(final_message, added_messages_ids),
          model = GlobalConfig.get(:ask_model),
+         prompt = chat_prompt(message.chat_id),
          {:ok, response} <-
            OpenAIClient.response(
              input: input,
@@ -40,6 +41,15 @@ defmodule AnyTalker.AI do
       nil -> {nil, []}
       value -> value
     end
+  end
+
+  defp chat_prompt(nil), do: GlobalConfig.get(:ask_prompt)
+
+  defp chat_prompt(chat_id) do
+    chat_id
+    |> Settings.get_chat_config()
+    |> Map.get(:ask_prompt)
+    |> Kernel.||(GlobalConfig.get(:ask_prompt))
   end
 
   if Mix.env() == :prod do
