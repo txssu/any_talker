@@ -24,6 +24,7 @@ defmodule AnyTalkerWeb.WebApp.ChatLive do
         <.form for={@form} phx-change="save">
           <.switch label="Антиспам" field={@form[:antispam]} />
           <.switch label="Команда /ask" field={@form[:ask_command]} />
+          <.input type="textarea" label="Промпт /ask" field={@form[:ask_prompt]} />
         </.form>
       </div>
     </.section>
