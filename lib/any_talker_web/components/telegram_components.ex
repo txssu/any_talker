@@ -60,4 +60,33 @@ defmodule AnyTalkerWeb.TelegramComponents do
     </label>
     """
   end
+
+  attr :id, :any, default: nil
+  attr :name, :any
+  attr :label, :string, default: nil
+  attr :value, :any
+
+  attr :field, FormField
+
+  @spec textarea(map()) :: Rendered.t()
+  def textarea(%{field: %FormField{} = field} = assigns) do
+    assigns =
+      assigns
+      |> assign(field: nil, id: assigns.id || field.id)
+      |> assign_new(:name, fn -> field.name end)
+      |> assign_new(:value, fn -> field.value end)
+
+    ~H"""
+    <div class="px-3">
+      <label for={@id}>{@label}</label>
+      <textarea
+        id={@id}
+        name={@name}
+        class="min-h-[6rem] mx-[3px] mt-2 block w-full rounded-lg text-zinc-900 focus:ring-0 sm:text-sm sm:leading-6"
+      >
+        {Phoenix.HTML.Form.normalize_value("textarea", @value)}
+        </textarea>
+    </div>
+    """
+  end
 end
