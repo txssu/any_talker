@@ -59,6 +59,7 @@ defmodule AnyTalkerWeb.Router do
       on_mount: [{AnyTalkerWeb.AuthPlug, :ensure_authenticated}] do
       live "/", MenuLive
       live "/c/:chat_id", ChatLive
+      live "/global", GlobalConfigLive
     end
   end
 
