@@ -22,7 +22,7 @@ defmodule AnyTalker.Counters.Helpers do
       keyboard :inline do
         row do
           button("Да", callback_data: "counter-yes")
-          button("Нет", callback_data: "counter-no")
+          button("Да не", callback_data: "counter-no")
         end
       end
 
