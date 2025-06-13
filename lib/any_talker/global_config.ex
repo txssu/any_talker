@@ -30,7 +30,7 @@ defmodule AnyTalker.GlobalConfig do
     Repo.get!(__MODULE__, 1)
   end
 
-  @spec update_config(t(), map()) :: {:ok, t()} | {:error, Changeset.t()}
+  @spec update_config(t(), map()) :: {:ok, t()} | {:error, Ecto.Changeset.t()}
   def update_config(config, attrs) do
     result =
       config
@@ -42,7 +42,7 @@ defmodule AnyTalker.GlobalConfig do
     result
   end
 
-  @spec change_config(t(), map()) :: Changeset.t()
+  @spec change_config(t(), map()) :: Ecto.Changeset.t()
   def change_config(config, attrs \\ %{}) do
     changeset(config, attrs)
   end
