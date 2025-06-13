@@ -50,6 +50,6 @@ defmodule AnyTalker.GlobalConfig do
   defp changeset(config, attrs) do
     config
     |> cast(attrs, @fields)
-    |> validate_required([:ask_model, :ask_rate_limit, :ask_rate_limit_scale_ms])
+    |> validate_required(@fields)
   end
 end
