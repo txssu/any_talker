@@ -5,6 +5,7 @@ defmodule AnyTalkerWeb.WebApp.MenuLive do
   import AnyTalkerWeb.TelegramComponents
 
   alias AnyTalker.Accounts
+  alias AnyTalker.BuildInfo
 
   @impl Phoenix.LiveView
   def render(assigns) do
@@ -46,6 +47,8 @@ defmodule AnyTalkerWeb.WebApp.MenuLive do
         </li>
       </ul>
     </.section>
+
+    <p class="text-tg-hint mt-6 text-center text-xs">v{BuildInfo.git_short_hash()}</p>
     """
   end
 
