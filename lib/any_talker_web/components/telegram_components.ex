@@ -83,9 +83,8 @@ defmodule AnyTalkerWeb.TelegramComponents do
         id={@id}
         name={@name}
         class="min-h-[6rem] mx-[3px] mt-2 block w-full rounded-lg text-zinc-900 focus:ring-0 sm:text-sm sm:leading-6"
-      >
-        {Phoenix.HTML.Form.normalize_value("textarea", @value)}
-        </textarea>
+      >{Phoenix.HTML.Form.normalize_value("textarea", @value)}
+      </textarea>
     </div>
     """
   end
