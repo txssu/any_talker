@@ -22,7 +22,7 @@ defmodule AnyTalkerWeb.WebApp.ChatLive do
       </.section>
 
       <.section>
-        <:header>Топ 5 отправителей</:header>
+        <:header>Топ 5 отправителей за сегодня</:header>
         <p :if={@top_authors == []} class="text-[15px] text-tg-hint mt-2.5 text-center">Сегодня не было сообщений</p>
         <ul :if={@top_authors != []}>
           <li :for={author <- @top_authors}>
