@@ -60,6 +60,14 @@ defmodule AnyTalkerWeb.Router do
       live "/", MenuLive
       live "/c/:chat_id", ChatLive
     end
+
+    live_session :require_admin_user,
+      on_mount: [
+        {AnyTalkerWeb.AuthPlug, :ensure_authenticated},
+        {AnyTalkerWeb.AdminPlug, :ensure_owner}
+      ] do
+      live "/global", GlobalConfigLive
+    end
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
