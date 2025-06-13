@@ -83,9 +83,38 @@ defmodule AnyTalkerWeb.TelegramComponents do
         id={@id}
         name={@name}
         class="min-h-[6rem] mx-[3px] mt-2 block w-full rounded-lg text-zinc-900 focus:ring-0 sm:text-sm sm:leading-6"
-      >
-        {Phoenix.HTML.Form.normalize_value("textarea", @value)}
-        </textarea>
+      >{Phoenix.HTML.Form.normalize_value("textarea", @value)}
+      </textarea>
+    </div>
+    """
+  end
+
+  attr :id, :any, default: nil
+  attr :name, :any
+  attr :label, :string, default: nil
+  attr :value, :any
+  attr :type, :string, default: "text"
+
+  attr :field, FormField
+
+  @spec tg_input(map()) :: Rendered.t()
+  def tg_input(%{field: %FormField{} = field} = assigns) do
+    assigns =
+      assigns
+      |> assign(field: nil, id: assigns.id || field.id)
+      |> assign_new(:name, fn -> field.name end)
+      |> assign_new(:value, fn -> field.value end)
+
+    ~H"""
+    <div class="px-3">
+      <label for={@id}>{@label}</label>
+      <input
+        type={@type}
+        id={@id}
+        name={@name}
+        value={Phoenix.HTML.Form.normalize_value(@type, @value)}
+        class="mx-[3px] mt-2 block w-full rounded-lg text-zinc-900 focus:ring-0 sm:text-sm sm:leading-6"
+      />
     </div>
     """
   end
