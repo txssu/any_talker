@@ -13,42 +13,44 @@ defmodule AnyTalkerWeb.WebApp.ChatLive do
   def render(assigns) do
     ~H"""
     <div id="back-init" phx-hook="TelegramBack" data-state="on"></div>
-    <.section class="mb-5">
-      <:header>Топ 3 авторов сообщений за {formatted_today()}</:header>
-      <p :if={@top_authors == []} class="text-[15px] text-tg-hint mt-2.5 text-center">Нет сообщений за сегодня</p>
-      <ul :if={@top_authors != []}>
-        <li :for={{author, index} <- Enum.with_index(@top_authors, 1)}>
-          <a
-            href={"tg://user?id=#{author.from_id}"}
-            class="border-tg-section-separator hover-effect h-[42px] flex items-center rounded-lg border-b-2 pl-5 last:border-b-0"
-          >
-            <span class="text-[15px] flex-1 py-2.5">
-              {index}. {username(author.user)} — {author.message_count} {message_word(author.message_count)}
-            </span>
-          </a>
-        </li>
-      </ul>
-    </.section>
+    <div class="space-y-5">
+      <.section class="pt-[30px] pb-[15px]">
+        <div class="flex justify-center">
+          <img src class="rounded-full" width="90" height="90" alt="Chat photo" />
+        </div>
+        <h1 class="mt-[15px] text-center text-xl font-bold">{@chat_config.title}</h1>
+      </.section>
 
-    <.section class="pt-[30px] pb-[15px]">
-      <div class="flex justify-center">
-        <img src class="rounded-full" width="90" height="90" alt="Chat photo" />
-      </div>
-      <h1 class="mt-[15px] text-center text-xl font-bold">{@chat_config.title}</h1>
-    </.section>
+      <.section>
+        <:header>Топ 5 отправителей</:header>
+        <p :if={@top_authors == []} class="text-[15px] text-tg-hint mt-2.5 text-center">Сегодня не было сообщений</p>
+        <ul :if={@top_authors != []}>
+          <li :for={author <- @top_authors}>
+            <a
+              href={"https://t.me/#{author.user.username}"}
+              class="border-tg-section-separator hover-effect h-[42px] flex items-center rounded-lg border-b-2 pl-5 last:border-b-0"
+            >
+              <span class="text-[15px] flex-1 py-2.5">
+                {username(author.user)} — {author.message_count} {message_word(author.message_count)}
+              </span>
+            </a>
+          </li>
+        </ul>
+      </.section>
 
-    <.section :if={@user_owner?} class="mt-5">
-      <:header>Настройки</:header>
-      <div class="px-2">
-        <.form for={@form} phx-change="save">
-          <.switch label="Антиспам" field={@form[:antispam]} />
-          <.switch label="Команда /ask" field={@form[:ask_command]} />
-          <div class="mt-2">
-            <.textarea label="Промпт /ask" field={@form[:ask_prompt]} />
-          </div>
-        </.form>
-      </div>
-    </.section>
+      <.section :if={@user_owner?}>
+        <:header>Настройки</:header>
+        <div class="px-2">
+          <.form for={@form} phx-change="save">
+            <.switch label="Антиспам" field={@form[:antispam]} />
+            <.switch label="Команда /ask" field={@form[:ask_command]} />
+            <div class="mt-2">
+              <.textarea label="Промпт /ask" field={@form[:ask_prompt]} />
+            </div>
+          </.form>
+        </div>
+      </.section>
+    </div>
     """
   end
 
@@ -57,7 +59,7 @@ defmodule AnyTalkerWeb.WebApp.ChatLive do
     user_owner? = Accounts.owner?(socket.assigns.current_user)
 
     chat_config = Settings.get_chat_config(id)
-    top_authors = Statistics.get_top_message_authors_today(id, 3)
+    top_authors = Statistics.get_top_message_authors_today(id, 5)
 
     {:ok,
      socket
@@ -98,11 +100,7 @@ defmodule AnyTalkerWeb.WebApp.ChatLive do
   end
 
   defp username(nil), do: "Неизвестный пользователь"
-  defp username(user), do: user.username || user.first_name
+  defp username(user), do: user.first_name || user.username
 
   defp message_word(count), do: pluralize(count, "сообщение", "сообщения", "сообщений")
-
-  defp formatted_today do
-    Calendar.strftime(Date.utc_today(), "%d.%m.%Y")
-  end
 end
