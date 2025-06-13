@@ -7,10 +7,12 @@ defmodule AnyTalkerBot.StatCommand do
   alias AnyTalker.Statistics
   alias AnyTalkerBot.Reply
 
+  @authors_count 5
+
   @impl AnyTalkerBot.Command
   def call(%Reply{} = reply) do
     {:command, :stat, message} = reply.message
-    top_authors = Statistics.get_top_message_authors_today(message.chat.id, 5)
+    top_authors = Statistics.get_top_message_authors_today(message.chat.id, @authors_count)
 
     text = format_response(top_authors)
     %{reply | text: text, for_dm: true, markdown: true}
@@ -24,7 +26,7 @@ defmodule AnyTalkerBot.StatCommand do
     today = Date.utc_today()
     formatted_date = Calendar.strftime(today, "%d.%m.%Y")
 
-    header = ~i"Топ 3 авторов сообщений за #{formatted_date}:"
+    header = ~i"Топ #{@authors_count} авторов сообщений за #{formatted_date}:"
 
     authors_text =
       authors
