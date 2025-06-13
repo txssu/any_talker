@@ -16,8 +16,11 @@ defmodule AnyTalkerWeb.WebApp.GlobalConfigLive do
 
     <.section class="mt-5">
       <:header>Настройки</:header>
-      <div class="px-2">
+      <div class="space-y-2 px-2">
         <.form for={@form} phx-change="save">
+          <.tg_input label="Модель /ask" field={@form[:ask_model]} />
+          <.tg_input type="number" label="Лимит запросов /ask" field={@form[:ask_rate_limit]} />
+          <.tg_input type="number" label="Период лимита /ask (мс)" field={@form[:ask_rate_limit_scale_ms]} />
           <div class="mt-2">
             <.textarea label="Промпт /ask" field={@form[:ask_prompt]} />
           </div>
