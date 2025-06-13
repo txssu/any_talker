@@ -18,6 +18,20 @@ defmodule AnyTalkerWeb.WebApp.MenuLive do
       <p class="text-tg-hint mt-2.5 text-center text-sm">Циничны как никогда</p>
     </.section>
 
+    <.section :if={@user_owner?} class="mt-5">
+      <:header>Настройки</:header>
+      <ul>
+        <li>
+          <.link
+            navigate={~p"/webapp/global"}
+            class="border-tg-section-separator hover-effect h-[42px] flex items-center rounded-lg border-b-2 pl-5 last:border-b-0"
+          >
+            <span class="text-[15px] py-2.5">Глобальный конфиг</span>
+          </.link>
+        </li>
+      </ul>
+    </.section>
+
     <.section class="mt-5">
       <:header>Чаты</:header>
       <p :if={@chats == []} class="text-[15px] text-tg-hint mt-2.5 text-center">Как одинокий зритель в пустом зале</p>
@@ -28,20 +42,6 @@ defmodule AnyTalkerWeb.WebApp.MenuLive do
             class="border-tg-section-separator hover-effect h-[42px] flex items-center rounded-lg border-b-2 pl-5 last:border-b-0"
           >
             <span class="text-[15px] py-2.5">{chat.title}</span>
-          </.link>
-        </li>
-      </ul>
-    </.section>
-
-    <.section :if={@user_owner?} class="mt-5">
-      <:header>Настройки</:header>
-      <ul>
-        <li>
-          <.link
-            navigate={~p"/webapp/global"}
-            class="border-tg-section-separator hover-effect h-[42px] flex items-center rounded-lg border-b-2 pl-5 last:border-b-0"
-          >
-            <span class="text-[15px] py-2.5">Глобальный конфиг</span>
           </.link>
         </li>
       </ul>
