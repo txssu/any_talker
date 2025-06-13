@@ -5,6 +5,7 @@ defmodule AnyTalkerWeb.WebApp.MenuLive do
   import AnyTalkerWeb.TelegramComponents
 
   alias AnyTalker.Accounts
+  alias AnyTalker.BuildInfo
 
   @impl Phoenix.LiveView
   def render(assigns) do
@@ -19,7 +20,7 @@ defmodule AnyTalkerWeb.WebApp.MenuLive do
     </.section>
 
     <.section :if={@user_owner?} class="mt-5">
-      <:header>Настройки</:header>
+      <:header>Админка</:header>
       <ul>
         <li>
           <.link
@@ -30,6 +31,7 @@ defmodule AnyTalkerWeb.WebApp.MenuLive do
           </.link>
         </li>
       </ul>
+      <p class="text-tg-hint mt-2 text-center text-xs">Версия {BuildInfo.git_short_hash()}</p>
     </.section>
 
     <.section class="mt-5">
