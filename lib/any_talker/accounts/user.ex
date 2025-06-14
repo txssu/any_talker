@@ -9,6 +9,7 @@ defmodule AnyTalker.Accounts.User do
   schema "users" do
     field :username, :string
     field :allows_write_to_pm, :boolean, default: false
+    field :custom_name, :string
     field :first_name, :string
     field :last_name, :string
     field :photo_url, :string
@@ -20,7 +21,7 @@ defmodule AnyTalker.Accounts.User do
   @spec changeset(t(), map()) :: Ecto.Changeset.t()
   def changeset(user, attrs) do
     user
-    |> cast(attrs, [:id, :allows_write_to_pm, :first_name, :last_name, :photo_url, :username])
+    |> cast(attrs, [:id, :allows_write_to_pm, :first_name, :last_name, :photo_url, :username, :custom_name])
     |> validate_required([:first_name, :username])
   end
 end

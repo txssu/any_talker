@@ -8,6 +8,11 @@ defmodule AnyTalker.Accounts do
   alias AnyTalker.Repo
   alias AnyTalker.Settings.ChatConfig
 
+  @spec get_user(integer()) :: User.t() | nil
+  def get_user(id) do
+    Repo.get(User, id)
+  end
+
   @spec upsert_user(map(), [atom()]) :: {:ok, User.t()} | {:error, Ecto.Changeset.t()}
   def upsert_user(attrs, keys) do
     %User{}
@@ -20,6 +25,11 @@ defmodule AnyTalker.Accounts do
     user
     |> User.changeset(attrs)
     |> Repo.update()
+  end
+
+  @spec change_user(User.t(), map()) :: Ecto.Changeset.t()
+  def change_user(user, attrs \\ %{}) do
+    User.changeset(user, attrs)
   end
 
   @spec create_token(User.t()) :: String.t()
@@ -64,5 +74,12 @@ defmodule AnyTalker.Accounts do
   @spec owner?(User.t()) :: boolean()
   def owner?(%User{id: user_id}) do
     Application.get_env(:any_talker, :owner_id) == user_id
+  end
+
+  @spec display_name(User.t() | nil) :: String.t() | nil
+  def display_name(nil), do: nil
+
+  def display_name(%User{} = user) do
+    user.custom_name || user.first_name
   end
 end

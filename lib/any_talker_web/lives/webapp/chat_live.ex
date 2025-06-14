@@ -100,7 +100,7 @@ defmodule AnyTalkerWeb.WebApp.ChatLive do
   end
 
   defp username(nil), do: "Неизвестный пользователь"
-  defp username(user), do: user.first_name || user.username
+  defp username(user), do: Accounts.display_name(user) || user.username
 
   defp message_word(count), do: pluralize(count, "сообщение", "сообщения", "сообщений")
 end
