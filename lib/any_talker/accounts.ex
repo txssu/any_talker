@@ -65,4 +65,21 @@ defmodule AnyTalker.Accounts do
   def owner?(%User{id: user_id}) do
     Application.get_env(:any_talker, :owner_id) == user_id
   end
+
+  @spec get_user(integer()) :: User.t() | nil
+  def get_user(id) do
+    Repo.get(User, id)
+  end
+
+  @spec change_user(User.t(), map()) :: Ecto.Changeset.t()
+  def change_user(user, attrs \\ %{}) do
+    User.changeset(user, attrs)
+  end
+
+  @spec display_name(User.t() | nil) :: String.t() | nil
+  def display_name(nil), do: nil
+
+  def display_name(%User{} = user) do
+    user.custom_name || user.first_name
+  end
 end

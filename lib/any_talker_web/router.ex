@@ -58,6 +58,7 @@ defmodule AnyTalkerWeb.Router do
     live_session :require_authenticated_user,
       on_mount: [{AnyTalkerWeb.AuthPlug, :ensure_authenticated}] do
       live "/", MenuLive
+      live "/profile", ProfileLive
       live "/c/:chat_id", ChatLive
     end
 

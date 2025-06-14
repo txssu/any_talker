@@ -15,8 +15,22 @@ defmodule AnyTalkerWeb.WebApp.MenuLive do
       <div class="flex justify-center">
         <img src={@current_user.photo_url} class="rounded-full" width="90" height="90" alt="User photo" />
       </div>
-      <h1 class="mt-[15px] text-center text-xl font-bold">Добро пожаловать, {@current_user.first_name}!</h1>
+      <h1 class="mt-[15px] text-center text-xl font-bold">Добро пожаловать, {Accounts.display_name(@current_user)}!</h1>
       <p class="text-tg-hint mt-2.5 text-center text-sm">Циничны как никогда</p>
+    </.section>
+
+    <.section class="mt-5">
+      <:header>Аккаунт</:header>
+      <ul>
+        <li>
+          <.link
+            navigate={~p"/webapp/profile"}
+            class="border-tg-section-separator hover-effect h-[42px] flex items-center rounded-lg border-b-2 pl-5 last:border-b-0"
+          >
+            <span class="text-[15px] py-2.5">Настройки</span>
+          </.link>
+        </li>
+      </ul>
     </.section>
 
     <.section :if={@user_owner?} class="mt-5">
