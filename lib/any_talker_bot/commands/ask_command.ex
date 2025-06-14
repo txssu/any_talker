@@ -2,6 +2,7 @@ defmodule AnyTalkerBot.AskCommand do
   @moduledoc false
   use AnyTalkerBot, :command
 
+  alias AnyTalker.Accounts
   alias AnyTalker.AI
   alias AnyTalker.GlobalConfig
   alias AnyTalkerBot.Attachments
@@ -95,11 +96,18 @@ defmodule AnyTalkerBot.AskCommand do
     parse_message(message, bot_id)
   end
 
+  defp display_name(%Message{from: from}) do
+    from.id
+    |> Accounts.get_user()
+    |> Accounts.display_name()
+    |> Kernel.||(from.first_name)
+  end
+
   defp build_message(message, bot_id) do
     role = if message.from.id == bot_id, do: :assistant, else: :user
 
     AI.Message.new(message.message_id, role, message.text || message.caption,
-      username: message.from.first_name,
+      username: display_name(message),
       user_id: message.from.id,
       message_id: message.message_id,
       chat_id: message.chat.id,
@@ -120,7 +128,7 @@ defmodule AnyTalkerBot.AskCommand do
 
     reply =
       AI.Message.new(original_reply.message_id, role, message_text,
-        username: original_reply.from.first_name,
+        username: display_name(original_reply),
         quote: quote_text,
         image_url: get_image_url(original_reply)
       )
