@@ -19,20 +19,6 @@ defmodule AnyTalkerWeb.WebApp.MenuLive do
       <p class="text-tg-hint mt-2.5 text-center text-sm">Циничны как никогда</p>
     </.section>
 
-    <.section class="mt-5">
-      <:header>Аккаунт</:header>
-      <ul>
-        <li>
-          <.link
-            navigate={~p"/webapp/profile"}
-            class="border-tg-section-separator hover-effect h-[42px] flex items-center rounded-lg border-b-2 pl-5 last:border-b-0"
-          >
-            <span class="text-[15px] py-2.5">Настройки</span>
-          </.link>
-        </li>
-      </ul>
-    </.section>
-
     <.section :if={@user_owner?} class="mt-5">
       <:header>Админка</:header>
       <ul>
@@ -46,6 +32,20 @@ defmodule AnyTalkerWeb.WebApp.MenuLive do
         </li>
       </ul>
       <p class="text-tg-hint mt-2 text-center text-xs">Версия {BuildInfo.git_short_hash()}</p>
+    </.section>
+
+    <.section class="mt-5">
+      <:header>Аккаунт</:header>
+      <ul>
+        <li>
+          <.link
+            navigate={~p"/webapp/profile"}
+            class="border-tg-section-separator hover-effect h-[42px] flex items-center rounded-lg border-b-2 pl-5 last:border-b-0"
+          >
+            <span class="text-[15px] py-2.5">Настройки</span>
+          </.link>
+        </li>
+      </ul>
     </.section>
 
     <.section class="mt-5">
