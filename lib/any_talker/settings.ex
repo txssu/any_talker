@@ -1,5 +1,6 @@
 defmodule AnyTalker.Settings do
   @moduledoc false
+  alias AnyTalker.GlobalConfig
   alias AnyTalker.Repo
   alias AnyTalker.Settings.ChatConfig
 
@@ -26,5 +27,24 @@ defmodule AnyTalker.Settings do
   @spec change_chat_config(ChatConfig.t(), map()) :: Ecto.Changeset.t()
   def change_chat_config(chat_config, attrs \\ %{}) do
     ChatConfig.changeset(chat_config, attrs)
+  end
+
+  @spec get_full_chat_config(integer() | nil) :: ChatConfig.t()
+  def get_full_chat_config(nil), do: merge_configs(%ChatConfig{}, GlobalConfig.get_config())
+
+  def get_full_chat_config(id) do
+    id
+    |> get_chat_config()
+    |> merge_configs(GlobalConfig.get_config())
+  end
+
+  defp merge_configs(chat, global) do
+    %{
+      chat
+      | ask_model: chat.ask_model || global.ask_model,
+        ask_rate_limit: chat.ask_rate_limit || global.ask_rate_limit,
+        ask_rate_limit_scale_ms: chat.ask_rate_limit_scale_ms || global.ask_rate_limit_scale_ms,
+        ask_prompt: chat.ask_prompt || global.ask_prompt
+    }
   end
 end

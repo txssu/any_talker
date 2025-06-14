@@ -4,7 +4,7 @@ defmodule AnyTalkerBot.AskCommand do
 
   alias AnyTalker.Accounts
   alias AnyTalker.AI
-  alias AnyTalker.GlobalConfig
+  alias AnyTalker.Settings
   alias AnyTalkerBot.Attachments
   alias AnyTalkerBot.Reply
   alias ExGram.Model.Message
@@ -16,10 +16,12 @@ defmodule AnyTalkerBot.AskCommand do
   def call(%Reply{message: {:command, :ask, message}} = reply) do
     bot_id = reply.context.bot_info.id
 
+    config = Settings.get_full_chat_config(message.chat.id)
+
     with :ok <- validate_is_group(reply.context.extra.is_group),
-         :ok <- validate_config(reply.context.extra.chat),
+         :ok <- validate_config(config),
          :ok <- validate_not_empty(message, bot_id),
-         :ok <- validate_rate("ask:#{message.from.id}") do
+         :ok <- validate_rate(message.from.id, config) do
       reply(reply, message, reply.context.bot_info.id)
     else
       error -> error_reply(error, reply)
@@ -174,10 +176,8 @@ defmodule AnyTalkerBot.AskCommand do
 
   defp validate_not_empty(_otherwise, _bot_id), do: {:error, :empty_text}
 
-  defp validate_rate(user_id) do
+  defp validate_rate(user_id, %{ask_rate_limit_scale_ms: scale, ask_rate_limit: limit}) do
     key = "ask:#{user_id}"
-    scale = GlobalConfig.get(:ask_rate_limit_scale_ms)
-    limit = GlobalConfig.get(:ask_rate_limit)
 
     case AnyTalker.RateLimit.hit(key, scale, limit) do
       {:allow, _count} ->

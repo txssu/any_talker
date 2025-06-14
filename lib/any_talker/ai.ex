@@ -4,7 +4,6 @@ defmodule AnyTalker.AI do
   alias AnyTalker.AI.Message
   alias AnyTalker.AI.OpenAIClient
   alias AnyTalker.Cache
-  alias AnyTalker.GlobalConfig
   alias AnyTalker.Settings
 
   require Logger
@@ -18,8 +17,9 @@ defmodule AnyTalker.AI do
 
     with {:ok, final_message} <- AnyTalker.AI.Attachments.download_message_image(message),
          input = Message.format_message(final_message, added_messages_ids),
-         model = GlobalConfig.get(:ask_model),
-         prompt = chat_prompt(message.chat_id),
+         config = Settings.get_full_chat_config(message.chat_id),
+         model = config.ask_model,
+         prompt = config.ask_prompt,
          {:ok, response} <-
            OpenAIClient.response(
              input: input,
@@ -43,15 +43,6 @@ defmodule AnyTalker.AI do
     end
   end
 
-  defp chat_prompt(nil), do: GlobalConfig.get(:ask_prompt)
-
-  defp chat_prompt(chat_id) do
-    chat_id
-    |> Settings.get_chat_config()
-    |> Map.get(:ask_prompt)
-    |> Kernel.||(GlobalConfig.get(:ask_prompt))
-  end
-
   if Mix.env() == :prod do
     defp instructions(prompt) do
       today =
@@ -60,7 +51,7 @@ defmodule AnyTalker.AI do
         |> DateTime.to_date()
         |> Date.to_iso8601()
 
-      String.replace(prompt || GlobalConfig.get(:ask_prompt), "%{date}", today)
+      String.replace(prompt || AnyTalker.GlobalConfig.get(:ask_prompt), "%{date}", today)
     end
   else
     defp instructions(prompt) do
