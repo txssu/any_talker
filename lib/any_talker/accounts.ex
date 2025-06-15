@@ -20,7 +20,7 @@ defmodule AnyTalker.Accounts do
     |> Repo.insert(on_conflict: {:replace, keys}, conflict_target: [:id])
   end
 
-  @spec update_user(User.t(), map()) :: {:ok, User.t()}
+  @spec update_user(User.t(), map()) :: {:ok, User.t()} | {:error, Ecto.Changeset.t()}
   def update_user(user, attrs) do
     user
     |> User.changeset(attrs)
@@ -69,6 +69,13 @@ defmodule AnyTalker.Accounts do
         select: cc
 
     Repo.all(query)
+  end
+
+  @spec list_users() :: [User.t()]
+  def list_users do
+    User
+    |> order_by(:id)
+    |> Repo.all()
   end
 
   @spec owner?(User.t()) :: boolean()
