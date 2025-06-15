@@ -68,6 +68,8 @@ defmodule AnyTalkerWeb.Router do
         {AnyTalkerWeb.AdminPlug, :ensure_owner}
       ] do
       live "/global", GlobalConfigLive
+      live "/users", UsersLive
+      live "/profile/:id", ProfileLive
     end
   end
 

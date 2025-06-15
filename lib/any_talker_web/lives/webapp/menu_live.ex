@@ -30,6 +30,14 @@ defmodule AnyTalkerWeb.WebApp.MenuLive do
             <span class="text-[15px] py-2.5">Глобальный конфиг</span>
           </.link>
         </li>
+        <li>
+          <.link
+            navigate={~p"/webapp/users"}
+            class="border-tg-section-separator hover-effect h-[42px] flex items-center rounded-lg border-b-2 pl-5 last:border-b-0"
+          >
+            <span class="text-[15px] py-2.5">Пользователи</span>
+          </.link>
+        </li>
       </ul>
       <p class="text-tg-hint mt-2 text-center text-xs">Версия {BuildInfo.git_short_hash()}</p>
     </.section>
