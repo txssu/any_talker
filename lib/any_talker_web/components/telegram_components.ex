@@ -80,6 +80,7 @@ defmodule AnyTalkerWeb.TelegramComponents do
     <div class="px-3">
       <label for={@id}>{@label}</label>
       <textarea
+        phx-update="ignore"
         id={@id}
         name={@name}
         class="min-h-[6rem] mx-[3px] mt-2 block w-full rounded-lg text-zinc-900 focus:ring-0 sm:text-sm sm:leading-6"
