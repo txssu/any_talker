@@ -9,15 +9,24 @@ defmodule AnyTalker.AI.OpenAIClient do
 
   @spec response(keyword()) :: {:ok, Response.t()} | {:error, any()}
   def response(options) do
+    input = Keyword.fetch!(options, :input)
+
     body = %{
-      input: Keyword.fetch!(options, :input),
+      input: input,
       instructions: Keyword.get(options, :instructions),
       model: Keyword.fetch!(options, :model),
       previous_response_id: Keyword.get(options, :previous_response_id)
     }
 
-    with {:ok, %{body: body}} <- Tesla.post(client(), "/v1/responses", body) do
-      cast_response(body)
+    with {:ok, %{body: response_body}} <- Tesla.post(client(), "/v1/responses", body) do
+      cast_response(response_body)
+    else
+      {:error, error} = err ->
+        Logger.error("OpenAiClientError", error_details: error, request_message: input)
+        err
+      other ->
+        Logger.error("OpenAiClientError", error_details: other, request_message: input)
+        {:error, other}
     end
   end
 
