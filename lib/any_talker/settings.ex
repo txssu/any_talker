@@ -79,7 +79,7 @@ defmodule AnyTalker.Settings do
         {:error, :no_chat_id}
 
       id ->
-        Repo.insert(%ChatConfig{id: id, avatar_blob: avatar_data, avatar_updated_at: DateTime.utc_now()},
+        Repo.insert(%ChatConfig{id: id, avatar_blob: avatar_data, avatar_updated_at: DateTime.utc_now(:second)},
           on_conflict: {:replace, [:avatar_blob, :avatar_updated_at]},
           conflict_target: [:id]
         )
