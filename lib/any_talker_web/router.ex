@@ -44,6 +44,7 @@ defmodule AnyTalkerWeb.Router do
     pipe_through :browser
 
     get "/log_in/via_webapp", AuthController, :via_webapp
+    get "/avatar/:chat_id", AvatarController, :show
   end
 
   scope "/", AnyTalkerWeb do

@@ -16,7 +16,7 @@ defmodule AnyTalkerWeb.WebApp.ChatLive do
     <div class="space-y-5">
       <.section class="pt-[30px] pb-[15px]">
         <div class="flex justify-center">
-          <img src class="rounded-full" width="90" height="90" alt="Chat photo" />
+          <img src={~p"/avatar/#{@chat_config.id}"} class="rounded-full" width="90" height="90" alt="Chat photo" />
         </div>
         <h1 class="mt-[15px] text-center text-xl font-bold">{@chat_config.title}</h1>
       </.section>
@@ -64,6 +64,13 @@ defmodule AnyTalkerWeb.WebApp.ChatLive do
     chat_config = Settings.get_chat_config(id)
     top_authors = Statistics.get_top_message_authors_today(id, 5)
 
+    Task.async(fn ->
+      case Integer.parse(id) do
+        {chat_id, ""} -> Settings.get_or_fetch_chat_avatar(chat_id)
+        _ -> {:error, :invalid_chat_id}
+      end
+    end)
+
     {:ok,
      socket
      |> assign(user_owner?: user_owner?, top_authors: top_authors)
@@ -91,6 +98,17 @@ defmodule AnyTalkerWeb.WebApp.ChatLive do
     else
       {:noreply, assign_chat_config(socket, chat_config)}
     end
+  end
+
+  @impl Phoenix.LiveView
+  def handle_info({ref, _result}, socket) when is_reference(ref) do
+    Process.demonitor(ref, [:flush])
+    {:noreply, socket}
+  end
+
+  @impl Phoenix.LiveView
+  def handle_info({:DOWN, _ref, :process, _pid, _reason}, socket) do
+    {:noreply, socket}
   end
 
   defp assign_chat_config(socket, chat_config) do
