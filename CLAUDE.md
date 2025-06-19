@@ -4,35 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Development Commands
 
-**Project Setup**
-- `mix setup` - Complete setup: install deps, setup database, build assets
-- `mix deps.get` - Install dependencies
-- `mix ecto.setup` - Create and migrate database, run seeds
-- `mix ecto.reset` - Drop, create, and migrate database
-
-**Development Server**
-- `mix phx.server` - Start Phoenix server
-- `iex -S mix phx.server` - Start server with interactive Elixir shell
-
 **Database**
-- `mix ecto.create` - Create database
-- `mix ecto.migrate` - Run migrations
 - `mix ecto.gen.migration <name>` - Generate new migration
-
-**Testing**
-- `mix test` - Run all tests
-- `mix test test/path/to/specific_test.exs` - Run specific test file
-- `mix test --cover` - Run tests with coverage
 
 **Code Quality**
 - `mix ci` - Run full CI pipeline (compile, format check, credo, sobelow, deps audit)
-- `mix format` - Format code
-- `mix credo` - Static code analysis
-- `mix sobelow` - Security analysis
-
-**Assets**
-- `mix assets.build` - Build assets (Tailwind + esbuild)
-- `mix assets.deploy` - Build and minify assets for production
 
 ## Architecture Overview
 
