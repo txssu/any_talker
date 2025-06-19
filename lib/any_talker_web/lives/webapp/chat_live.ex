@@ -16,7 +16,7 @@ defmodule AnyTalkerWeb.WebApp.ChatLive do
     <div class="space-y-5">
       <.section class="pt-[30px] pb-[15px]">
         <div class="flex justify-center">
-          <img src class="rounded-full" width="90" height="90" alt="Chat photo" />
+          <img src={~p"/avatar/#{@chat_config.id}"} class="rounded-full" width="90" height="90" alt="Chat photo" />
         </div>
         <h1 class="mt-[15px] text-center text-xl font-bold">{@chat_config.title}</h1>
       </.section>
@@ -64,6 +64,13 @@ defmodule AnyTalkerWeb.WebApp.ChatLive do
     chat_config = Settings.get_chat_config(id)
     top_authors = Statistics.get_top_message_authors_today(id, 5)
 
+    Task.async(fn ->
+      case Integer.parse(id) do
+        {chat_id, ""} -> Settings.get_or_fetch_chat_avatar(chat_id)
+        _invalid_format -> {:error, :invalid_chat_id}
+      end
+    end)
+
     {:ok,
      socket
      |> assign(user_owner?: user_owner?, top_authors: top_authors)
@@ -85,7 +92,7 @@ defmodule AnyTalkerWeb.WebApp.ChatLive do
         {:ok, new_config} ->
           {:noreply, assign_chat_config(socket, new_config)}
 
-        {:error, _changeset} ->
+        {:error, _error_changeset} ->
           {:noreply, assign_chat_config(socket, chat_config)}
       end
     else
