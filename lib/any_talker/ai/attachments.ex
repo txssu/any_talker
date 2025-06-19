@@ -7,7 +7,7 @@ defmodule AnyTalker.AI.Attachments do
         when maybe_message: Message.t() | nil
   def download_message_image(nil), do: {:ok, nil}
 
-  def download_message_image(message) do
+  def download_message_image(%Message{} = message) do
     with {:ok, new_url} <- get_data(message.image_url),
          {:ok, reply} <- download_message_image(message.reply) do
       final_message = %{message | image_url: new_url, reply: reply}
