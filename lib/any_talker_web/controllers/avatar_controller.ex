@@ -3,6 +3,7 @@ defmodule AnyTalkerWeb.AvatarController do
 
   alias AnyTalker.Settings
 
+  @spec show(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def show(conn, %{"chat_id" => chat_id}) do
     case Integer.parse(chat_id) do
       {id, ""} ->
@@ -16,11 +17,11 @@ defmodule AnyTalkerWeb.AvatarController do
           {:ok, nil} ->
             send_resp(conn, 404, "No avatar found")
 
-          {:error, _reason} ->
+          {:error, _error_reason} ->
             send_resp(conn, 404, "Avatar not found")
         end
 
-      _ ->
+      _invalid_parse_result ->
         send_resp(conn, 400, "Invalid chat ID")
     end
   end

@@ -58,18 +58,38 @@ defmodule AnyTalker.Settings do
   end
 
   defp fetch_and_store_avatar(chat_id, chat_config) do
-    options = [bot: AnyTalkerBot.bot()]
-
-    with {:ok, chat} <- ExGram.get_chat(chat_id, options),
-         photo when not is_nil(photo) <- Map.get(chat, :photo),
-         small_file_id when not is_nil(small_file_id) <- Map.get(photo, :small_file_id),
-         file_url = Attachments.get_file_link(small_file_id),
-         {:ok, %{body: avatar_data}} <- :get |> Finch.build(file_url) |> Finch.request(AnyTalker.Finch),
+    with {:ok, chat} <- get_telegram_chat(chat_id),
+         {:ok, file_url} <- extract_avatar_url(chat),
+         {:ok, avatar_data} <- download_avatar(file_url),
          {:ok, updated_config} <- update_avatar(chat_config, avatar_data) do
       {:ok, updated_config.avatar_blob}
     else
       error ->
         {:error, error}
+    end
+  end
+
+  defp get_telegram_chat(chat_id) do
+    options = [bot: AnyTalkerBot.bot()]
+    ExGram.get_chat(chat_id, options)
+  end
+
+  defp extract_avatar_url(chat) do
+    with photo when photo != nil <- Map.get(chat, :photo),
+         small_file_id when small_file_id != nil <- Map.get(photo, :small_file_id) do
+      file_url = Attachments.get_file_link(small_file_id)
+      {:ok, file_url}
+    else
+      _no_avatar -> {:error, :no_avatar}
+    end
+  end
+
+  defp download_avatar(file_url) do
+    request = Finch.build(:get, file_url)
+
+    case Finch.request(request, AnyTalker.Finch) do
+      {:ok, %{body: avatar_data}} -> {:ok, avatar_data}
+      error -> error
     end
   end
 
