@@ -22,6 +22,6 @@ defmodule AnyTalker.Accounts.User do
   def changeset(user, attrs) do
     user
     |> cast(attrs, [:id, :allows_write_to_pm, :first_name, :last_name, :photo_url, :username, :custom_name])
-    |> validate_required([:first_name, :username])
+    |> validate_required([:first_name])
   end
 end
