@@ -2,6 +2,7 @@ defmodule AnyTalkerWeb.Router do
   use AnyTalkerWeb, :router
 
   import AnyTalkerWeb.AuthPlug
+  import AnyTalkerWeb.ChatMemberPlug
 
   alias AnyTalkerWeb.CSPNoncePlug
 
@@ -44,6 +45,12 @@ defmodule AnyTalkerWeb.Router do
     pipe_through :browser
 
     get "/log_in/via_webapp", AuthController, :via_webapp
+  end
+
+  scope "/", AnyTalkerWeb do
+    pipe_through [:browser, :require_authenticated_user, :require_chat_member]
+
+    get "/avatar/:chat_id", AvatarController, :show
   end
 
   scope "/", AnyTalkerWeb do

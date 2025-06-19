@@ -14,6 +14,8 @@ defmodule AnyTalker.Settings.ChatConfig do
     field :ask_model, :string
     field :ask_rate_limit, :integer
     field :ask_rate_limit_scale_ms, :integer
+    field :avatar_blob, :binary
+    field :avatar_updated_at, :utc_datetime
 
     timestamps(type: :utc_datetime)
   end

@@ -83,6 +83,15 @@ defmodule AnyTalker.Accounts do
     Application.get_env(:any_talker, :owner_id) == user_id
   end
 
+  @spec chat_member?(integer(), integer()) :: boolean()
+  def chat_member?(user_id, chat_id) do
+    query =
+      from cm in ChatMember,
+        where: cm.user_id == ^user_id and cm.chat_id == ^chat_id
+
+    Repo.exists?(query)
+  end
+
   @spec display_name(User.t() | nil) :: String.t() | nil
   def display_name(nil), do: nil
 

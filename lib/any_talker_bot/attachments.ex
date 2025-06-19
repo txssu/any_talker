@@ -2,12 +2,11 @@ defmodule AnyTalkerBot.Attachments do
   @moduledoc false
   alias ExGram.Model.PhotoSize
 
-  @max_area 1536 * 1024
-  @spec best_fit_photo([PhotoSize.t()]) :: PhotoSize.t() | nil
-  def best_fit_photo(sizes) when is_list(sizes) do
+  @spec best_fit_photo([PhotoSize.t()], non_neg_integer()) :: PhotoSize.t() | nil
+  def best_fit_photo(sizes, max_area) when is_list(sizes) and is_integer(max_area) do
     sizes
     |> Enum.map(&{&1, photo_area(&1)})
-    |> Enum.filter(fn {_photo, area} -> area < @max_area end)
+    |> Enum.filter(fn {_photo, area} -> area < max_area end)
     |> Enum.max_by(fn {_photo, area} -> area end, fn -> nil end)
     |> case do
       {photo, _area} -> photo
