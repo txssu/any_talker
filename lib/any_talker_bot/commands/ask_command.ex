@@ -141,7 +141,7 @@ defmodule AnyTalkerBot.AskCommand do
   defp get_image_url(%Message{photo: nil}), do: nil
 
   defp get_image_url(%Message{photo: photos}) do
-    %PhotoSize{file_id: photo_id} = Attachments.best_fit_photo(photos)
+    %PhotoSize{file_id: photo_id} = Attachments.best_fit_photo(photos, 1536 * 1024)
 
     Attachments.get_file_link(photo_id)
   end
