@@ -23,5 +23,6 @@ defmodule AnyTalker.Accounts.User do
     user
     |> cast(attrs, [:id, :allows_write_to_pm, :first_name, :last_name, :photo_url, :username, :custom_name])
     |> validate_required([:first_name])
+    |> validate_length(:custom_name, max: 20)
   end
 end
