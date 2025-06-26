@@ -58,17 +58,14 @@ defmodule AnyTalkerWeb.WebApp.ChatLive do
   end
 
   @impl Phoenix.LiveView
-  def mount(%{"chat_id" => id}, _session, socket) do
+  def mount(%{"chat_id" => chat_id}, _session, socket) do
     user_owner? = Accounts.owner?(socket.assigns.current_user)
 
-    chat_config = Settings.get_chat_config(id)
-    top_authors = Statistics.get_top_message_authors_today(id, 5)
+    chat_config = Settings.get_chat_config(chat_id)
+    top_authors = Statistics.get_top_message_authors_today(chat_id, 5)
 
     Task.async(fn ->
-      case Integer.parse(id) do
-        {chat_id, ""} -> Settings.get_or_fetch_chat_avatar(chat_id)
-        _invalid_format -> {:error, :invalid_chat_id}
-      end
+      Settings.get_or_fetch_chat_avatar(chat_id)
     end)
 
     {:ok,
