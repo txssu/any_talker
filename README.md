@@ -1,6 +1,6 @@
 # AnyTalker
 
-A Telegram bot initially developed for a specific chat. It can emulate characters using AI models (OpenAI) and includes basic anti-spam protection. While originally chat-specific, it can now be used in multiple chats — access control is managed solely by the owner. The bot runs at @AnyTalkerBot.
+A Telegram bot initially developed for a specific chat. It can emulate characters using AI models (OpenAI) and includes basic anti-spam protection. While originally chat-specific, it can now be used in multiple chats — access control is managed solely by the owner. The bot runs at [@AnyTalkerBot](https://t.me/AnyTalkerBot).
 
 ## Envs
 
