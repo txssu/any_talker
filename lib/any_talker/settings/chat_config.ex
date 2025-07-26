@@ -14,6 +14,7 @@ defmodule AnyTalker.Settings.ChatConfig do
     field :ask_model, :string
     field :ask_rate_limit, :integer
     field :ask_rate_limit_scale_ms, :integer
+    field :bot_name, :string
     field :avatar_blob, :binary
     field :avatar_updated_at, :utc_datetime
 
@@ -29,7 +30,8 @@ defmodule AnyTalker.Settings.ChatConfig do
       :ask_prompt,
       :ask_model,
       :ask_rate_limit,
-      :ask_rate_limit_scale_ms
+      :ask_rate_limit_scale_ms,
+      :bot_name
     ])
     |> validate_required([:antispam, :ask_command])
   end
