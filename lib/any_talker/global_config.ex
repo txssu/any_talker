@@ -10,13 +10,14 @@ defmodule AnyTalker.GlobalConfig do
 
   @type t :: %__MODULE__{}
 
-  @fields ~w[ask_model ask_rate_limit ask_rate_limit_scale_ms ask_prompt]a
+  @fields ~w[ask_model ask_rate_limit ask_rate_limit_scale_ms ask_prompt bot_name]a
 
   schema "global_config" do
     field :ask_model, :string
     field :ask_rate_limit, :integer
     field :ask_rate_limit_scale_ms, :integer
     field :ask_prompt, :string
+    field :bot_name, :string
   end
 
   @spec get(term()) :: term()

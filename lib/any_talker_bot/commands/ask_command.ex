@@ -2,6 +2,8 @@ defmodule AnyTalkerBot.AskCommand do
   @moduledoc false
   use AnyTalkerBot, :command
 
+  import AnyTalkerBot.MarkdownUtils
+
   alias AnyTalker.Accounts
   alias AnyTalker.AI
   alias AnyTalker.Settings
@@ -67,24 +69,26 @@ defmodule AnyTalkerBot.AskCommand do
   defp format_unit(0, _singular, _few, _many), do: nil
   defp format_unit(n, singular, few, many), do: "#{n} #{pluralize(n, singular, few, many)}"
 
-  defp reply(reply, message, bot_id) do
+  defp reply(%Reply{} = reply, message, bot_id) do
     parsed_message = parse_message(message, bot_id)
+    config = Settings.get_full_chat_config(message.chat.id)
 
     {reply_text, reply_callback} =
       message.reply_to_message
       |> history_key()
       |> AI.ask(parsed_message)
-      |> handle_ask_response()
+      |> handle_ask_response(config)
 
-    %{reply | text: reply_text, on_sent: reply_callback}
+    %{reply | text: reply_text, on_sent: reply_callback, markdown: true}
   end
 
-  defp handle_ask_response(nil) do
+  defp handle_ask_response(nil, _config) do
     {"Да не", nil}
   end
 
-  defp handle_ask_response({reply_text, reply_callback}) do
-    {reply_text, &adjust_params(reply_callback, &1)}
+  defp handle_ask_response({reply_text, reply_callback}, config) do
+    formatted_text = format_response_with_bot_name(reply_text, config)
+    {formatted_text, &adjust_params(reply_callback, &1)}
   end
 
   defp parse_message(%Message{text: t, caption: c, photo: p} = message, bot_id)
@@ -185,6 +189,19 @@ defmodule AnyTalkerBot.AskCommand do
 
       {:deny, time_left_ms} ->
         {:error, :rate_limit, time_left_ms}
+    end
+  end
+
+  defp format_response_with_bot_name(reply_text, config) do
+    bot_name = config.bot_name
+
+    if not is_nil(bot_name) and bot_name != "" do
+      ~i"""
+      *#{bot_name}*:
+      #{reply_text}
+      """
+    else
+      escape_markdown(reply_text)
     end
   end
 end
