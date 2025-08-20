@@ -43,20 +43,23 @@ defmodule AnyTalker.AI do
     end
   end
 
-  if Mix.env() == :prod do
-    defp instructions(prompt) do
-      today =
-        "Asia/Yekaterinburg"
-        |> DateTime.now!()
-        |> DateTime.to_date()
-        |> Date.to_iso8601()
+  defp instructions(prompt) do
+    base_prompt = prompt || AnyTalker.GlobalConfig.get(:ask_prompt)
 
-      String.replace(prompt || AnyTalker.GlobalConfig.get(:ask_prompt), "%{date}", today)
-    end
-  else
-    defp instructions(prompt) do
-      prompt || "You are in a test environment."
-    end
+    json_instructions = """
+
+    # Формат сообщений
+
+    Сообщения пользователей приходят в JSON формате со следующими полями:
+    - `text`: основной текст сообщения
+    - `username`: имя отправителя (только для пользователей)
+    - `sent_at`: время отправки сообщения
+    - `quote`: цитируемый текст из сообщения, на которое отвечает пользователь (если есть)
+
+    ВАЖНО: Обращай внимание на поле `sent_at` - это реальное время отправки сообщения. Используй эту информацию для понимания контекста времени и актуальности сообщения.
+    """
+
+    base_prompt <> json_instructions
   end
 
   defp hit_metrics(response) do

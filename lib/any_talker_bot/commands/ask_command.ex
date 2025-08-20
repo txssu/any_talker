@@ -112,7 +112,7 @@ defmodule AnyTalkerBot.AskCommand do
   defp build_message(message, bot_id) do
     role = if message.from.id == bot_id, do: :assistant, else: :user
 
-    AI.Message.new(message.message_id, role, message.text || message.caption,
+    AI.Message.new(message.message_id, role, message.text || message.caption, DateTime.from_unix!(message.date),
       username: display_name(message),
       user_id: message.from.id,
       message_id: message.message_id,
@@ -133,7 +133,7 @@ defmodule AnyTalkerBot.AskCommand do
     message_text = original_reply.text || original_reply.caption
 
     reply =
-      AI.Message.new(original_reply.message_id, role, message_text,
+      AI.Message.new(original_reply.message_id, role, message_text, DateTime.from_unix!(original_reply.date),
         username: display_name(original_reply),
         quote: quote_text,
         image_url: get_image_url(original_reply)

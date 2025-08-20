@@ -12,9 +12,9 @@ defmodule AnyTalker.AI.MessageTest do
       ]
 
       expected = [
-        %{content: ~s({"text":"1"}), role: :system},
-        %{content: ~s({"text":"2"}), role: :system},
-        %{content: ~s({"text":"3"}), role: :system}
+        %{content: ~s({"text":"1","sent_at":"2024-01-01T17:00:00+05:00"}), role: :system},
+        %{content: ~s({"text":"2","sent_at":"2024-01-01T17:00:00+05:00"}), role: :system},
+        %{content: ~s({"text":"3","sent_at":"2024-01-01T17:00:00+05:00"}), role: :system}
       ]
 
       assert expected == Message.format_list(messages)
@@ -31,6 +31,19 @@ defmodule AnyTalker.AI.MessageTest do
       assert json_content["text"] == "TestText"
     end
 
+    test "always includes sent_at in message" do
+      sent_at = ~U[2024-01-01 12:00:00Z]
+
+      messages = [
+        message("TestText", role: :user, sent_at: sent_at)
+      ]
+
+      assert [msg] = Message.format_list(messages)
+      json_content = Jason.decode!(msg.content)
+      assert json_content["text"] == "TestText"
+      assert json_content["sent_at"] == "2024-01-01T17:00:00+05:00"
+    end
+
     test "appends reply to assistant message before current" do
       reply = message("1", role: :assistant, id: 1)
 
@@ -39,8 +52,8 @@ defmodule AnyTalker.AI.MessageTest do
       ]
 
       expected = [
-        %{content: ~s({"text":"1"}), role: :assistant},
-        %{content: ~s({"text":"2"}), role: :assistant}
+        %{content: ~s({"text":"1","sent_at":"2024-01-01T17:00:00+05:00"}), role: :assistant},
+        %{content: ~s({"text":"2","sent_at":"2024-01-01T17:00:00+05:00"}), role: :assistant}
       ]
 
       assert expected == Message.format_list(messages)
@@ -55,9 +68,9 @@ defmodule AnyTalker.AI.MessageTest do
       ]
 
       expected = [
-        %{content: ~s({"text":"1"}), role: :assistant},
-        %{content: ~s({"text":"2"}), role: :assistant},
-        %{content: ~s({"text":"3"}), role: :assistant}
+        %{content: ~s({"text":"1","sent_at":"2024-01-01T17:00:00+05:00"}), role: :assistant},
+        %{content: ~s({"text":"2","sent_at":"2024-01-01T17:00:00+05:00"}), role: :assistant},
+        %{content: ~s({"text":"3","sent_at":"2024-01-01T17:00:00+05:00"}), role: :assistant}
       ]
 
       assert expected == Message.format_list(messages)
@@ -77,8 +90,10 @@ defmodule AnyTalker.AI.MessageTest do
 
       assert json1["username"] == "User1"
       assert json1["text"] == "1"
+      assert json1["sent_at"] == "2024-01-01T17:00:00+05:00"
       assert json2["username"] == "User2"
       assert json2["text"] == "2"
+      assert json2["sent_at"] == "2024-01-01T17:00:00+05:00"
     end
 
     test "does not append reply if already in list" do
@@ -90,8 +105,8 @@ defmodule AnyTalker.AI.MessageTest do
       ]
 
       expected = [
-        %{content: ~s({"text":"1"}), role: :assistant},
-        %{content: ~s({"text":"2"}), role: :assistant}
+        %{content: ~s({"text":"1","sent_at":"2024-01-01T17:00:00+05:00"}), role: :assistant},
+        %{content: ~s({"text":"2","sent_at":"2024-01-01T17:00:00+05:00"}), role: :assistant}
       ]
 
       assert expected == Message.format_list(messages)
@@ -110,7 +125,9 @@ defmodule AnyTalker.AI.MessageTest do
       json2 = Jason.decode!(msg2.content)
 
       assert json1["text"] == "1"
+      assert json1["sent_at"] == "2024-01-01T17:00:00+05:00"
       assert json2["text"] == "2"
+      assert json2["sent_at"] == "2024-01-01T17:00:00+05:00"
       assert json2["quote"] == "One"
     end
 
@@ -128,7 +145,9 @@ defmodule AnyTalker.AI.MessageTest do
       json2 = Jason.decode!(msg2.content)
 
       assert json1["text"] == "1"
+      assert json1["sent_at"] == "2024-01-01T17:00:00+05:00"
       assert json2["text"] == "2"
+      assert json2["sent_at"] == "2024-01-01T17:00:00+05:00"
       assert json2["quote"] == "One"
     end
 
@@ -216,7 +235,8 @@ defmodule AnyTalker.AI.MessageTest do
   defp message(text, options) do
     id = Keyword.get_lazy(options, :id, &System.unique_integer/0)
     role = Keyword.get(options, :role, :system)
+    sent_at = Keyword.get(options, :sent_at, ~U[2024-01-01 12:00:00Z])
 
-    Message.new(id, role, text, options)
+    Message.new(id, role, text, sent_at, options)
   end
 end
