@@ -15,6 +15,7 @@ defmodule AnyTalkerBot.Dispatcher do
   middleware(ExGram.Middleware.IgnoreUsername)
   middleware(AnyTalkerBot.LoadDataMiddleware)
   middleware(AnyTalkerBot.AntispamMiddleware)
+  middleware(AnyTalkerBot.IgnoreForwardedCommandsMiddleware)
 
   @spec bot() :: :any_talker
   def bot, do: :any_talker
