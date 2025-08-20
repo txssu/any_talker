@@ -12,6 +12,7 @@ defmodule AnyTalker.AI.Message do
     field :role, role()
     field :username, String.t() | nil
     field :text, String.t()
+    field :sent_at, DateTime.t()
 
     field :reply, t() | nil
     field :quote, String.t() | nil
@@ -19,13 +20,14 @@ defmodule AnyTalker.AI.Message do
     field :image_url, String.t() | nil
   end
 
-  @spec new(integer(), role(), String.t(), keyword()) :: t()
-  def new(message_id, role, text, options \\ []) do
+  @spec new(integer(), role(), String.t(), DateTime.t(), keyword()) :: t()
+  def new(message_id, role, text, sent_at, options \\ []) do
     %__MODULE__{
       message_id: message_id,
       role: role,
       username: options[:username],
       text: text,
+      sent_at: sent_at,
       reply: options[:reply],
       quote: options[:quote],
       user_id: options[:user_id],
@@ -92,6 +94,7 @@ defmodule AnyTalker.AI.Message do
       |> maybe_add_text(message)
       |> maybe_add_username(message)
       |> maybe_add_quote(message)
+      |> add_sent_at(message)
 
     Jason.encode!(content_map)
   end
@@ -113,6 +116,11 @@ defmodule AnyTalker.AI.Message do
   end
 
   defp maybe_add_quote(content, _message), do: content
+
+  defp add_sent_at(content, %__MODULE__{sent_at: sent_at}) do
+    yekaterinburg_sent_at = DateTime.shift_zone!(sent_at, "Asia/Yekaterinburg")
+    Map.put(content, :sent_at, DateTime.to_iso8601(yekaterinburg_sent_at))
+  end
 
   defp append(list, elem) do
     [elem | list]
