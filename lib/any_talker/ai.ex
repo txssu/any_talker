@@ -46,7 +46,7 @@ defmodule AnyTalker.AI do
   if Mix.env() == :prod do
     defp instructions(prompt) do
       today =
-        "Etc/GMT+5"
+        "Asia/Yekaterinburg"
         |> DateTime.now!()
         |> DateTime.to_date()
         |> Date.to_iso8601()
