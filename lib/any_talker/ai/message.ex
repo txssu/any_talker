@@ -34,77 +34,87 @@ defmodule AnyTalker.AI.Message do
     }
   end
 
+  @spec format_list([t()]) :: [%{role: :user | :system | :assistant, content: String.t()}]
+  def format_list(messages) do
+    messages
+    |> Enum.sort_by(& &1.message_id)
+    |> Enum.flat_map(&format_message(&1, get_message_ids(messages)))
+  end
+
   @spec format_message(t(), [integer()]) :: [%{role: :user | :system | :assistant, content: String.t()}]
   def format_message(message, messages_ids) do
     []
     |> maybe_append_reply(message, messages_ids)
-    |> maybe_append_quote(message)
-    |> maybe_append_username(message)
     |> append_content(message)
     |> Enum.reverse()
+  end
+
+  defp get_message_ids(messages) do
+    Enum.map(messages, & &1.message_id)
   end
 
   defp maybe_append_reply(result, message, messages_ids) do
     reply = message.reply
 
     if reply && reply.message_id not in messages_ids do
-      result
-      |> maybe_append_username(reply)
-      |> append_content(reply)
+      append_content(result, reply)
     else
       result
-    end
-  end
-
-  defp maybe_append_quote(result, message) do
-    if message.reply && message.reply.quote do
-      append(result, %{role: :system, content: quote_message_content(message.reply)})
-    else
-      result
-    end
-  end
-
-  defp maybe_append_username(result, message) do
-    case message.role do
-      :user -> append(result, %{role: :system, content: username_message_content(message)})
-      _other -> result
     end
   end
 
   defp append_content(result, message) do
-    append(result, %{role: message.role, content: build_content(message)})
+    # Always use JSON, but handle images as separate content blocks
+    content = build_json_and_attachments(message)
+    append(result, %{role: message.role, content: content})
   end
 
-  defp build_content(message) do
-    []
-    |> build_content_text(message)
-    |> build_content_image(message)
-    |> Enum.reverse()
+  defp build_json_and_attachments(message) do
+    # Build JSON content with all text data
+    json_content = build_json_content(message)
+
+    # Add attachments if present
+    case message.image_url do
+      nil ->
+        json_content
+
+      image_url ->
+        [
+          %{type: "input_text", text: json_content},
+          %{type: "input_image", image_url: image_url}
+        ]
+    end
   end
 
-  defp build_content_text(content, %__MODULE__{text: nil}), do: content
-  defp build_content_text(content, %__MODULE__{text: t}), do: append(content, %{type: "input_text", text: t})
+  defp build_json_content(message) do
+    content_map =
+      %{}
+      |> maybe_add_text(message)
+      |> maybe_add_username(message)
+      |> maybe_add_quote(message)
 
-  defp build_content_image(content, %__MODULE__{image_url: nil}), do: content
+    Jason.encode!(content_map)
+  end
 
-  defp build_content_image(content, %__MODULE__{image_url: u}),
-    do: append(content, %{type: "input_image", image_url: u})
+  defp maybe_add_text(content, %__MODULE__{text: text}) when is_binary(text) do
+    Map.put(content, :text, text)
+  end
+
+  defp maybe_add_text(content, _message), do: content
+
+  defp maybe_add_username(content, %__MODULE__{role: :user, username: username}) when is_binary(username) do
+    Map.put(content, :username, username)
+  end
+
+  defp maybe_add_username(content, _message), do: content
+
+  defp maybe_add_quote(content, %__MODULE__{reply: %__MODULE__{quote: quote}}) when is_binary(quote) do
+    Map.put(content, :quote, quote)
+  end
+
+  defp maybe_add_quote(content, _message), do: content
 
   defp append(list, elem) do
     [elem | list]
-  end
-
-  defp username_message_content(message) do
-    safe_username = safe_text(message.username)
-    ~s(Next message author's username:\n"""\n#{safe_username}\n""")
-  end
-
-  defp quote_message_content(message) do
-    safe_quote = safe_text(message.quote)
-    ~s(Quoted text from the previous message:\n"""\n#{safe_quote}\n""")
-  end
-
-  defp safe_text(text) do
-    String.replace(text, ~s("), "")
   end
 end
