@@ -41,7 +41,7 @@ defmodule AnyTalkerWeb.WebApp.ChatLive do
       <.section :if={@user_owner?}>
         <:header>Настройки</:header>
         <div class="px-2">
-          <.form for={@form} phx-change="save">
+          <.form for={@form} phx-change="validate" phx-submit="save">
             <.switch label="Антиспам" field={@form[:antispam]} />
             <.switch label="Команда /ask" field={@form[:ask_command]} />
             <.tg_input label="Имя бота" field={@form[:bot_name]} />
@@ -50,6 +50,14 @@ defmodule AnyTalkerWeb.WebApp.ChatLive do
             <.tg_input type="number" label="Период лимита /ask (мс)" field={@form[:ask_rate_limit_scale_ms]} />
             <div class="mt-2">
               <.textarea label="Промпт /ask" field={@form[:ask_prompt]} />
+            </div>
+            <div class="px-1 pt-3">
+              <button
+                type="submit"
+                class="w-full rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-700"
+              >
+                Сохранить
+              </button>
             </div>
           </.form>
         </div>
@@ -78,6 +86,20 @@ defmodule AnyTalkerWeb.WebApp.ChatLive do
   @impl Phoenix.LiveView
   def handle_event("back", _params, socket) do
     {:noreply, push_navigate(socket, to: ~p"/webapp")}
+  end
+
+  @impl Phoenix.LiveView
+  def handle_event("validate", %{"chat_config" => attrs}, socket) do
+    chat_config = socket.assigns.chat_config
+
+    changeset =
+      chat_config
+      |> Settings.change_chat_config(attrs)
+      |> Map.put(:action, :validate)
+
+    form = to_form(changeset)
+
+    {:noreply, assign(socket, form: form)}
   end
 
   @impl Phoenix.LiveView
