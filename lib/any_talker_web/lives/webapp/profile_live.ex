@@ -16,9 +16,17 @@ defmodule AnyTalkerWeb.WebApp.ProfileLive do
 
     <.section class="mt-5">
       <:header>Профиль</:header>
-      <.form for={@form} phx-change="save">
+      <.form for={@form} phx-change="validate" phx-submit="save">
         <div class="space-y-3">
           <.tg_input label="Ник" field={@form[:custom_name]} />
+          <div class="px-3 pt-3">
+            <button
+              type="submit"
+              class="w-full rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-700"
+            >
+              Сохранить
+            </button>
+          </div>
         </div>
       </.form>
     </.section>
@@ -46,6 +54,20 @@ defmodule AnyTalkerWeb.WebApp.ProfileLive do
   @impl Phoenix.LiveView
   def handle_event("back", _params, socket) do
     {:noreply, push_navigate(socket, to: socket.assigns.back)}
+  end
+
+  @impl Phoenix.LiveView
+  def handle_event("validate", %{"user" => attrs}, socket) do
+    user = socket.assigns.profile_user
+
+    changeset =
+      user
+      |> Accounts.change_user(attrs)
+      |> Map.put(:action, :validate)
+
+    form = to_form(changeset)
+
+    {:noreply, assign(socket, form: form)}
   end
 
   @impl Phoenix.LiveView

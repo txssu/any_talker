@@ -16,14 +16,21 @@ defmodule AnyTalkerWeb.WebApp.GlobalConfigLive do
 
     <.section class="mt-5">
       <:header>Настройки</:header>
-      <.form for={@form} phx-change="save">
+      <.form for={@form} phx-change="validate" phx-submit="save">
         <div class="space-y-3">
-          <.tg_input label="Имя бота" field={@form[:bot_name]} />
           <.tg_input label="Модель /ask" field={@form[:ask_model]} />
           <.tg_input type="number" label="Лимит запросов /ask" field={@form[:ask_rate_limit]} />
           <.tg_input type="number" label="Период лимита /ask (мс)" field={@form[:ask_rate_limit_scale_ms]} />
           <div class="mt-2">
             <.textarea label="Промпт /ask" field={@form[:ask_prompt]} />
+          </div>
+          <div class="px-3 pt-3">
+            <button
+              type="submit"
+              class="w-full rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-700"
+            >
+              Сохранить
+            </button>
           </div>
         </div>
       </.form>
@@ -41,6 +48,20 @@ defmodule AnyTalkerWeb.WebApp.GlobalConfigLive do
   @impl Phoenix.LiveView
   def handle_event("back", _params, socket) do
     {:noreply, push_navigate(socket, to: ~p"/webapp")}
+  end
+
+  @impl Phoenix.LiveView
+  def handle_event("validate", %{"global_config" => attrs}, socket) do
+    config = socket.assigns.global_config
+
+    changeset =
+      config
+      |> GlobalConfig.change_config(attrs)
+      |> Map.put(:action, :validate)
+
+    form = to_form(changeset)
+
+    {:noreply, assign(socket, form: form)}
   end
 
   @impl Phoenix.LiveView
