@@ -45,6 +45,7 @@ defmodule AnyTalkerWeb.Router do
     pipe_through :browser
 
     get "/log_in/via_webapp", AuthController, :via_webapp
+    get "/nikita-player/poll", NikitaPlayerController, :poll
   end
 
   scope "/", AnyTalkerWeb do
