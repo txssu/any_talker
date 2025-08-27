@@ -32,15 +32,17 @@ defmodule AnyTalker.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:tidewave, "~> 0.2", only: [:dev]},
+      {:tidewave, "~> 0.4", only: [:dev]},
       {:usage_rules, "~> 0.1", only: [:dev]},
       {:claude, "~> 0.5", only: [:dev], runtime: false},
+      # Migrate to 1.8
       {:phoenix, "~> 1.7.18"},
       {:phoenix_ecto, "~> 4.5"},
       {:ecto_sql, "~> 3.10"},
       {:postgrex, ">= 0.0.0"},
       {:phoenix_html, "~> 4.1"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
+      # Migrate to 1.1
       {:phoenix_live_view, "~> 1.0.0"},
       {:floki, ">= 0.30.0", only: :test},
       {:phoenix_live_dashboard, "~> 0.8.3"},
@@ -58,6 +60,7 @@ defmodule AnyTalker.MixProject do
       {:bandit, "~> 1.5"},
       {:ecto_psql_extras, "~> 0.6"},
       {:oban, "~> 2.17"},
+      # Migrate to 7.0
       {:logger_json, "~> 6.1"},
       {:nebulex, "~> 2.6"},
       {:decorator, "~> 1.4"},
