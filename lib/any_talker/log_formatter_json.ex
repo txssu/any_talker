@@ -19,7 +19,7 @@ defmodule AnyTalker.LogFormatterJSON do
                               otel_trace_id trace_id
                               conn]a
 
-  @impl LoggerJSON.Formatter
+  @impl Formatter
   def format(%{level: level, meta: meta, msg: msg}, opts) do
     opts = Keyword.new(opts)
     encoder_opts = Keyword.get(opts, :encoder_opts, [])

@@ -35,8 +35,7 @@ defmodule AnyTalker.MixProject do
       {:tidewave, "~> 0.4", only: [:dev]},
       {:usage_rules, "~> 0.1", only: [:dev]},
       {:claude, "~> 0.5", only: [:dev], runtime: false},
-      # Migrate to 1.8
-      {:phoenix, "~> 1.7.18"},
+      {:phoenix, "~> 1.8.0"},
       {:phoenix_ecto, "~> 4.5"},
       {:ecto_sql, "~> 3.10"},
       {:postgrex, ">= 0.0.0"},
