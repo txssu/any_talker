@@ -11,12 +11,10 @@ defmodule AnyTalker.Counters.Helpers do
   @nikita_chat_id Application.compile_env!(:any_talker, :nikita_chat_id)
   @counter_timeout_min Application.compile_env!(:any_talker, :nikita_counter_timeout_min)
 
-  @spec nikita_id?(integer()) :: boolean()
   def nikita_id?(id) do
     id == @nikita_id
   end
 
-  @spec send_init_message() :: :ok
   def send_init_message do
     markup =
       keyboard :inline do
@@ -44,7 +42,6 @@ defmodule AnyTalker.Counters.Helpers do
     :ok
   end
 
-  @spec answer_counter(integer(), atom(), atom()) :: :ok
   def answer_counter(message_id, updated_by, summary_message_type \\ :normal) do
     updated_text = get_updated_text(updated_by)
 
@@ -65,13 +62,10 @@ defmodule AnyTalker.Counters.Helpers do
     :ok
   end
 
-  @spec mark_as_unanswered(integer()) :: :ok
   def mark_as_unanswered(message_id), do: Cache.put(message_id, false)
 
-  @spec mark_as_answered(integer()) :: :ok
   def mark_as_answered(message_id), do: Cache.put(message_id, true)
 
-  @spec answered?(integer()) :: boolean()
   def answered?(message_id), do: Cache.get(message_id)
 
   defp init_text do

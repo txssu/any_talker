@@ -1,6 +1,5 @@
 defmodule AnyTalker.LogFormatter do
   @moduledoc false
-  @spec format(atom(), IO.chardata(), Logger.Formatter.date_time_ms(), keyword()) :: IO.chardata()
   def format(level, message, _timestamp, metadata) do
     # "$metadata[$level] $message\n"
     level_msg = ["[", to_string(level), "]"]

@@ -4,8 +4,7 @@ defmodule AnyTalkerBot.TypingStatus do
 
   alias AnyTalkerBot.Reply
 
-  @spec with_typing((Reply.t() -> Reply.t()), Reply.t()) :: Reply.t()
-  def with_typing(fun, reply) do
+  def with_typing(fun, %Reply{} = reply) do
     {:ok, pid} = start_link(reply.context.update.message.chat.id)
 
     result = fun.(reply)
@@ -15,12 +14,10 @@ defmodule AnyTalkerBot.TypingStatus do
     result
   end
 
-  @spec start_link(integer()) :: GenServer.on_start()
   def start_link(chat_id) do
     GenServer.start_link(__MODULE__, chat_id)
   end
 
-  @spec stop(pid()) :: :ok
   def stop(pid) do
     GenServer.stop(pid)
   end

@@ -7,7 +7,6 @@ defmodule AnyTalkerBot.IgnoreForwardedCommandsMiddleware do
   """
   use ExGram.Middleware
 
-  @spec call(ExGram.Cnt.t(), any()) :: ExGram.Cnt.t()
   def call(%ExGram.Cnt{update: %{message: %{forward_origin: %ExGram.Model.MessageOriginUser{}}}} = context, _options) do
     %{context | middleware_halted: true}
   end

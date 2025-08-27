@@ -2,7 +2,6 @@ defmodule AnyTalkerBot.MarkdownUtils do
   @moduledoc false
   @chars_to_escape [?_, ?*, ?[, ?], ?(, ?), ?~, ?`, ?>, ?#, ?+, ?-, ?=, ?|, ?{, ?}, ?., ?!]
 
-  @spec sigil_i(Macro.t(), any()) :: Macro.t()
   defmacro sigil_i(data, _params) do
     Macro.prewalk(data, fn
       # credo:disable-for-next-line Credo.Check.Consistency.UnusedVariableNames
@@ -28,7 +27,6 @@ defmodule AnyTalkerBot.MarkdownUtils do
     put_elem(ast, 1, meta)
   end
 
-  @spec mark_escape_chars(String.t()) :: [char()]
   def mark_escape_chars(text) do
     text
     |> String.to_charlist()
@@ -37,7 +35,6 @@ defmodule AnyTalkerBot.MarkdownUtils do
     end)
   end
 
-  @spec escape_markdown(String.t() | {:unescape, String.t()}) :: String.t()
   def escape_markdown(data)
 
   def escape_markdown({:unescape, binary}) do

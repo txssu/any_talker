@@ -37,7 +37,6 @@ defmodule AnyTalker.DataCase do
   @doc """
   Sets up the sandbox based on the test tags.
   """
-  @spec setup_sandbox(map()) :: :ok
   def setup_sandbox(tags) do
     pid = Sandbox.start_owner!(AnyTalker.Repo, shared: not tags[:async])
     on_exit(fn -> Sandbox.stop_owner(pid) end)
@@ -51,7 +50,6 @@ defmodule AnyTalker.DataCase do
       assert %{password: ["password is too short"]} = errors_on(changeset)
 
   """
-  @spec errors_on(Ecto.Changeset.t()) :: Ecto.Changeset.traverse_result()
   def errors_on(changeset) do
     Ecto.Changeset.traverse_errors(changeset, fn {message, opts} ->
       Regex.replace(~r"%{(\w+)}", message, fn _match, key ->

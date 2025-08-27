@@ -7,12 +7,10 @@ defmodule AnyTalker.Antispam do
   alias AnyTalker.Antispam.Captcha
   alias AnyTalker.Repo
 
-  @spec get_captcha(integer()) :: Captcha.t() | nil
   def get_captcha(id) do
     Repo.get(Captcha, id)
   end
 
-  @spec get_captcha(integer(), integer()) :: Captcha.t() | nil
   def get_captcha(user_id, chat_id) do
     query =
       from c in Captcha,
@@ -23,7 +21,6 @@ defmodule AnyTalker.Antispam do
     Repo.one(query)
   end
 
-  @spec create_captcha(integer(), String.t(), integer(), integer()) :: {:ok, Captcha.t()} | {:error, Ecto.Changeset.t()}
   def create_captcha(user_id, username, chat_id, join_message_id) do
     {question, answer} = generate_captcha()
     text = format_question(user_id, username, question)
@@ -56,7 +53,6 @@ defmodule AnyTalker.Antispam do
     |> Repo.insert()
   end
 
-  @spec try_resolve_captcha(Captcha.t(), String.t(), integer()) :: Captcha.t()
   def try_resolve_captcha(captcha, user_answer, message_id) do
     status =
       if captcha.answer == user_answer,
@@ -66,12 +62,10 @@ defmodule AnyTalker.Antispam do
     set_status(captcha, status, message_id: message_id)
   end
 
-  @spec obsolete_captcha(Captcha.t()) :: Captcha.t()
   def obsolete_captcha(captcha) do
     set_status(captcha, :obsoleted)
   end
 
-  @spec time_out_captcha(Captcha.t()) :: Captcha.t()
   def time_out_captcha(captcha) do
     set_status(captcha, :timed_out)
   end

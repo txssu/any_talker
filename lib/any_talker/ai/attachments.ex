@@ -3,8 +3,6 @@ defmodule AnyTalker.AI.Attachments do
 
   alias AnyTalker.AI.Message
 
-  @spec download_message_image(maybe_message) :: {:ok, maybe_message} | {:error, any()}
-        when maybe_message: Message.t() | nil
   def download_message_image(nil), do: {:ok, nil}
 
   def download_message_image(%Message{} = message) do

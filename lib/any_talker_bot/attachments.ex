@@ -2,7 +2,6 @@ defmodule AnyTalkerBot.Attachments do
   @moduledoc false
   alias ExGram.Model.PhotoSize
 
-  @spec best_fit_photo([PhotoSize.t()], non_neg_integer()) :: PhotoSize.t() | nil
   def best_fit_photo(sizes, max_area) when is_list(sizes) and is_integer(max_area) do
     sizes
     |> Enum.map(&{&1, photo_area(&1)})
@@ -14,7 +13,6 @@ defmodule AnyTalkerBot.Attachments do
     end
   end
 
-  @spec get_file_link(String.t()) :: String.t()
   def get_file_link(file_id) when is_binary(file_id) do
     options = [bot: AnyTalkerBot.bot()]
 

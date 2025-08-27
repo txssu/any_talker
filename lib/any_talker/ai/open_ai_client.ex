@@ -7,7 +7,6 @@ defmodule AnyTalker.AI.OpenAIClient do
 
   require Logger
 
-  @spec response(keyword()) :: {:ok, Response.t()} | {:error, any()}
   def response(options) do
     body = %{
       input: Keyword.fetch!(options, :input),

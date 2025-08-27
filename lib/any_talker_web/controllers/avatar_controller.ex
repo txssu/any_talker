@@ -3,7 +3,6 @@ defmodule AnyTalkerWeb.AvatarController do
 
   alias AnyTalker.Settings
 
-  @spec show(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def show(conn, %{"chat_id" => chat_id}) do
     case Integer.parse(chat_id) do
       {id, ""} ->

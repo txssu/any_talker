@@ -24,7 +24,6 @@ defmodule AnyTalker.Statistics do
     * :message_count — number of messages they’ve sent
     * :user — the `%AnyTalker.Accounts.User{}` struct for that author
   """
-  @spec get_top_message_authors(DateTime.t(), DateTime.t(), integer(), pos_integer()) :: [map()]
   def get_top_message_authors(start_date, end_date, chat_id, limit \\ 3) do
     query =
       from m in Message,
@@ -55,7 +54,6 @@ defmodule AnyTalker.Statistics do
   ## Returns
     A list of maps as per `get_top_message_authors/3`.
   """
-  @spec get_top_message_authors_today(pos_integer(), pos_integer()) :: [map()]
   def get_top_message_authors_today(chat_id, limit \\ 3) do
     # Get today's date in UTC at midnight (00:00:00)
     today_start = DateTime.new!(Date.utc_today(), ~T[00:00:00.000], "Etc/UTC")

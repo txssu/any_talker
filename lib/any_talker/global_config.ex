@@ -19,18 +19,15 @@ defmodule AnyTalker.GlobalConfig do
     field :ask_prompt, :string
   end
 
-  @spec get(term()) :: term()
   def get(key) when key in @fields do
     Map.fetch!(get_config(), key)
   end
 
-  @spec get_config() :: t()
   @decorate cacheable(cache: Cache)
   def get_config do
     Repo.get!(__MODULE__, 1)
   end
 
-  @spec update_config(t(), map()) :: {:ok, t()} | {:error, Ecto.Changeset.t()}
   def update_config(config, attrs) do
     result =
       config
@@ -42,7 +39,6 @@ defmodule AnyTalker.GlobalConfig do
     result
   end
 
-  @spec change_config(t(), map()) :: Ecto.Changeset.t()
   def change_config(config, attrs \\ %{}) do
     changeset(config, attrs)
   end

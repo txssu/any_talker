@@ -17,10 +17,8 @@ defmodule AnyTalkerBot.Dispatcher do
   middleware(AnyTalkerBot.AntispamMiddleware)
   middleware(AnyTalkerBot.IgnoreForwardedCommandsMiddleware)
 
-  @spec bot() :: :any_talker
   def bot, do: :any_talker
 
-  @spec handle(ExGram.Dispatcher.parsed_message(), ExGram.Cnt.t()) :: ExGram.Cnt.t()
   def handle(message, context) do
     context
     |> Reply.new(message)

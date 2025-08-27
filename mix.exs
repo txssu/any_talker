@@ -56,7 +56,6 @@ defmodule AnyTalker.MixProject do
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
-      {:typedstruct, "~> 0.5"},
       {:ecto_psql_extras, "~> 0.6"},
       {:oban, "~> 2.17"},
       {:logger_json, "~> 6.1"},

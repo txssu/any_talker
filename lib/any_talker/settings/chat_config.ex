@@ -21,7 +21,6 @@ defmodule AnyTalker.Settings.ChatConfig do
     timestamps(type: :utc_datetime)
   end
 
-  @spec changeset(t(), map()) :: Ecto.Changeset.t()
   def changeset(chat_config, attrs) do
     chat_config
     |> cast(attrs, [
