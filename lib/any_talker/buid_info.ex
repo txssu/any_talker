@@ -32,6 +32,5 @@ defmodule AnyTalker.BuildInfo do
 
   @git_short_hash hash
 
-  @spec git_short_hash() :: String.t()
   def git_short_hash, do: @git_short_hash
 end

@@ -1,26 +1,17 @@
 defmodule AnyTalker.AI.Message do
   @moduledoc false
-  use TypedStruct
 
-  @type role :: :assistant | :system | :user
+  defstruct message_id: nil,
+            chat_id: nil,
+            user_id: nil,
+            role: nil,
+            username: nil,
+            text: nil,
+            sent_at: nil,
+            reply: nil,
+            quote: nil,
+            image_url: nil
 
-  typedstruct do
-    field :message_id, integer() | nil
-    field :chat_id, integer() | nil
-    field :user_id, integer() | nil
-
-    field :role, role()
-    field :username, String.t() | nil
-    field :text, String.t()
-    field :sent_at, DateTime.t()
-
-    field :reply, t() | nil
-    field :quote, String.t() | nil
-
-    field :image_url, String.t() | nil
-  end
-
-  @spec new(integer(), role(), String.t(), DateTime.t(), keyword()) :: t()
   def new(message_id, role, text, sent_at, options \\ []) do
     %__MODULE__{
       message_id: message_id,
@@ -36,15 +27,13 @@ defmodule AnyTalker.AI.Message do
     }
   end
 
-  @spec format_list([t()]) :: [%{role: :user | :system | :assistant, content: String.t()}]
   def format_list(messages) do
     messages
     |> Enum.sort_by(& &1.message_id)
     |> Enum.flat_map(&format_message(&1, get_message_ids(messages)))
   end
 
-  @spec format_message(t(), [integer()]) :: [%{role: :user | :system | :assistant, content: String.t()}]
-  def format_message(message, messages_ids) do
+  def format_message(%__MODULE__{} = message, messages_ids) do
     []
     |> maybe_append_reply(message, messages_ids)
     |> append_content(message)

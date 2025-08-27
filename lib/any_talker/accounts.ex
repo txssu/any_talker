@@ -8,44 +8,37 @@ defmodule AnyTalker.Accounts do
   alias AnyTalker.Repo
   alias AnyTalker.Settings.ChatConfig
 
-  @spec get_user(integer()) :: User.t() | nil
   def get_user(id) do
     Repo.get(User, id)
   end
 
-  @spec upsert_user(map(), [atom()]) :: {:ok, User.t()} | {:error, Ecto.Changeset.t()}
   def upsert_user(attrs, keys) do
     %User{}
     |> User.changeset(attrs)
     |> Repo.insert(on_conflict: {:replace, keys}, conflict_target: [:id])
   end
 
-  @spec update_user(User.t(), map()) :: {:ok, User.t()} | {:error, Ecto.Changeset.t()}
   def update_user(user, attrs) do
     user
     |> User.changeset(attrs)
     |> Repo.update()
   end
 
-  @spec change_user(User.t(), map()) :: Ecto.Changeset.t()
   def change_user(user, attrs \\ %{}) do
     User.changeset(user, attrs)
   end
 
-  @spec create_token(User.t()) :: String.t()
   def create_token(user) do
     {token, user_token} = UserToken.build_token(user)
     Repo.insert!(user_token)
     token
   end
 
-  @spec get_user_by_token(String.t()) :: User.t() | nil
   def get_user_by_token(token) do
     {:ok, query} = UserToken.verify_token_query(token)
     Repo.one(query)
   end
 
-  @spec add_chat_member(integer(), integer(), String.t()) :: {:ok, any()} | {:error, any()} | Ecto.Multi.failure()
   def add_chat_member(user_id, chat_id, chat_title) do
     Ecto.Multi.new()
     |> Ecto.Multi.insert(:chat_member, fn _schema ->
@@ -59,7 +52,6 @@ defmodule AnyTalker.Accounts do
     |> Repo.transaction()
   end
 
-  @spec list_user_chats(integer()) :: [ChatConfig.t()]
   def list_user_chats(user_id) do
     query =
       from cm in ChatMember,
@@ -71,19 +63,16 @@ defmodule AnyTalker.Accounts do
     Repo.all(query)
   end
 
-  @spec list_users() :: [User.t()]
   def list_users do
     User
     |> order_by(:id)
     |> Repo.all()
   end
 
-  @spec owner?(User.t()) :: boolean()
   def owner?(%User{id: user_id}) do
     Application.get_env(:any_talker, :owner_id) == user_id
   end
 
-  @spec chat_member?(integer(), integer()) :: boolean()
   def chat_member?(user_id, chat_id) do
     query =
       from cm in ChatMember,
@@ -92,7 +81,6 @@ defmodule AnyTalker.Accounts do
     Repo.exists?(query)
   end
 
-  @spec display_name(User.t() | nil) :: String.t() | nil
   def display_name(nil), do: nil
 
   def display_name(%User{} = user) do

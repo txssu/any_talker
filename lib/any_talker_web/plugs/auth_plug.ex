@@ -6,9 +6,7 @@ defmodule AnyTalkerWeb.AuthPlug do
   import Plug.Conn
 
   alias AnyTalker.Accounts
-  alias Phoenix.LiveView.Socket
 
-  @spec valid_web_app_data?(map(), String.t()) :: boolean()
   def valid_web_app_data?(data, hash) do
     data_check_string =
       data
@@ -38,7 +36,6 @@ defmodule AnyTalkerWeb.AuthPlug do
   disconnected on log out. The line can be safely removed
   if you are not using LiveView.
   """
-  @spec log_in_user(Plug.Conn.t(), Accounts.User.t()) :: Plug.Conn.t()
   def log_in_user(conn, user) do
     token = Accounts.create_token(user)
 
@@ -59,7 +56,6 @@ defmodule AnyTalkerWeb.AuthPlug do
   @doc """
   Authenticates the user by looking into the session.
   """
-  @spec fetch_current_user(Plug.Conn.t(), Keyword.t()) :: Plug.Conn.t()
   def fetch_current_user(conn, _opts) do
     {user_token, conn} = ensure_user_token(conn)
     user = user_token && Accounts.get_user_by_token(user_token)
@@ -91,8 +87,7 @@ defmodule AnyTalkerWeb.AuthPlug do
     * `:redirect_if_user_is_authenticated` - Authenticates the user from the session.
       Redirects to signed_in_path if there's a logged user.
   """
-  @spec on_mount(atom(), Phoenix.LiveView.unsigned_params(), map(), Socket.t()) ::
-          {:cont, Socket.t()} | {:halt, Socket.t()}
+
   def on_mount(:mount_current_user, _params, session, socket) do
     {:cont, mount_current_user(socket, session)}
   end
@@ -130,7 +125,6 @@ defmodule AnyTalkerWeb.AuthPlug do
   @doc """
   Used for routes that require the user to not be authenticated.
   """
-  @spec redirect_if_user_is_authenticated(Plug.Conn.t(), Keyword.t()) :: Plug.Conn.t()
   def redirect_if_user_is_authenticated(conn, _opts) do
     if conn.assigns[:current_user] do
       conn
@@ -147,7 +141,6 @@ defmodule AnyTalkerWeb.AuthPlug do
   If you want to enforce the user email is confirmed before
   they use the application at all, here would be a good place.
   """
-  @spec require_authenticated_user(Plug.Conn.t(), Keyword.t()) :: Plug.Conn.t()
   def require_authenticated_user(conn, _opts) do
     if conn.assigns[:current_user] do
       conn

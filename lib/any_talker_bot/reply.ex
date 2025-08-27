@@ -1,32 +1,25 @@
 defmodule AnyTalkerBot.Reply do
   @moduledoc false
 
-  use TypedStruct
-
   import AnyTalkerBot.MarkdownUtils
 
-  alias ExGram.Model.Message
+  alias ExGram.Cnt
 
   require Logger
 
-  typedstruct do
-    field :text, String.t()
-    field :halt, boolean(), default: false
-    field :markdown, boolean(), default: false
-    field :on_sent, (Message.t() -> any()) | nil
-    field :as_reply?, boolean()
-    field :for_dm, boolean(), default: false
+  defstruct text: nil,
+            halt: false,
+            markdown: false,
+            on_sent: nil,
+            as_reply?: nil,
+            for_dm: false,
+            message: nil,
+            context: nil
 
-    field :message, ExGram.Dispatcher.parsed_message() | nil
-    field :context, ExGram.Cnt.t()
-  end
-
-  @spec new(ExGram.Cnt.t(), ExGram.Dispatcher.parsed_message()) :: __MODULE__.t()
-  def new(context, message) do
+  def new(%Cnt{} = context, message) do
     %__MODULE__{message: message, context: context}
   end
 
-  @spec execute(t()) :: any()
   def execute(%__MODULE__{} = reply) do
     reply
     |> check_halt()

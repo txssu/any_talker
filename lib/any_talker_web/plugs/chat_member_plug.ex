@@ -4,7 +4,6 @@ defmodule AnyTalkerWeb.ChatMemberPlug do
 
   alias AnyTalker.Accounts
 
-  @spec require_chat_member(Plug.Conn.t(), Keyword.t()) :: Plug.Conn.t()
   def require_chat_member(conn, _opts) do
     with chat_id when is_binary(chat_id) <- conn.path_params["chat_id"],
          {id, ""} <- Integer.parse(chat_id),

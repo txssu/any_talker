@@ -24,7 +24,6 @@ defmodule AnyTalker.Antispam.Captcha do
     timestamps(type: :utc_datetime)
   end
 
-  @spec changeset(t(), map()) :: Ecto.Changeset.t()
   def changeset(captcha, attrs) do
     captcha
     |> cast(attrs, @required_fields)

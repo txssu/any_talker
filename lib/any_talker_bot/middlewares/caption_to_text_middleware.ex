@@ -4,7 +4,6 @@ defmodule AnyTalkerBot.CaptionToTextMiddleware do
 
   alias ExGram.Model.Message
 
-  @spec call(ExGram.Cnt.t(), any()) :: ExGram.Cnt.t()
   def call(%{update: %{message: %Message{caption: caption}}} = context, _options) when is_binary(caption) do
     put_in(context.update.message.text, caption)
   end

@@ -6,7 +6,6 @@ defmodule AnyTalker.Events do
   alias AnyTalker.Repo
   alias ExGram.Model.Message
 
-  @spec save_update(integer() | String.t(), map()) :: :ok
   def save_update(id, update) do
     value = remove_deep_nils(update)
 
@@ -20,7 +19,6 @@ defmodule AnyTalker.Events do
     :ok
   end
 
-  @spec save_new_message(Message.t()) :: :ok
   def save_new_message(%Message{} = message) do
     utc_datetime = DateTime.from_unix!(message.date)
 

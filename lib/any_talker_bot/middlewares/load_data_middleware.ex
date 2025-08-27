@@ -5,7 +5,6 @@ defmodule AnyTalkerBot.LoadDataMiddleware do
   alias AnyTalker.Accounts
   alias AnyTalker.Settings
 
-  @spec call(ExGram.Cnt.t(), any()) :: ExGram.Cnt.t()
   def call(
         %ExGram.Cnt{
           update: %ExGram.Model.Update{message: %ExGram.Model.Message{chat: message_chat, from: message_user}}

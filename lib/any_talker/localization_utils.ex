@@ -1,7 +1,6 @@
 defmodule AnyTalker.LocalizationUtils do
   @moduledoc false
 
-  @spec pluralize(integer(), String.t(), String.t(), String.t()) :: String.t()
   def pluralize(number, one, few, many) do
     n = rem(abs(number), 100)
 

@@ -4,7 +4,6 @@ defmodule AnyTalkerBot.AntispamMiddleware do
 
   alias AnyTalker.Antispam
 
-  @spec call(ExGram.Cnt.t(), any()) :: ExGram.Cnt.t()
   def call(context, _options) do
     case context.extra.chat do
       %{antispam: true} -> do_call(context.update.message, context)

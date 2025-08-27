@@ -3,14 +3,12 @@ defmodule AnyTalkerWeb.TelegramComponents do
   use Phoenix.Component
 
   alias Phoenix.HTML.FormField
-  alias Phoenix.LiveView.Rendered
 
   attr :class, :string, default: nil
 
   slot :header
   slot :inner_block, required: true
 
-  @spec section(map()) :: Rendered.t()
   def section(assigns) do
     ~H"""
     <section class={["bg-tg-bg p-[15px] rounded-xl", @class]}>
@@ -29,7 +27,6 @@ defmodule AnyTalkerWeb.TelegramComponents do
   attr :field, FormField, doc: "a form field struct retrieved from the form, for example: @form[:email]"
   attr :checked, :boolean, doc: "the checked flag for checkbox inputs"
 
-  @spec switch(map()) :: Rendered.t()
   def switch(%{field: %FormField{} = field} = assigns) do
     assigns =
       assigns
@@ -68,7 +65,6 @@ defmodule AnyTalkerWeb.TelegramComponents do
 
   attr :field, FormField
 
-  @spec textarea(map()) :: Rendered.t()
   def textarea(%{field: %FormField{} = field} = assigns) do
     assigns =
       assigns
@@ -98,7 +94,6 @@ defmodule AnyTalkerWeb.TelegramComponents do
 
   attr :field, FormField
 
-  @spec tg_input(map()) :: Rendered.t()
   def tg_input(%{field: %FormField{} = field} = assigns) do
     assigns =
       assigns

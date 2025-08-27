@@ -8,10 +8,6 @@ defmodule AnyTalker.AI do
 
   require Logger
 
-  @type history_key :: {integer(), integer()}
-
-  @spec ask(history_key() | nil, Message.t()) :: {String.t(), callback_fun} | nil
-        when callback_fun: (history_key(), message_id :: integer() -> :ok)
   def ask(history_key, message) do
     {response_id, added_messages_ids} = get_history_data(history_key)
 
