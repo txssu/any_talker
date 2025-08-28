@@ -59,6 +59,8 @@ config :esbuild,
     env: %{"NODE_PATH" => [Path.expand("../deps", __DIR__), Mix.Project.build_path()]}
   ]
 
+config :ex_gram, adapter: ExGram.Adapter.TeslaNoDebug
+
 # Configures Elixir's Logger
 config :logger, :default_formatter,
   format: {AnyTalker.LogFormatter, :format},
@@ -76,9 +78,12 @@ config :tailwind,
       --input=css/app.css
       --output=../priv/static/assets/app.css
     ),
+
+    # Import environment specific config. This must remain at the bottom
+    # of this file so it overrides the configuration defined above.
     cd: Path.expand("../assets", __DIR__)
   ]
 
-# Import environment specific config. This must remain at the bottom
-# of this file so it overrides the configuration defined above.
+config :tesla, disable_deprecated_builder_warning: true
+
 import_config "#{config_env()}.exs"
