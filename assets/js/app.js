@@ -16,31 +16,32 @@
 //
 
 // Include phoenix_html to handle method=PUT/DELETE in forms and buttons.
-import "phoenix_html"
+import "phoenix_html";
 // Establish Phoenix Socket and LiveView configuration.
-import { Socket } from "phoenix"
-import { LiveSocket } from "phoenix_live_view"
-import TelegramBack from "./telegram_back"
+import { Socket } from "phoenix";
+import { LiveSocket } from "phoenix_live_view";
+import { hooks } from "phoenix-colocated/any_talker";
+import TelegramBack from "./telegram_back";
 
-const Hooks = { TelegramBack }
-
-let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
+let csrfToken = document
+  .querySelector("meta[name='csrf-token']")
+  .getAttribute("content");
 let liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: { _csrf_token: csrfToken },
-  hooks: Hooks
-})
+  hooks: { TelegramBack, ...hooks },
+});
 
 // connect if there are any LiveViews on the page
-liveSocket.connect()
+liveSocket.connect();
 
 // expose liveSocket on window for web console debug logs and latency simulation:
 // >> liveSocket.enableDebug()
 // >> liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
 // >> liveSocket.disableLatencySim()
-window.liveSocket = liveSocket
+window.liveSocket = liveSocket;
 
-if ('ontouchstart' in document.documentElement) {
+if ("ontouchstart" in document.documentElement) {
   document.documentElement.classList.add("touch");
 } else {
   document.documentElement.classList.add("no-touch");

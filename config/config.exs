@@ -54,10 +54,12 @@ config :esbuild,
   version: "0.17.11",
   any_talker: [
     args:
-      ~w(js/app.js js/telegram.js --bundle --target=es2017 --outdir=../priv/static/assets --external:/fonts/* --external:/images/*),
+      ~w(js/app.js js/telegram.js --bundle --target=es2022 --outdir=../priv/static/assets --external:/fonts/* --external:/images/* --alias:@=.),
     cd: Path.expand("../assets", __DIR__),
-    env: %{"NODE_PATH" => Path.expand("../deps", __DIR__)}
+    env: %{"NODE_PATH" => [Path.expand("../deps", __DIR__), Mix.Project.build_path()]}
   ]
+
+config :ex_gram, adapter: ExGram.Adapter.TeslaNoDebug
 
 # Configures Elixir's Logger
 config :logger, :default_formatter,
@@ -79,6 +81,6 @@ config :tailwind,
     cd: Path.expand("../assets", __DIR__)
   ]
 
-# Import environment specific config. This must remain at the bottom
-# of this file so it overrides the configuration defined above.
+config :tesla, disable_deprecated_builder_warning: true
+
 import_config "#{config_env()}.exs"

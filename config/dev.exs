@@ -85,9 +85,8 @@ config :phoenix, :plug_init_mode, :runtime
 config :phoenix, :stacktrace_depth, 20
 
 config :phoenix_live_view,
-  # Include HEEx debug annotations as HTML comments in rendered markup
   debug_heex_annotations: true,
-  # Enable helpful, but potentially expensive runtime checks
+  debug_attributes: true,
   enable_expensive_runtime_checks: true
 
 # Disable swoosh api client as it is only required for production adapters.
