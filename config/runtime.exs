@@ -81,14 +81,7 @@ if config_env() == :prod do
   config :any_talker, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
   config :any_talker, :metrics_auth_token, "Bearer #{System.get_env("METRICS_AUTH_TOKEN")}"
 
-  config :logger, :default_handler,
-    formatter:
-      {AnyTalker.LogFormatterJSON,
-       [
-         redactors: [{AnyTalkerBot.TokenRedactor, []}],
-         metadata: [:error_details],
-         static_fields: [service: "any_talker"]
-       ]}
+  config :logger, :default_handler, formatter: LoggerJSON.Formatters.Basic.new(metadata: [:error_details])
 
   # ## SSL Support
   #

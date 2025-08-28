@@ -59,8 +59,7 @@ defmodule AnyTalker.MixProject do
       {:bandit, "~> 1.5"},
       {:ecto_psql_extras, "~> 0.6"},
       {:oban, "~> 2.17"},
-      # Migrate to 7.0
-      {:logger_json, "~> 6.1"},
+      {:logger_json, "~> 7.0"},
       {:nebulex, "~> 2.6"},
       {:decorator, "~> 1.4"},
       {:hammer, "~> 7.0"},
