@@ -33,7 +33,7 @@ defmodule AnyTalker.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:tidewave, "~> 0.4", only: [:dev]},
+      {:tidewave, "~> 0.2", only: [:dev]},
       {:usage_rules, "~> 0.1", only: [:dev]},
       {:claude, "~> 0.5", only: [:dev], runtime: false},
       {:phoenix, "~> 1.8.0"},
