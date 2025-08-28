@@ -1,6 +1,6 @@
-defmodule JokerCynic.ImportData do
+defmodule AnyTalker.ImportData do
   @moduledoc false
-  alias JokerCynic.Events
+  alias AnyTalker.Events
 
   def import_from_stream(bin_stream, chat_id) do
     {json_stream, _data} = JSONStream.stream(bin_stream, ["messages"])
@@ -49,9 +49,9 @@ defmodule JokerCynic.ImportData do
   defp convert_from_id("user" <> id_str) do
     case Integer.parse(id_str) do
       {id, ""} -> id
-      _ -> nil
+      _error -> nil
     end
   end
 
-  defp convert_from_id(_), do: nil
+  defp convert_from_id(_id), do: nil
 end

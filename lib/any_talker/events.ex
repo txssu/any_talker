@@ -60,8 +60,8 @@ defmodule AnyTalker.Events do
     end)
     # because of maps with 8 keys
     |> Stream.chunk_every(floor(@postgres_max_params / 8))
-    |> Stream.map(fn batch ->
-      {c, _} =
+    |> Enum.each(fn batch ->
+      {c, _entries} =
         Repo.insert_all(
           Events.Message,
           batch,
@@ -72,8 +72,6 @@ defmodule AnyTalker.Events do
 
       c
     end)
-    |> Enum.to_list()
-    |> IO.inspect(limit: :infinity)
 
     :ok
   end
