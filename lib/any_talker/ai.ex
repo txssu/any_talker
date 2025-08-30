@@ -1,8 +1,10 @@
 defmodule AnyTalker.AI do
   @moduledoc false
 
+  alias AnyTalker.AI.FunctionCall
   alias AnyTalker.AI.Message
   alias AnyTalker.AI.OpenAIClient
+  alias AnyTalker.AI.Response
   alias AnyTalker.Cache
   alias AnyTalker.Settings
 
@@ -17,9 +19,7 @@ defmodule AnyTalker.AI do
          model = config.ask_model,
          prompt = config.ask_prompt,
          {:ok, response} <-
-           OpenAIClient.response(
-             input: input,
-             previous_response_id: response_id,
+           request_response(response_id, input,
              model: model,
              instructions: instructions(prompt)
            ) do
@@ -56,6 +56,25 @@ defmodule AnyTalker.AI do
     """
 
     base_prompt <> json_instructions
+  end
+
+  def request_response(response_id, input, opts) do
+    body =
+      Keyword.merge(opts,
+        input: input,
+        previous_response_id: response_id
+      )
+
+    with {:ok, response} <- OpenAIClient.response(body) do
+      case response do
+        %Response{function_call: %FunctionCall{} = function_call, id: new_response_id} ->
+          call_result = FunctionCall.exec(function_call)
+          request_response(new_response_id, [call_result], opts)
+
+        %Response{} = resp ->
+          {:ok, resp}
+      end
+    end
   end
 
   defp hit_metrics(response) do

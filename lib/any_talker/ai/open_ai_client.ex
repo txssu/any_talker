@@ -1,8 +1,7 @@
 defmodule AnyTalker.AI.OpenAIClient do
   @moduledoc false
-  import Pathex
-  import Pathex.Lenses
 
+  alias AnyTalker.AI.NowFunction
   alias AnyTalker.AI.Response
 
   require Logger
@@ -12,53 +11,14 @@ defmodule AnyTalker.AI.OpenAIClient do
       input: Keyword.fetch!(options, :input),
       instructions: Keyword.get(options, :instructions),
       model: Keyword.fetch!(options, :model),
-      previous_response_id: Keyword.get(options, :previous_response_id)
+      previous_response_id: Keyword.get(options, :previous_response_id),
+      tools: [NowFunction.spec()]
     }
 
-    with {:ok, %{body: body}} <- Tesla.post(client(), "/v1/responses", body) do
-      cast_response(body)
+    with {:ok, %{body: resp_body}} <- Tesla.post(client(), "/v1/responses", body) do
+      Response.parse(resp_body)
     end
   end
-
-  defp cast_response(api_response) do
-    with {:ok, response_id} <- cast_response_id(api_response),
-         {:ok, total_tokens} <- cast_total_tokens(api_response),
-         {:ok, model} <- cast_model(api_response),
-         {:ok, output_text} <- cast_output_text(api_response) do
-      response = %Response{id: response_id, model: model, output_text: output_text, total_tokens: total_tokens}
-      {:ok, response}
-    else
-      :error -> {:error, api_response}
-    end
-  end
-
-  defp cast_response_id(api_response), do: check_nil(api_response["id"])
-  defp cast_total_tokens(api_response), do: check_nil(api_response["usage"]["total_tokens"])
-  defp cast_model(api_response), do: check_nil(api_response["model"])
-
-  defp cast_output_text(api_response) do
-    output_texts =
-      api_response
-      |> Pathex.get(
-        path("output")
-        ~> star()
-        ~> matching(%{"type" => "message"})
-        ~> path("content")
-        ~> star()
-        ~> matching(%{"type" => "output_text"})
-        ~> path("text")
-      )
-      |> List.wrap()
-      |> List.flatten()
-
-    case output_texts do
-      [nil] -> :error
-      texts -> {:ok, Enum.join(texts)}
-    end
-  end
-
-  defp check_nil(nil), do: :error
-  defp check_nil(value), do: {:ok, value}
 
   defp api_url do
     fetch_env(:api_url)
