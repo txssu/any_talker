@@ -1,7 +1,6 @@
 defmodule AnyTalker.AI.OpenAIClient do
   @moduledoc false
 
-  alias AnyTalker.AI.NowFunction
   alias AnyTalker.AI.Response
 
   require Logger
@@ -12,7 +11,7 @@ defmodule AnyTalker.AI.OpenAIClient do
       instructions: Keyword.get(options, :instructions),
       model: Keyword.fetch!(options, :model),
       previous_response_id: Keyword.get(options, :previous_response_id),
-      tools: [NowFunction.spec()]
+      tools: Keyword.get(options, :tools, [])
     }
 
     with {:ok, %{body: resp_body}} <- Tesla.post(client(), "/v1/responses", body) do
