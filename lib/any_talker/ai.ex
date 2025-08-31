@@ -2,6 +2,7 @@ defmodule AnyTalker.AI do
   @moduledoc false
 
   alias AnyTalker.AI.FunctionCall
+  alias AnyTalker.Ai.FunctionsRegistry
   alias AnyTalker.AI.Message
   alias AnyTalker.AI.OpenAIClient
   alias AnyTalker.AI.Response
@@ -10,19 +11,19 @@ defmodule AnyTalker.AI do
 
   require Logger
 
-  def ask(history_key, message) do
+  def ask(history_key, message, extra) do
     {response_id, added_messages_ids} = get_history_data(history_key)
 
     with {:ok, final_message} <- AnyTalker.AI.Attachments.download_message_image(message),
          input = Message.format_message(final_message, added_messages_ids),
          config = Settings.get_full_chat_config(message.chat_id),
-         model = config.ask_model,
-         prompt = config.ask_prompt,
+         common = [
+           model: config.ask_model,
+           instructions: instructions(config.ask_prompt),
+           tools: FunctionsRegistry.list_specs()
+         ],
          {:ok, response} <-
-           request_response(response_id, input,
-             model: model,
-             instructions: instructions(prompt)
-           ) do
+           request_response(response_id, input, common, extra) do
       hit_metrics(response)
       {response.output_text, &Cache.put(&1, {response.id, [&2 | added_messages_ids]})}
     else
@@ -58,9 +59,9 @@ defmodule AnyTalker.AI do
     base_prompt <> json_instructions
   end
 
-  def request_response(response_id, input, opts) do
+  def request_response(response_id, input, common, extra) do
     body =
-      Keyword.merge(opts,
+      Keyword.merge(common,
         input: input,
         previous_response_id: response_id
       )
@@ -68,8 +69,8 @@ defmodule AnyTalker.AI do
     with {:ok, response} <- OpenAIClient.response(body) do
       case response do
         %Response{function_call: %FunctionCall{} = function_call, id: new_response_id} ->
-          call_result = FunctionCall.exec(function_call)
-          request_response(new_response_id, [call_result], opts)
+          call_result = FunctionCall.exec(function_call, extra)
+          request_response(new_response_id, [call_result], common, extra)
 
         %Response{} = resp ->
           {:ok, resp}
