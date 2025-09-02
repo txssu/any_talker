@@ -1,13 +1,11 @@
-defmodule AnyTalker.AI.NowFunction do
+defmodule AnyTalker.AI.NowTool do
   @moduledoc false
-  @behaviour AnyTalker.AI.Function
+  use AnyTalker.AI.Tool, type: :function
 
   alias AnyTalker.AI.Function
+  alias AnyTalker.AI.Tool
 
-  @impl Function
-  def name, do: "now"
-
-  @impl Function
+  @impl Tool
   def spec do
     %{
       type: "function",
@@ -17,6 +15,9 @@ defmodule AnyTalker.AI.NowFunction do
       parameters: %{additionalProperties: false, type: "object", properties: %{}}
     }
   end
+
+  @impl Function
+  def name, do: "now"
 
   @impl Function
   def exec(_params, _extra) do

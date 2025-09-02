@@ -1,15 +1,13 @@
-defmodule AnyTalker.AI.CreateTaskFunction do
+defmodule AnyTalker.AI.CreateTaskTool do
   @moduledoc false
-  @behaviour AnyTalker.AI.Function
+  use AnyTalker.AI.Tool, type: :function
 
   alias AnyTalker.Accounts
   alias AnyTalker.AI.Function
+  alias AnyTalker.AI.Tool
   alias AnyTalkerBot.MarkdownUtils
 
-  @impl Function
-  def name, do: "create_task"
-
-  @impl Function
+  @impl Tool
   def spec do
     %{
       type: "function",
@@ -40,6 +38,9 @@ defmodule AnyTalker.AI.CreateTaskFunction do
       }
     }
   end
+
+  @impl Function
+  def name, do: "create_task"
 
   @impl Function
   def exec(params, %{chat_id: chat_id, user_id: user_id}) do

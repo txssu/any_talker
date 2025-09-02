@@ -1,7 +1,7 @@
 defmodule AnyTalker.AI.FunctionCall do
   @moduledoc false
 
-  alias AnyTalker.Ai.FunctionsRegistry
+  alias AnyTalker.AI.ToolsRegistry
   alias AnyTalker.Parser
 
   defstruct module: nil, arguments: nil, call_id: nil
@@ -28,7 +28,7 @@ defmodule AnyTalker.AI.FunctionCall do
 
   defp parse_module(function_call) do
     with {:ok, name} <- Parser.not_nil(function_call["name"], "function_call.name not found") do
-      FunctionsRegistry.get_module_by_name(name)
+      ToolsRegistry.get_function_module_by_name(name)
     end
   end
 

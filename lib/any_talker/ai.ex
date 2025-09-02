@@ -2,10 +2,10 @@ defmodule AnyTalker.AI do
   @moduledoc false
 
   alias AnyTalker.AI.FunctionCall
-  alias AnyTalker.Ai.FunctionsRegistry
   alias AnyTalker.AI.Message
   alias AnyTalker.AI.OpenAIClient
   alias AnyTalker.AI.Response
+  alias AnyTalker.AI.ToolsRegistry
   alias AnyTalker.Cache
   alias AnyTalker.Settings
 
@@ -20,7 +20,7 @@ defmodule AnyTalker.AI do
          common = [
            model: config.ask_model,
            instructions: instructions(config.ask_prompt),
-           tools: FunctionsRegistry.list_specs()
+           tools: ToolsRegistry.list_specs()
          ],
          {:ok, response} <-
            request_response(response_id, input, common, extra) do
