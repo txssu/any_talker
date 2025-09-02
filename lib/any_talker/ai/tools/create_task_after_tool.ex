@@ -2,10 +2,9 @@ defmodule AnyTalker.AI.CreateTaskAfterTool do
   @moduledoc false
   use AnyTalker.AI.Tool, type: :function
 
-  alias AnyTalker.Accounts
   alias AnyTalker.AI.Function
+  alias AnyTalker.AI.SendReminderJob
   alias AnyTalker.AI.Tool
-  alias AnyTalkerBot.MarkdownUtils
 
   @impl Tool
   def spec do
@@ -53,35 +52,25 @@ defmodule AnyTalker.AI.CreateTaskAfterTool do
     minutes = params["minutes"]
 
     total_minutes = hours * 60 + minutes
-    delay = total_minutes * 60 * 1000
+    delay_milliseconds = total_minutes * 60 * 1000
 
-    case validate_minimum_delay(delay) do
+    case validate_minimum_delay(delay_milliseconds) do
       :ok ->
-        username =
-          user_id
-          |> Accounts.get_user()
-          |> Accounts.display_name()
+        scheduled_at = DateTime.add(DateTime.utc_now(), total_minutes * 60, :second)
 
-        text =
-          params
-          |> Map.fetch!("message")
-          |> add_mention(user_id, username)
-
-        :timer.apply_after(delay, fn ->
-          ExGram.send_message!(chat_id, text, parse_mode: "MarkdownV2", bot: AnyTalkerBot.bot())
-        end)
+        %{
+          "message" => params["message"],
+          "chat_id" => chat_id,
+          "user_id" => user_id
+        }
+        |> SendReminderJob.new(scheduled_at: scheduled_at)
+        |> Oban.insert()
 
         :ok
 
       {:error, reason} ->
         {:error, reason}
     end
-  end
-
-  defp add_mention(text, user_id, username) do
-    """
-    [#{username}](tg://user?id=#{user_id}), #{MarkdownUtils.escape_markdown(text)}
-    """
   end
 
   defp validate_minimum_delay(delay) do
