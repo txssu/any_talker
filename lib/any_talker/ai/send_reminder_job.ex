@@ -21,7 +21,7 @@ defmodule AnyTalker.AI.SendReminderJob do
 
   defp add_mention(text, user_id, username) do
     """
-    [#{username}](tg://user?id=#{user_id}), #{MarkdownUtils.escape_markdown(text)}
+    [#{MarkdownUtils.escape_markdown(username)}](tg://user?id=#{user_id}), #{MarkdownUtils.escape_markdown(text)}
     """
   end
 end
