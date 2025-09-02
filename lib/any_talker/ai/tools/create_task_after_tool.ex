@@ -66,10 +66,10 @@ defmodule AnyTalker.AI.CreateTaskAfterTool do
         |> SendReminderJob.new(scheduled_at: scheduled_at)
         |> Oban.insert()
 
-        :ok
+        "ok"
 
       {:error, reason} ->
-        {:error, reason}
+        %{"error" => reason}
     end
   end
 
