@@ -1,4 +1,4 @@
-defmodule AnyTalker.AI.CreateTaskTool do
+defmodule AnyTalker.AI.CreateTaskAtTool do
   @moduledoc false
   use AnyTalker.AI.Tool, type: :function
 
@@ -40,37 +40,44 @@ defmodule AnyTalker.AI.CreateTaskTool do
   end
 
   @impl Function
-  def name, do: "create_task"
+  def name, do: "create_task_at"
 
   @impl Function
   def exec(params, %{chat_id: chat_id, user_id: user_id}) do
-    {:ok, reminder_at, _offset} =
-      params
-      |> Map.fetch!("reminder_at")
-      |> DateTime.from_iso8601()
+    with {:ok, reminder_at, _offset} <- DateTime.from_iso8601(params["reminder_at"]),
+         delay = DateTime.diff(reminder_at, DateTime.utc_now(), :millisecond),
+         :ok <- validate_minimum_delay(delay) do
+      username =
+        user_id
+        |> Accounts.get_user()
+        |> Accounts.display_name()
 
-    username =
-      user_id
-      |> Accounts.get_user()
-      |> Accounts.display_name()
+      text =
+        params
+        |> Map.fetch!("message")
+        |> add_mention(user_id, username)
 
-    text =
-      params
-      |> Map.fetch!("message")
-      |> add_mention(user_id, username)
+      :timer.apply_after(delay, fn ->
+        ExGram.send_message!(chat_id, text, parse_mode: "MarkdownV2", bot: AnyTalkerBot.bot())
+      end)
 
-    delay = DateTime.diff(reminder_at, DateTime.utc_now(), :millisecond)
-
-    :timer.apply_after(delay, fn ->
-      ExGram.send_message!(chat_id, text, parse_mode: "MarkdownV2", bot: AnyTalkerBot.bot())
-    end)
-
-    :ok
+      :ok
+    else
+      {:error, reason} -> {:error, "Invalid reminder_at format: #{reason}"}
+    end
   end
 
   defp add_mention(text, user_id, username) do
     """
     [#{username}](tg://user?id=#{user_id}), #{MarkdownUtils.escape_markdown(text)}
     """
+  end
+
+  defp validate_minimum_delay(delay) do
+    if delay < 60_000 do
+      {:error, "Reminder must be scheduled at least 1 minute in the future"}
+    else
+      :ok
+    end
   end
 end

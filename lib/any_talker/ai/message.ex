@@ -107,7 +107,11 @@ defmodule AnyTalker.AI.Message do
   defp maybe_add_quote(content, _message), do: content
 
   defp add_sent_at(content, %__MODULE__{sent_at: sent_at}) do
-    yekaterinburg_sent_at = DateTime.shift_zone!(sent_at, "Asia/Yekaterinburg")
+    yekaterinburg_sent_at =
+      sent_at
+      |> DateTime.shift_zone!("Asia/Yekaterinburg")
+      |> DateTime.truncate(:second)
+
     Map.put(content, :sent_at, DateTime.to_iso8601(yekaterinburg_sent_at))
   end
 
