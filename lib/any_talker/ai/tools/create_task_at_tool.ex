@@ -2,10 +2,9 @@ defmodule AnyTalker.AI.CreateTaskAtTool do
   @moduledoc false
   use AnyTalker.AI.Tool, type: :function
 
-  alias AnyTalker.Accounts
   alias AnyTalker.AI.Function
+  alias AnyTalker.AI.SendReminderJob
   alias AnyTalker.AI.Tool
-  alias AnyTalkerBot.MarkdownUtils
 
   @impl Tool
   def spec do
@@ -45,32 +44,20 @@ defmodule AnyTalker.AI.CreateTaskAtTool do
   @impl Function
   def exec(params, %{chat_id: chat_id, user_id: user_id}) do
     with {:ok, reminder_at, _offset} <- DateTime.from_iso8601(params["reminder_at"]),
-         delay = DateTime.diff(reminder_at, DateTime.utc_now(), :millisecond),
-         :ok <- validate_minimum_delay(delay) do
-      username =
-        user_id
-        |> Accounts.get_user()
-        |> Accounts.display_name()
-
-      text =
-        params
-        |> Map.fetch!("message")
-        |> add_mention(user_id, username)
-
-      :timer.apply_after(delay, fn ->
-        ExGram.send_message!(chat_id, text, parse_mode: "MarkdownV2", bot: AnyTalkerBot.bot())
-      end)
+         delay_seconds = DateTime.diff(reminder_at, DateTime.utc_now(), :second),
+         :ok <- validate_minimum_delay(delay_seconds * 1000) do
+      %{
+        "message" => params["message"],
+        "chat_id" => chat_id,
+        "user_id" => user_id
+      }
+      |> SendReminderJob.new(scheduled_at: reminder_at)
+      |> Oban.insert()
 
       :ok
     else
       {:error, reason} -> {:error, "Invalid reminder_at format: #{reason}"}
     end
-  end
-
-  defp add_mention(text, user_id, username) do
-    """
-    [#{username}](tg://user?id=#{user_id}), #{MarkdownUtils.escape_markdown(text)}
-    """
   end
 
   defp validate_minimum_delay(delay) do
