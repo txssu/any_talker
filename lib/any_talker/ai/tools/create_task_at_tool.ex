@@ -43,7 +43,7 @@ defmodule AnyTalker.AI.CreateTaskAtTool do
 
   @impl Function
   def exec(params, %{chat_id: chat_id, user_id: user_id}) do
-    with {:ok, reminder_at, _offset} <- DateTime.from_iso8601(params["reminder_at"]),
+    with {:ok, reminder_at} <- parse_datetime(params["reminder_at"]),
          delay_seconds = DateTime.diff(reminder_at, DateTime.utc_now(), :second),
          :ok <- validate_minimum_delay(delay_seconds * 1000) do
       %{
@@ -54,8 +54,15 @@ defmodule AnyTalker.AI.CreateTaskAtTool do
       |> SendReminderJob.new(scheduled_at: reminder_at)
       |> Oban.insert()
 
-      :ok
+      "ok"
     else
+      {:error, reason} -> %{"error" => "Invalid reminder_at format: #{reason}"}
+    end
+  end
+
+  defp parse_datetime(str) do
+    case DateTime.from_iso8601(str) do
+      {:ok, reminder_at, _offset} -> {:ok, reminder_at}
       {:error, reason} -> {:error, "Invalid reminder_at format: #{reason}"}
     end
   end
