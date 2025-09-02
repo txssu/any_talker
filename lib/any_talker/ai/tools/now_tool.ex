@@ -21,6 +21,6 @@ defmodule AnyTalker.AI.NowTool do
 
   @impl Function
   def exec(_params, _extra) do
-    DateTime.utc_now()
+    DateTime.utc_now(:second)
   end
 end

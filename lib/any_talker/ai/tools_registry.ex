@@ -3,7 +3,8 @@ defmodule AnyTalker.AI.ToolsRegistry do
 
   modules = [
     AnyTalker.AI.NowTool,
-    AnyTalker.AI.CreateTaskTool
+    AnyTalker.AI.CreateTaskAtTool,
+    AnyTalker.AI.CreateTaskAfterTool
   ]
 
   function_name_mapping =
