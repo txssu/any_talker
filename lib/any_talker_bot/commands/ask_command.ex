@@ -61,7 +61,7 @@ defmodule AnyTalkerBot.AskCommand do
     hours = div(time_left_ms, 3_600_000)
     minutes = div(rem(time_left_ms, 3_600_000), 60_000)
 
-    [format_unit(hours, "час", "часа", "часов"), format_unit(minutes, "минута", "минуты", "минут")]
+    [format_unit(hours, "час", "часа", "часов"), format_unit(minutes, "минуту", "минуты", "минут")]
     |> Enum.reject(&is_nil/1)
     |> Enum.join(" ")
   end
