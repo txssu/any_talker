@@ -2,7 +2,7 @@ x-app-common: &app-common
   build:
     context: .
   environment:
-    DATABASE_URL: "ecto://postgres:postgres@database/any_talker_prod"
+    DATABASE_URL: "ecto://postgres:postgres@database/any_talker_dev"
     SECRET_KEY_BASE: "/mtcJdz/VjE4ZfwVi/RMkKevnX027sfhZTM5FKvGxu6yMv3AnGf/kCIkeRvVclAh"
     PHX_HOST: ${PHX_HOST:-localhost}
     METRICS_AUTH_TOKEN: my-super-secret
@@ -19,50 +19,18 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: any_talker_prod
+      POSTGRES_DB: any_talker_dev
       PGDATA: /data/postgres
     volumes:
       - database:/data/postgres
     restart: unless-stopped
+    ports:
+      - "5432:5432"
     healthcheck:
       test: pg_isready -U postgres -h localhost
       interval: 5s
       timeout: 5s
       retries: 10
-
-  loki:
-    image: grafana/loki:latest
-    ports:
-      - "3100:3100"
-    command: -config.file=/etc/loki/local-config.yaml
-
-  promtail:
-    image: grafana/promtail:latest
-    ports:
-      - "5000:5000"
-    volumes:
-      - ./docker/promtail/config.yml:/etc/promtail/config.yml
-    command: -config.file=/etc/promtail/config.yml
-
-  prometheus:
-    image: prom/prometheus
-    command:
-      - "--config.file=/etc/prometheus/prometheus.yml"
-    restart: unless-stopped
-    volumes:
-      - ./docker/prometheus:/etc/prometheus
-      - prom_data:/prometheus
-
-  grafana:
-    image: grafana/grafana
-    ports:
-      - 3000:3000
-    restart: unless-stopped
-    environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=grafana
-    volumes:
-      - ./docker/grafana:/etc/grafana/provisioning/datasources
 
   app-db-migration:
     <<: *app-common
@@ -70,8 +38,6 @@ services:
     depends_on:
       database:
         condition: service_healthy
-      promtail:
-        condition: service_started
 
   app:
     <<: *app-common
@@ -81,16 +47,8 @@ services:
         condition: service_completed_successfully
       database:
         condition: service_healthy
-      promtail:
-        condition: service_started
     ports:
       - "4000:4000"
 
 volumes:
   database:
-  prom_data:
-  logs:
-
-networks:
-  elastic:
-    driver: bridge
