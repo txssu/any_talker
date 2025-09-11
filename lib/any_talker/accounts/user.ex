@@ -25,6 +25,8 @@ defmodule AnyTalker.Accounts.User do
     field :last_name, :string
     field :photo_url, :string
 
+    has_one :current_subscription, AnyTalker.Accounts.Subscription
+
     timestamps(type: :utc_datetime)
   end
 

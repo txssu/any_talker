@@ -5,8 +5,11 @@ defmodule AnyTalkerBot.AskCommand do
   import AnyTalkerBot.MarkdownUtils
 
   alias AnyTalker.Accounts
+  alias AnyTalker.Accounts.Subscription
+  alias AnyTalker.Accounts.User
   alias AnyTalker.AI
   alias AnyTalker.Settings
+  alias AnyTalker.Settings.ChatConfig
   alias AnyTalkerBot.Attachments
   alias AnyTalkerBot.Reply
   alias ExGram.Model.Message
@@ -17,13 +20,17 @@ defmodule AnyTalkerBot.AskCommand do
   @impl AnyTalkerBot.Command
   def call(%Reply{message: {:command, :ask, message}} = reply) do
     bot_id = reply.context.bot_info.id
+    is_group = reply.context.extra.is_group
 
+    user_with_sub = Accounts.preload_current_subscription(reply.context.extra.user)
     config = Settings.get_full_chat_config(message.chat.id)
 
-    with :ok <- validate_is_group(reply.context.extra.is_group),
-         :ok <- validate_config(config),
+    maybe_wait(user_with_sub)
+
+    with :ok <- validate_chat_type(user_with_sub, is_group),
+         :ok <- validate_config(user_with_sub, config),
          :ok <- validate_not_empty(message, bot_id),
-         :ok <- validate_rate(message.from.id, config) do
+         :ok <- validate_rate_limit(user_with_sub, config) do
       reply(reply, message, reply.context.bot_info.id)
     else
       error -> error_reply(error, reply)
@@ -173,11 +180,15 @@ defmodule AnyTalkerBot.AskCommand do
     {chat.id, message_id}
   end
 
-  defp validate_is_group(true), do: :ok
-  defp validate_is_group(_otherwise), do: {:error, :not_group}
+  defp validate_chat_type(user_with_sub, group?)
+  defp validate_chat_type(%User{current_subscription: %Subscription{plan: :pro}}, _group?), do: :ok
+  defp validate_chat_type(_user, true), do: :ok
+  defp validate_chat_type(_user, false), do: {:error, :not_group}
 
-  defp validate_config(%{ask_command: true}), do: :ok
-  defp validate_config(_chat_config), do: {:error, :not_enabled}
+  defp validate_config(user_with_sub, chat_config)
+  defp validate_config(%User{current_subscription: %Subscription{plan: :pro}}, _chat_config), do: :ok
+  defp validate_config(_user, %ChatConfig{ask_command: true}), do: :ok
+  defp validate_config(_user, _chat_config), do: {:error, :not_enabled}
 
   defp validate_not_empty(%Message{text: t, photo: p}, _bot_id) when not_empty_string(t) or is_list(p), do: :ok
 
@@ -189,8 +200,17 @@ defmodule AnyTalkerBot.AskCommand do
 
   defp validate_not_empty(_otherwise, _bot_id), do: {:error, :empty_text}
 
-  defp validate_rate(user_id, %{ask_rate_limit_scale_ms: scale, ask_rate_limit: limit}) do
-    key = "ask:#{user_id}"
+  def validate_rate_limit(%User{current_subscription: sub} = user, %ChatConfig{} = config) do
+    {scale, limit} =
+      case sub do
+        nil ->
+          {config.ask_rate_limit_scale_ms, config.ask_rate_limit}
+
+        %Subscription{plan: :pro} ->
+          {config.ask_pro_rate_limit_scale_ms, config.ask_pro_rate_limit}
+      end
+
+    key = "ask:#{user.id}"
 
     case AnyTalker.RateLimit.hit(key, scale, limit) do
       {:allow, _count} ->
@@ -199,6 +219,14 @@ defmodule AnyTalkerBot.AskCommand do
       {:deny, time_left_ms} ->
         {:error, :rate_limit, time_left_ms}
     end
+  end
+
+  defp maybe_wait(%User{current_subscription: %Subscription{plan: :pro}}), do: nil
+
+  defp maybe_wait(_user) do
+    [second: 5]
+    |> to_timeout()
+    |> Process.sleep()
   end
 
   defp format_response_with_bot_name(reply_text, config) do

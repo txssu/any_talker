@@ -88,6 +88,13 @@ defmodule AnyTalker.Accounts do
     user.custom_name || user.first_name
   end
 
+  def preload_current_subscription(%User{current_subscription: %Subscription{}} = user), do: user
+  def preload_current_subscription(%User{current_subscription: nil} = user), do: user
+
+  def preload_current_subscription(%User{} = user) do
+    %{user | current_subscription: get_current_subscription(user)}
+  end
+
   def get_current_subscription(%User{id: user_id}) do
     now = DateTime.utc_now()
 

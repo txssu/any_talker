@@ -10,13 +10,15 @@ defmodule AnyTalker.GlobalConfig do
 
   @type t :: %__MODULE__{}
 
-  @fields ~w[ask_model ask_rate_limit ask_rate_limit_scale_ms ask_prompt]a
+  @fields ~w[ask_model ask_rate_limit ask_rate_limit_scale_ms ask_prompt ask_pro_rate_limit ask_pro_rate_limit_scale_ms]a
 
   schema "global_config" do
     field :ask_model, :string
     field :ask_rate_limit, :integer
     field :ask_rate_limit_scale_ms, :integer
     field :ask_prompt, :string
+    field :ask_pro_rate_limit, :integer
+    field :ask_pro_rate_limit_scale_ms, :integer
   end
 
   def get(key) when key in @fields do
