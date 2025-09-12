@@ -8,6 +8,8 @@ defmodule AnyTalkerBot.Dispatcher do
 
   command("privacy", description: "Политика конфиденциальности")
   command("ask", description: "Задать вопрос мудрецу")
+  command("play", description: "Включить воспроизведение")
+  command("stop", description: "Остановить воспроизведение")
 
   middleware(AnyTalkerBot.AddTelemetryDataMiddleware)
   middleware(AnyTalkerBot.SaveUpdateMiddleware)
@@ -53,6 +55,14 @@ defmodule AnyTalkerBot.Dispatcher do
 
   defp execute_command(reply, {:command, :ask, _msg}) do
     AnyTalkerBot.TypingStatus.with_typing(&AnyTalkerBot.AskCommand.call/1, reply)
+  end
+
+  defp execute_command(reply, {:command, :play, _msg}) do
+    AnyTalkerBot.PlayCommand.call(reply)
+  end
+
+  defp execute_command(reply, {:command, :stop, _msg}) do
+    AnyTalkerBot.StopCommand.call(reply)
   end
 
   # Fast ban @DickGrowerBot

@@ -16,6 +16,7 @@ defmodule AnyTalker.Application do
       AnyTalker.RateLimit,
       # Start the Finch HTTP client for sending emails
       {Finch, name: AnyTalker.Finch},
+      AnyTalker.NikitaPlayer,
       # Telegram
       {AnyTalker.Cache, []},
       ExGram,
