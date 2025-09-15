@@ -1,11 +1,11 @@
 defmodule AnyTalker.Antispam do
   @moduledoc false
 
-  import AnyTalkerBot.MarkdownUtils
   import Ecto.Query
 
   alias AnyTalker.Antispam.Captcha
   alias AnyTalker.Repo
+  alias AnyTalkerBot.MarkdownUtils
 
   def get_captcha(id) do
     Repo.get(Captcha, id)
@@ -110,7 +110,7 @@ defmodule AnyTalker.Antispam do
   end
 
   defp send_message(chat_id, text) do
-    ExGram.send_message!(chat_id, text, parse_mode: "MarkdownV2", bot: bot())
+    ExGram.send_message!(chat_id, MarkdownUtils.to_html(text), parse_mode: "HTML", bot: bot())
   end
 
   defp generate_captcha do
@@ -124,17 +124,17 @@ defmodule AnyTalker.Antispam do
   end
 
   defp format_question(user_id, username, question) do
-    ~i"""
+    """
     [#{username}](tg://user?id=#{user_id}), у тебя ровно одна минута, чтобы решить капчу:
     #{question}
 
-    Если ты отправишь что\-то кроме ответа на капчу, я кикну тебя из чата\.
+    Если ты отправишь что-то кроме ответа на капчу, я кикну тебя из чата.
     """
   end
 
   defp welcome_message(username, user_id) do
-    ~i"""
-    Закуриваю 🚬, выдыхаю дым и с ехидной улыбкой шепчу: “Добро пожаловать в этот цирк, [#{username}](tg://user?id=#{user_id}), здесь каждый клоун думает, что он главная звезда\.”
+    """
+    Закуриваю 🚬, выдыхаю дым и с ехидной улыбкой шепчу: “Добро пожаловать в этот цирк, [#{username}](tg://user?id=#{user_id}), здесь каждый клоун думает, что он главная звезда.”
     """
   end
 

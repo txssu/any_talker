@@ -1,15 +1,13 @@
 defmodule AnyTalkerBot.Reply do
   @moduledoc false
 
-  import AnyTalkerBot.MarkdownUtils
-
+  alias AnyTalkerBot.MarkdownUtils
   alias ExGram.Cnt
 
   require Logger
 
   defstruct text: nil,
             halt: false,
-            markdown: false,
             on_sent: nil,
             as_reply?: nil,
             for_dm: false,
@@ -58,11 +56,11 @@ defmodule AnyTalkerBot.Reply do
   end
 
   defp dm_success_message do
-    ~i"Ответ отправлен в личные сообщения\."
+    "Ответ отправлен в личные сообщения."
   end
 
   defp dm_error_message do
-    ~i"Не удалось отправить сообщение в личные сообщения\. Пожалуйста, разблокируйте бота и начните с ним диалог командой /start\."
+    "Не удалось отправить сообщение в личные сообщения. Пожалуйста, разблокируйте бота и начните с ним диалог командой /start."
   end
 
   defp send_reply({:halt, %__MODULE__{}}), do: :ok
@@ -74,7 +72,7 @@ defmodule AnyTalkerBot.Reply do
   end
 
   defp do_send_message(chat_id, text, reply) do
-    case ExGram.send_message(chat_id, text, send_options(reply)) do
+    case ExGram.send_message(chat_id, MarkdownUtils.to_html(text), send_options(reply)) do
       {:ok, message} ->
         AnyTalker.Events.save_new_message(message)
         if reply.on_sent, do: reply.on_sent.(message)
@@ -89,14 +87,13 @@ defmodule AnyTalkerBot.Reply do
   defp send_options(reply) do
     []
     |> add_bot()
-    |> maybe_add_markdown(reply)
+    |> add_html()
     |> maybe_add_reply_to(reply)
   end
 
   defp add_bot(options), do: [{:bot, AnyTalkerBot.bot()} | options]
 
-  defp maybe_add_markdown(options, %__MODULE__{markdown: true}), do: [{:parse_mode, "MarkdownV2"} | options]
-  defp maybe_add_markdown(options, _reply), do: options
+  defp add_html(options), do: [{:parse_mode, "HTML"} | options]
 
   defp maybe_add_reply_to(options, reply) do
     if reply.context.update.message.chat.type == "private" or not is_nil(reply.as_reply?) do
