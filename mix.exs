@@ -72,7 +72,6 @@ defmodule AnyTalker.MixProject do
       {:hackney, "~> 1.21"},
       {:mint, "~> 1.7"},
       {:tzdata, "~> 1.1"},
-      {:telegex_marked, "~> 0.0.9"},
       # Code quality
       {:styler, "~> 1.2", only: [:dev, :test], runtime: false},
       {:tailwind_formatter, "~> 0.4.0", only: [:dev, :test], runtime: false},

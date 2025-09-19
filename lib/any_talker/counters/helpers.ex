@@ -4,7 +4,6 @@ defmodule AnyTalker.Counters.Helpers do
 
   alias AnyTalker.Cache
   alias AnyTalker.Counters.CounterVerificationTimeoutJob
-  alias AnyTalkerBot.MarkdownUtils
 
   require ExGram.Dsl.Keyboard
 
@@ -25,7 +24,12 @@ defmodule AnyTalker.Counters.Helpers do
         end
       end
 
-    message = send_message(init_text(), reply_markup: markup)
+    message =
+      ExGram.send_message!(@nikita_chat_id, init_text(),
+        reply_markup: markup,
+        parse_mode: "MarkdownV2",
+        bot: AnyTalkerBot.bot()
+      )
 
     mark_as_unanswered(message.message_id)
 
@@ -39,19 +43,19 @@ defmodule AnyTalker.Counters.Helpers do
   end
 
   def answer_counter(message_id, updated_by, summary_message_type \\ :normal) do
-    updated_by
-    |> get_updated_text()
-    |> MarkdownUtils.to_html()
-    |> ExGram.edit_message_text(
+    updated_text = get_updated_text(updated_by)
+
+    ExGram.edit_message_text(
+      updated_text,
       chat_id: @nikita_chat_id,
       message_id: message_id,
-      parse_mode: "HTML",
+      parse_mode: "MarkdownV2",
       bot: AnyTalkerBot.bot()
     )
 
     new_message_text = get_summary_text(summary_message_type)
 
-    send_message(new_message_text)
+    ExGram.send_message(@nikita_chat_id, new_message_text, bot: AnyTalkerBot.bot())
 
     mark_as_answered(message_id)
 
@@ -80,11 +84,5 @@ defmodule AnyTalker.Counters.Helpers do
     days = Date.diff(Date.utc_today(), ~D[2005-02-10])
 
     "День без секса #{days}."
-  end
-
-  defp send_message(text, opts \\ []) do
-    opts = Keyword.merge([parse_mode: "HTML", bot: AnyTalkerBot.bot()], opts)
-
-    ExGram.send_message!(@nikita_chat_id, MarkdownUtils.to_html(text), opts)
   end
 end

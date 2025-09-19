@@ -2,6 +2,8 @@ defmodule AnyTalkerBot.AskCommand do
   @moduledoc false
   use AnyTalkerBot, :command
 
+  import AnyTalkerBot.MarkdownUtils
+
   alias AnyTalker.Accounts
   alias AnyTalker.AI
   alias AnyTalker.Settings
@@ -77,7 +79,7 @@ defmodule AnyTalkerBot.AskCommand do
       |> AI.ask(parsed_message, build_extra(reply))
       |> handle_ask_response(config)
 
-    %{reply | text: reply_text, on_sent: reply_callback}
+    %{reply | text: reply_text, on_sent: reply_callback, markdown: true}
   end
 
   defp handle_ask_response(nil, _config) do
@@ -203,12 +205,12 @@ defmodule AnyTalkerBot.AskCommand do
     bot_name = config.bot_name
 
     if not is_nil(bot_name) and bot_name != "" do
-      """
+      ~i"""
       *#{bot_name}*:
       #{reply_text}
       """
     else
-      reply_text
+      escape_markdown(reply_text)
     end
   end
 end
