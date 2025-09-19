@@ -9,7 +9,7 @@ defmodule AnyTalkerBot.Reply do
 
   defstruct text: nil,
             halt: false,
-            markdown: false,
+            mode: :html,
             on_sent: nil,
             as_reply?: nil,
             for_dm: false,
@@ -48,8 +48,8 @@ defmodule AnyTalkerBot.Reply do
     user_id = reply.context.update.message.from.id
 
     case do_send_message(user_id, reply.text, reply) do
-      :ok -> {:cont, %{reply | text: dm_success_message(), markdown: true}}
-      :error -> {:cont, %{reply | text: dm_error_message(), markdown: true}}
+      :ok -> {:cont, %{reply | text: dm_success_message(), mode: :html}}
+      :error -> {:cont, %{reply | text: dm_error_message(), mode: :html}}
     end
   end
 
@@ -95,7 +95,7 @@ defmodule AnyTalkerBot.Reply do
 
   defp add_bot(options), do: [{:bot, AnyTalkerBot.bot()} | options]
 
-  defp maybe_add_markdown(options, %__MODULE__{markdown: true}), do: [{:parse_mode, "MarkdownV2"} | options]
+  defp maybe_add_markdown(options, %__MODULE__{mode: :html}), do: [{:parse_mode, "HTML"} | options]
   defp maybe_add_markdown(options, _reply), do: options
 
   defp maybe_add_reply_to(options, reply) do
