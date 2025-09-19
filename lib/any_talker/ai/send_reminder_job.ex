@@ -12,19 +12,16 @@ defmodule AnyTalker.AI.SendReminderJob do
       |> Accounts.get_user()
       |> Accounts.display_name()
 
-    text =
-      message
-      |> add_mention(user_id, username)
-      |> MarkdownUtils.to_html()
+    text = add_mention(message, user_id, username)
 
-    ExGram.send_message!(chat_id, text, parse_mode: "HTML", bot: AnyTalkerBot.bot())
+    ExGram.send_message!(chat_id, text, parse_mode: "MarkdownV2", bot: AnyTalkerBot.bot())
 
     :ok
   end
 
   defp add_mention(text, user_id, username) do
     """
-    [#{username}](tg://user?id=#{user_id}), #{text}
+    [#{MarkdownUtils.escape_markdown(username)}](tg://user?id=#{user_id}), #{MarkdownUtils.escape_markdown(text)}
     """
   end
 end
