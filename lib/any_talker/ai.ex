@@ -54,6 +54,18 @@ defmodule AnyTalker.AI do
     - `quote`: цитируемый текст из сообщения, на которое отвечает пользователь (если есть)
 
     ВАЖНО: Поле `sent_at` показывает реальное время отправки каждого сообщения. Время последнего сообщения в диалоге - это ТЕКУЩЕЕ ВРЕМЯ СЕЙЧАС.
+
+    # Формат ответа
+
+    Не используй markdown в ответе. Не используй JSON в ответе. Только обычный текст.
+    Доступное форматироване:
+    - <b>bold</b>
+    - <i>italic</i>
+    - <u>underline</u>
+    - <a href="http://www.example.com/">inline URL</a>
+    - <code>inline fixed-width code</code>
+    - <pre>pre-formatted fixed-width code block</pre>
+    - <pre><code class="language-python">pre-formatted fixed-width code block written in the Python programming language</code></pre>
     """
 
     base_prompt <> json_instructions
