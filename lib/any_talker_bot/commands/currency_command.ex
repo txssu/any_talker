@@ -66,6 +66,7 @@ defmodule AnyTalkerBot.CurrencyCommand do
 
           rate ->
             converted_amount = amount * rate
+
             format_currency_response(reply, from, to, amount, converted_amount)
         end
 
@@ -78,38 +79,22 @@ defmodule AnyTalkerBot.CurrencyCommand do
   end
 
   defp format_currency_response(reply, from, to, amount, converted_amount) do
-    from_formatted = format_amount(amount)
-    to_formatted = format_amount(converted_amount)
+    from_formatted = format_amount(amount, from)
+    to_formatted = format_amount(converted_amount, to)
 
     text = """
-    #{String.upcase(from)}: #{from_formatted}
-    #{String.upcase(to)}: #{to_formatted}
+    #{from_formatted}
+    #{to_formatted}
     """
 
     %{reply | text: text}
   end
 
-  defp format_amount(amount) when is_float(amount) do
-    amount
-    |> :erlang.float_to_binary(decimals: 2)
-    |> add_thousands_separator()
-  end
-
-  defp add_thousands_separator(amount_str) do
-    [integer_part, decimal_part] = String.split(amount_str, ".")
-
-    formatted_integer =
-      integer_part
-      |> String.reverse()
-      |> String.graphemes()
-      |> Enum.chunk_every(3)
-      |> Enum.map_join("\u202F", &Enum.join/1)
-      |> String.reverse()
-
-    if decimal_part == "00" do
-      formatted_integer
-    else
-      "#{formatted_integer}.#{decimal_part}"
-    end
+  defp format_amount(amount, currency_code) do
+    AnyTalker.Cldr.Number.to_string!(amount,
+      currency: String.upcase(currency_code),
+      currency_digits: :cash,
+      currency_symbol: :symbol
+    )
   end
 end

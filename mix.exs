@@ -66,6 +66,7 @@ defmodule AnyTalker.MixProject do
       {:prom_ex, "~> 1.11"},
       {:unplug, "~> 1.1.0"},
       {:pathex, "~> 2.6"},
+      {:ex_cldr_numbers, "~> 2.33"},
       # Telegram
       {:ex_gram, "~> 0.54"},
       {:tesla, "~> 1.2"},
