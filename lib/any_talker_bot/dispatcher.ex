@@ -8,6 +8,7 @@ defmodule AnyTalkerBot.Dispatcher do
 
   command("privacy", description: "Политика конфиденциальности")
   command("ask", description: "Задать вопрос мудрецу")
+  command("curs", description: "Конвертация валют")
 
   middleware(AnyTalkerBot.AddTelemetryDataMiddleware)
   middleware(AnyTalkerBot.SaveUpdateMiddleware)
@@ -53,6 +54,10 @@ defmodule AnyTalkerBot.Dispatcher do
 
   defp execute_command(reply, {:command, :ask, _msg}) do
     AnyTalkerBot.TypingStatus.with_typing(&AnyTalkerBot.AskCommand.call/1, reply)
+  end
+
+  defp execute_command(reply, {:command, :curs, _msg}) do
+    AnyTalkerBot.CurrencyCommand.call(reply)
   end
 
   # Fast ban @DickGrowerBot
