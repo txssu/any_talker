@@ -5,6 +5,7 @@ defmodule AnyTalkerBot.Dispatcher do
     setup_commands: true
 
   alias AnyTalkerBot.Reply
+  alias AnyTalkerBot.TextProcessor
 
   command("privacy", description: "Политика конфиденциальности")
   command("ask", description: "Задать вопрос мудрецу")
@@ -63,6 +64,15 @@ defmodule AnyTalkerBot.Dispatcher do
   # Move to Antispam in future
   defp execute_command(%{context: %{update: %{message: %{via_bot: %{id: 6_465_471_545}} = message}}} = reply, _msg) do
     ExGram.delete_message(message.chat.id, message.message_id, bot: bot())
+    %{reply | halt: true}
+  end
+
+  # Handle text messages that contain slash commands
+  defp execute_command(reply, {:text, text, message}) when is_binary(text) do
+    if slash_command = TextProcessor.extract_slash_command(text) do
+      ExGram.send_message(message.chat.id, slash_command, bot: bot())
+    end
+
     %{reply | halt: true}
   end
 
