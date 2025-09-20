@@ -11,7 +11,6 @@
 - Use **Verified Routes** (`~p"/path"`) instead of `Routes.page_path/2`.
 - Before suggesting code, aggressively simplify it using pattern matching, guards, and helper functions.
 - Make functions short and avoid nested blocks. If a function is long, break it into smaller functions.
-- Always write tests for any added or changed functionality.
 - Use **pipe-based query syntax** for clarity and composability.
 - Use **Elixir’s set-theoretic types** through structs. You don't need to add `@spec`.
 - Name unused variables (e.g., `_error`), don’t leave as `_`.
@@ -98,8 +97,8 @@
 <!-- usage-rules-header -->
 # Usage Rules
 
-**IMPORTANT**: Consult these usage rules early and often when working with the packages listed below. 
-Before attempting to use any of these packages or to discover if you should use them, review their 
+**IMPORTANT**: Consult these usage rules early and often when working with the packages listed below.
+Before attempting to use any of these packages or to discover if you should use them, review their
 usage rules to understand the correct patterns, conventions, and best practices.
 <!-- usage-rules-header-end -->
 
