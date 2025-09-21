@@ -56,8 +56,8 @@ defmodule AnyTalkerBot.Dispatcher do
     AnyTalkerBot.TypingStatus.with_typing(&AnyTalkerBot.AskCommand.call/1, reply)
   end
 
-  defp execute_command(reply, {:inline_query, query}) do
-    AnyTalkerBot.CurrencyCommand.handle_inline_query(reply, query)
+  defp execute_command(reply, {:inline_query, _query}) do
+    AnyTalkerBot.InlineQueryRouter.route_inline_query(reply)
   end
 
   # Fast ban @DickGrowerBot

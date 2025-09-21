@@ -1,17 +1,43 @@
 defmodule AnyTalkerBot.CurrencyCommand do
   @moduledoc false
+  use AnyTalkerBot, :inline_command
 
   alias AnyTalker.Currency.Client
   alias ExGram.Model.InlineQueryResultArticle
   alias ExGram.Model.InputTextMessageContent
 
-  def handle_inline_query(reply, query) do
-    case parse_inline_query(query.query) do
+  @impl AnyTalkerBot.InlineCommand
+  def command_prefixes, do: ["currency", "cur", "conv"]
+
+  @impl AnyTalkerBot.InlineCommand
+  def command_description, do: "Конвертация валют (формат: {from} {to} {amount})"
+
+  @impl AnyTalkerBot.InlineCommand
+  def handle_inline_query(%{context: %{update: %{inline_query: query}}} = reply) do
+    query_without_prefix = remove_command_prefix(query.query)
+
+    case parse_inline_query(query_without_prefix) do
       {:ok, from, to, amount} ->
         handle_inline_conversion(reply, query, from, to, amount)
 
       {:error, :invalid_format} ->
         send_inline_help(reply, query)
+    end
+  end
+
+  defp remove_command_prefix(query_text) do
+    words = String.split(query_text, " ", trim: true)
+
+    case words do
+      [first_word | rest] ->
+        if first_word in command_prefixes() do
+          Enum.join(rest, " ")
+        else
+          query_text
+        end
+
+      [] ->
+        ""
     end
   end
 
