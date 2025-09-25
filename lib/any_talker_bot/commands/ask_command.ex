@@ -74,7 +74,7 @@ defmodule AnyTalkerBot.AskCommand do
     {reply_text, reply_callback} =
       message.reply_to_message
       |> history_key()
-      |> AI.ask(parsed_message, build_extra(reply))
+      |> AI.ask(parsed_message, build_context(reply))
       |> handle_ask_response(config)
 
     %{reply | text: reply_text, on_sent: reply_callback, mode: :html}
@@ -154,12 +154,13 @@ defmodule AnyTalkerBot.AskCommand do
     |> reply_callback.(message.message_id)
   end
 
-  defp build_extra(%Reply{} = reply) do
+  defp build_context(%Reply{} = reply) do
     message = reply.context.update.message
 
-    %{
+    %AnyTalker.AI.Context{
       chat_id: message.chat.id,
-      user_id: message.from.id
+      user_id: message.from.id,
+      message_id: message.message_id
     }
   end
 

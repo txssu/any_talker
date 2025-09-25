@@ -28,7 +28,7 @@ defmodule AnyTalker.AI.RandomIntTool do
   def name, do: "random_int"
 
   @impl Function
-  def exec(%{"min" => min, "max" => max}, _extra) when is_integer(min) and is_integer(max) do
+  def exec(%{"min" => min, "max" => max}, _context) when is_integer(min) and is_integer(max) do
     if min <= max do
       Enum.random(min..max)
     else
@@ -36,7 +36,7 @@ defmodule AnyTalker.AI.RandomIntTool do
     end
   end
 
-  def exec(_params, _extra) do
+  def exec(_params, _context) do
     {:error, "Invalid parameters: min and max must be integers"}
   end
 end

@@ -33,7 +33,7 @@ defmodule AnyTalker.AI.RandomChoiceTool do
   def name, do: "random_choice"
 
   @impl Function
-  def exec(%{"choices" => choices}, _extra) when is_list(choices) do
+  def exec(%{"choices" => choices}, _context) when is_list(choices) do
     cond do
       Enum.empty?(choices) ->
         {:error, "Choices list cannot be empty"}
@@ -46,7 +46,7 @@ defmodule AnyTalker.AI.RandomChoiceTool do
     end
   end
 
-  def exec(_params, _extra) do
+  def exec(_params, _context) do
     {:error, "Invalid parameters: choices must be a list"}
   end
 end
