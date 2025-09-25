@@ -42,8 +42,7 @@ defmodule AnyTalkerBot.InlineQueryRouter do
     result = %ExGram.Model.InlineQueryResultArticle{
       type: "article",
       id: "inline_help",
-      title: "Доступные команды",
-      description: "Список всех inline команд",
+      title: help_text,
       input_message_content: %ExGram.Model.InputTextMessageContent{
         message_text: help_text
       }
