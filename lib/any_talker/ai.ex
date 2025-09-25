@@ -31,7 +31,6 @@ defmodule AnyTalker.AI do
          ],
          {:ok, response} <-
            request_response(history.response_id, input, common, context) do
-      hit_metrics(response)
       {response.output_text, make_callback(response, history)}
     else
       {:error, error} ->
@@ -47,7 +46,39 @@ defmodule AnyTalker.AI do
     end
   end
 
-  # TODO: MOVE
+  def request_response(response_id, input, common, %Context{} = context) do
+    body =
+      Keyword.merge(common,
+        input: input,
+        previous_response_id: response_id
+      )
+
+    with {:ok, response} <- OpenAIClient.response(body) do
+      hit_metrics(response)
+
+      case response do
+        %Response{function_call: %FunctionCall{} = function_call, id: new_response_id} ->
+          call_result = FunctionCall.exec(function_call, context)
+          request_response(new_response_id, [call_result], common, context)
+
+        %Response{} = resp ->
+          {:ok, resp}
+      end
+    end
+  end
+
+  defp hit_metrics(response) do
+    :telemetry.execute(
+      [:any_talker, :bot, :ai],
+      %{
+        total_tokens: response.total_tokens
+      },
+      %{model: response.model}
+    )
+
+    :ok
+  end
+
   defp instructions(prompt) do
     base_prompt = prompt || AnyTalker.GlobalConfig.get(:ask_prompt)
 
@@ -77,37 +108,5 @@ defmodule AnyTalker.AI do
     """
 
     base_prompt <> json_instructions
-  end
-
-  def request_response(response_id, input, common, %Context{} = context) do
-    body =
-      Keyword.merge(common,
-        input: input,
-        previous_response_id: response_id
-      )
-
-    with {:ok, response} <- OpenAIClient.response(body) do
-      case response do
-        %Response{function_call: %FunctionCall{} = function_call, id: new_response_id} ->
-          call_result = FunctionCall.exec(function_call, context)
-          request_response(new_response_id, [call_result], common, context)
-
-        %Response{} = resp ->
-          {:ok, resp}
-      end
-    end
-  end
-
-  # TODO: DELETE
-  defp hit_metrics(response) do
-    :telemetry.execute(
-      [:any_talker, :bot, :ai],
-      %{
-        total_tokens: response.total_tokens
-      },
-      %{model: response.model}
-    )
-
-    :ok
   end
 end
