@@ -4,7 +4,9 @@ defmodule AnyTalker.AI.ToolsRegistry do
   modules = [
     AnyTalker.AI.NowTool,
     AnyTalker.AI.CreateTaskAtTool,
-    AnyTalker.AI.CreateTaskAfterTool
+    AnyTalker.AI.CreateTaskAfterTool,
+    AnyTalker.AI.RandomIntTool,
+    AnyTalker.AI.RandomChoiceTool
   ]
 
   function_name_mapping =
