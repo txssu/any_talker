@@ -1,6 +1,7 @@
 defmodule AnyTalker.AI do
   @moduledoc false
 
+  alias AnyTalker.AI.Context
   alias AnyTalker.AI.FunctionCall
   alias AnyTalker.AI.Message
   alias AnyTalker.AI.OpenAIClient
@@ -11,7 +12,7 @@ defmodule AnyTalker.AI do
 
   require Logger
 
-  def ask(history_key, message, extra) do
+  def ask(history_key, message, %Context{} = context) do
     {response_id, added_messages_ids} = get_history_data(history_key)
 
     with {:ok, final_message} <- AnyTalker.AI.Attachments.download_message_image(message),
@@ -23,7 +24,7 @@ defmodule AnyTalker.AI do
            tools: ToolsRegistry.list_specs()
          ],
          {:ok, response} <-
-           request_response(response_id, input, common, extra) do
+           request_response(response_id, input, common, context) do
       hit_metrics(response)
       {response.output_text, &Cache.put(&1, {response.id, [&2 | added_messages_ids]})}
     else
@@ -71,7 +72,7 @@ defmodule AnyTalker.AI do
     base_prompt <> json_instructions
   end
 
-  def request_response(response_id, input, common, extra) do
+  def request_response(response_id, input, common, %Context{} = context) do
     body =
       Keyword.merge(common,
         input: input,
@@ -81,8 +82,8 @@ defmodule AnyTalker.AI do
     with {:ok, response} <- OpenAIClient.response(body) do
       case response do
         %Response{function_call: %FunctionCall{} = function_call, id: new_response_id} ->
-          call_result = FunctionCall.exec(function_call, extra)
-          request_response(new_response_id, [call_result], common, extra)
+          call_result = FunctionCall.exec(function_call, context)
+          request_response(new_response_id, [call_result], common, context)
 
         %Response{} = resp ->
           {:ok, resp}

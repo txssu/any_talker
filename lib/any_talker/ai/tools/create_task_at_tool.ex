@@ -2,6 +2,7 @@ defmodule AnyTalker.AI.CreateTaskAtTool do
   @moduledoc false
   use AnyTalker.AI.Tool, type: :function
 
+  alias AnyTalker.AI.Context
   alias AnyTalker.AI.Function
   alias AnyTalker.AI.SendReminderJob
   alias AnyTalker.AI.Tool
@@ -42,14 +43,15 @@ defmodule AnyTalker.AI.CreateTaskAtTool do
   def name, do: "create_task_at"
 
   @impl Function
-  def exec(params, %{chat_id: chat_id, user_id: user_id}) do
+  def exec(params, %Context{chat_id: cid, user_id: uid, message_id: mid}) do
     with {:ok, reminder_at} <- parse_datetime(params["reminder_at"]),
          delay_seconds = DateTime.diff(reminder_at, DateTime.utc_now(), :second),
          :ok <- validate_minimum_delay(delay_seconds * 1000) do
       %{
         "message" => params["message"],
-        "chat_id" => chat_id,
-        "user_id" => user_id
+        "chat_id" => cid,
+        "user_id" => uid,
+        "reply_to_id" => mid
       }
       |> SendReminderJob.new(scheduled_at: reminder_at)
       |> Oban.insert()

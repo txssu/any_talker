@@ -3,25 +3,46 @@ defmodule AnyTalker.AI.SendReminderJob do
   use Oban.Worker, queue: :default
 
   alias AnyTalker.Accounts
+  alias AnyTalker.Accounts.User
   alias AnyTalkerBot.MarkdownUtils
 
   @impl Oban.Worker
-  def perform(%Oban.Job{args: %{"message" => message, "chat_id" => chat_id, "user_id" => user_id}}) do
-    username =
-      user_id
+  def perform(%Oban.Job{args: %{"message" => message, "chat_id" => cid, "user_id" => uid} = args}) do
+    text =
+      uid
       |> Accounts.get_user()
-      |> Accounts.display_name()
+      |> to_text_with_mention(message)
 
-    text = add_mention(message, user_id, username)
+    options = [
+      parse_mode: "MarkdownV2",
+      bot: AnyTalkerBot.bot()
+    ]
 
-    ExGram.send_message!(chat_id, text, parse_mode: "MarkdownV2", bot: AnyTalkerBot.bot())
+    options =
+      case Map.get(args, "reply_to_id") do
+        nil -> options
+        mid -> Keyword.put(options, :reply_parameters, reply_parameters(mid, cid))
+      end
+
+    ExGram.send_message!(cid, text, options)
 
     :ok
   end
 
-  defp add_mention(text, user_id, username) do
+  defp reply_parameters(message_id, chat_id) do
+    %ExGram.Model.ReplyParameters{message_id: message_id, chat_id: chat_id}
+  end
+
+  defp to_text_with_mention(%User{} = user, text) do
+    username =
+      user
+      |> Accounts.display_name()
+      |> MarkdownUtils.escape_markdown()
+
+    formatted_text = MarkdownUtils.escape_markdown(text)
+
     """
-    [#{MarkdownUtils.escape_markdown(username)}](tg://user?id=#{user_id}), #{MarkdownUtils.escape_markdown(text)}
+    [#{username}](tg://user?id=#{user.id}), #{formatted_text}
     """
   end
 end

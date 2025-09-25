@@ -2,6 +2,7 @@ defmodule AnyTalker.AI.CreateTaskAfterTool do
   @moduledoc false
   use AnyTalker.AI.Tool, type: :function
 
+  alias AnyTalker.AI.Context
   alias AnyTalker.AI.Function
   alias AnyTalker.AI.SendReminderJob
   alias AnyTalker.AI.Tool
@@ -47,7 +48,7 @@ defmodule AnyTalker.AI.CreateTaskAfterTool do
   def name, do: "create_task_after"
 
   @impl Function
-  def exec(params, %{chat_id: chat_id, user_id: user_id}) do
+  def exec(params, %Context{chat_id: cid, user_id: uid, message_id: mid}) do
     hours = params["hours"]
     minutes = params["minutes"]
 
@@ -60,8 +61,9 @@ defmodule AnyTalker.AI.CreateTaskAfterTool do
 
         %{
           "message" => params["message"],
-          "chat_id" => chat_id,
-          "user_id" => user_id
+          "chat_id" => cid,
+          "user_id" => uid,
+          "reply_to_id" => mid
         }
         |> SendReminderJob.new(scheduled_at: scheduled_at)
         |> Oban.insert()

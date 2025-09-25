@@ -1,6 +1,7 @@
 defmodule AnyTalker.AI.FunctionCall do
   @moduledoc false
 
+  alias AnyTalker.AI.Context
   alias AnyTalker.AI.ToolsRegistry
   alias AnyTalker.Parser
 
@@ -16,8 +17,8 @@ defmodule AnyTalker.AI.FunctionCall do
     Parser.parse(%__MODULE__{}, params, parsers)
   end
 
-  def exec(%__MODULE__{module: module, arguments: params, call_id: call_id}, extra) do
-    call_result = module.exec(params, extra)
+  def exec(%__MODULE__{module: module, arguments: params, call_id: call_id}, %Context{} = context) do
+    call_result = module.exec(params, context)
 
     %{
       type: "function_call_output",
