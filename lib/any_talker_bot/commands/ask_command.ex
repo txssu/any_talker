@@ -4,9 +4,11 @@ defmodule AnyTalkerBot.AskCommand do
 
   alias AnyTalker.Accounts
   alias AnyTalker.AI
+  alias AnyTalker.AI.History
   alias AnyTalker.Settings
   alias AnyTalkerBot.Attachments
   alias AnyTalkerBot.Reply
+  alias ExGram.Model.Chat
   alias ExGram.Model.Message
   alias ExGram.Model.PhotoSize
 
@@ -72,12 +74,19 @@ defmodule AnyTalkerBot.AskCommand do
     config = Settings.get_full_chat_config(message.chat.id)
 
     {reply_text, reply_callback} =
-      message.reply_to_message
-      |> history_key()
-      |> AI.ask(parsed_message, build_context(reply))
+      parsed_message
+      |> AI.ask(build_context(reply), history_key: history_key(message.reply_to_message))
       |> handle_ask_response(config)
 
     %{reply | text: reply_text, on_sent: reply_callback, mode: :html}
+  end
+
+  defp history_key(nil) do
+    nil
+  end
+
+  defp history_key(%Message{chat: %Chat{id: chat_id}, message_id: message_id}) do
+    History.Key.new(chat_id, message_id)
   end
 
   defp handle_ask_response(nil, _config) do
@@ -162,14 +171,6 @@ defmodule AnyTalkerBot.AskCommand do
       user_id: message.from.id,
       message_id: message.message_id
     }
-  end
-
-  defp history_key(nil) do
-    nil
-  end
-
-  defp history_key(%Message{chat: chat, message_id: message_id}) do
-    {chat.id, message_id}
   end
 
   defp validate_is_group(true), do: :ok
