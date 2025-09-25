@@ -13,15 +13,15 @@ defmodule AnyTalker.AI.SendReminderJob do
       |> Accounts.get_user()
       |> to_text_with_mention(message)
 
-    options = [
+    base_options = [
       parse_mode: "MarkdownV2",
       bot: AnyTalkerBot.bot()
     ]
 
     options =
       case Map.get(args, "reply_to_id") do
-        nil -> options
-        mid -> Keyword.put(options, :reply_parameters, reply_parameters(mid, cid))
+        nil -> base_options
+        mid -> Keyword.put(base_options, :reply_parameters, reply_parameters(mid, cid))
       end
 
     ExGram.send_message!(cid, text, options)
