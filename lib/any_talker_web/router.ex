@@ -25,7 +25,7 @@ defmodule AnyTalkerWeb.Router do
   end
 
   pipeline :webapp do
-    plug :put_root_layout, html: :webapp
+    plug :put_root_layout, html: {AnyTalkerWeb.Layouts, :webapp}
   end
 
   pipeline :dev_dashboard do
