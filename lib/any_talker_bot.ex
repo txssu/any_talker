@@ -12,6 +12,14 @@ defmodule AnyTalkerBot do
     end
   end
 
+  def inline_command do
+    quote do
+      @behaviour AnyTalkerBot.InlineCommand
+
+      import AnyTalker.LocalizationUtils
+    end
+  end
+
   defmacro __using__(which) when is_atom(which) do
     apply(__MODULE__, which, [])
   end
