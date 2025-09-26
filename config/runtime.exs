@@ -26,7 +26,11 @@ config :any_talker, AnyTalker.AI.OpenAIClient,
   api_key: System.get_env("OPENAI_KEY"),
   proxy_uri: System.get_env("OPENAI_PROXY_URL")
 
-config :any_talker, AnyTalkerBot.Token, token: System.get_env("TELEGRAM_BOT_TOKEN")
+config :any_talker, AnyTalkerBot.Config,
+  bot_token: System.get_env("TELEGRAM_BOT_TOKEN"),
+  payment_provider_token: System.get_env("PAYMENT_PROVIDER_TOKEN"),
+  owner_id: get_env_and_transform("TELEGRAM_BOT_OWNER_ID", &String.to_integer/1)
+
 config :any_talker, owner_id: get_env_and_transform("TELEGRAM_BOT_OWNER_ID", &String.to_integer/1)
 
 if config_env() == :prod do
