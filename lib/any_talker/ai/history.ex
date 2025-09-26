@@ -17,10 +17,6 @@ defmodule AnyTalker.AI.History do
     %{history | messages: [message | history.messages]}
   end
 
-  def append(%__MODULE__{} = history, messages) do
-    %{history | messages: Enum.concat(messages, history)}
-  end
-
   @doc """
   Returns response_id and added_messages_ids
   """
