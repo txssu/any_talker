@@ -22,16 +22,15 @@ defmodule AnyTalker.AI do
       end
 
     with {:ok, final_message} <- Attachments.download_message_image(message),
-         input = Message.format_message(final_message, history.added_messages_ids),
+         request_history = History.append(history, final_message),
          config = Settings.get_full_chat_config(message.chat_id),
          common = [
            model: config.ask_model,
            instructions: instructions(config.ask_prompt),
            tools: ToolsRegistry.list_specs()
          ],
-         {:ok, response} <-
-           request_response(history.response_id, input, common, context) do
-      {response.output_text, make_callback(response, history)}
+         {:ok, response, result_history} <- request_response(request_history, common, context) do
+      {response.output_text, make_callback(result_history, response)}
     else
       {:error, error} ->
         Logger.error("OpenAiClientError", error_details: error)
@@ -39,30 +38,28 @@ defmodule AnyTalker.AI do
     end
   end
 
-  def make_callback(%Response{} = response, %History{} = old_history) do
+  defp make_callback(%History{} = history, %Response{} = response) do
     fn %History.Key{} = key, message_id ->
-      new_history = History.new(response.id, [message_id | old_history.added_messages_ids])
-      History.put(key, new_history)
+      message = Message.new(message_id, :assistant, response.output_text, DateTime.utc_now())
+
+      History.put(key, History.append(history, message))
     end
   end
 
-  def request_response(response_id, input, common, %Context{} = context) do
-    body =
-      Keyword.merge(common,
-        input: input,
-        previous_response_id: response_id
-      )
+  defp request_response(%History{} = history, common, %Context{} = context) do
+    body = Keyword.put(common, :input, Message.format_list(history.messages))
 
     with {:ok, response} <- OpenAIClient.response(body) do
       hit_metrics(response)
 
       case response do
-        %Response{function_call: %FunctionCall{} = function_call, id: new_response_id} ->
+        %Response{function_call: %FunctionCall{} = function_call} ->
           call_result = FunctionCall.exec(function_call, context)
-          request_response(new_response_id, [call_result], common, context)
+
+          request_response(History.append(history, call_result), common, context)
 
         %Response{} = resp ->
-          {:ok, resp}
+          {:ok, resp, history}
       end
     end
   end

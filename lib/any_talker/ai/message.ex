@@ -33,11 +33,10 @@ defmodule AnyTalker.AI.Message do
     |> Enum.flat_map(&format_message(&1, get_message_ids(messages)))
   end
 
-  def format_message(%__MODULE__{} = message, messages_ids) do
+  def format_message(%__MODULE__{} = message, messages_ids \\ []) do
     []
     |> maybe_append_reply(message, messages_ids)
     |> append_content(message)
-    |> Enum.reverse()
   end
 
   defp get_message_ids(messages) do

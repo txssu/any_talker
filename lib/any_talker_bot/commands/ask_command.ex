@@ -24,7 +24,7 @@ defmodule AnyTalkerBot.AskCommand do
          :ok <- validate_config(config),
          :ok <- validate_not_empty(message, bot_id),
          :ok <- validate_rate(message.from.id, config) do
-      reply(reply, message, reply.context.bot_info.id)
+      reply(reply, message, bot_id)
     else
       error -> error_reply(error, reply)
     end
@@ -95,7 +95,7 @@ defmodule AnyTalkerBot.AskCommand do
 
   defp handle_ask_response({reply_text, reply_callback}, config) do
     formatted_text = format_response_with_bot_name(reply_text, config)
-    {formatted_text, &adjust_params(reply_callback, &1)}
+    {formatted_text, adjust_params(reply_callback)}
   end
 
   defp parse_message(%Message{text: t, caption: c, photo: p} = message, bot_id)
@@ -157,10 +157,11 @@ defmodule AnyTalkerBot.AskCommand do
     Attachments.get_file_link(photo_id)
   end
 
-  defp adjust_params(reply_callback, message) do
-    message
-    |> history_key()
-    |> reply_callback.(message.message_id)
+  defp adjust_params(reply_callback) do
+    fn %Message{} = message ->
+      key = history_key(message)
+      reply_callback.(key, message.message_id)
+    end
   end
 
   defp build_context(%Reply{} = reply) do
