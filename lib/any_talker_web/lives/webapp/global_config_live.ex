@@ -21,6 +21,12 @@ defmodule AnyTalkerWeb.WebApp.GlobalConfigLive do
           <.tg_input label="Модель /ask" field={@form[:ask_model]} />
           <.tg_input type="number" label="Лимит запросов /ask" field={@form[:ask_rate_limit]} />
           <.tg_input type="number" label="Период лимита /ask (мс)" field={@form[:ask_rate_limit_scale_ms]} />
+          <.tg_input type="number" label="Лимит запросов /ask PRO" field={@form[:ask_pro_rate_limit]} />
+          <.tg_input
+            type="number"
+            label="Период лимита /ask PRO (мс)"
+            field={@form[:ask_pro_rate_limit_scale_ms]}
+          />
           <div class="mt-2">
             <.textarea label="Промпт /ask" field={@form[:ask_prompt]} />
           </div>

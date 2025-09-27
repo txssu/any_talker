@@ -4,7 +4,7 @@ defmodule AnyTalkerBot.TokenRedactor do
 
   @impl LoggerJSON.Redactor
   def redact("message", value, _options) do
-    String.replace(value, AnyTalkerBot.Token.value(), "[TOKEN]")
+    String.replace(value, AnyTalkerBot.Config.bot_token(), "[TOKEN]")
   end
 
   def redact(_key, value, _options) do

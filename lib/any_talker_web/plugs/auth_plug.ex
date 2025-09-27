@@ -14,7 +14,7 @@ defmodule AnyTalkerWeb.AuthPlug do
       |> Enum.sort_by(&elem(&1, 0))
       |> Enum.map_join("\n", fn {key, value} -> "#{key}=#{value}" end)
 
-    secret_key = :crypto.mac(:hmac, :sha256, "WebAppData", AnyTalkerBot.Token.value())
+    secret_key = :crypto.mac(:hmac, :sha256, "WebAppData", AnyTalkerBot.Config.bot_token())
 
     expected_hash =
       :hmac

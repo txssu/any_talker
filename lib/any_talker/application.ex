@@ -19,7 +19,7 @@ defmodule AnyTalker.Application do
       # Telegram
       {AnyTalker.Cache, []},
       ExGram,
-      {AnyTalkerBot.Dispatcher, [method: :polling, token: AnyTalkerBot.Token.value()]},
+      {AnyTalkerBot.Dispatcher, [method: :polling, token: AnyTalkerBot.Config.bot_token()]},
       # Start a worker by calling: AnyTalker.Worker.start_link(arg)
       # {AnyTalker.Worker, arg},
       # Start to serve requests, typically the last entry

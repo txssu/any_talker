@@ -3,6 +3,7 @@ defmodule AnyTalker.Accounts do
   import Ecto.Query
 
   alias AnyTalker.Accounts.ChatMember
+  alias AnyTalker.Accounts.Subscription
   alias AnyTalker.Accounts.User
   alias AnyTalker.Accounts.UserToken
   alias AnyTalker.Repo
@@ -70,7 +71,7 @@ defmodule AnyTalker.Accounts do
   end
 
   def owner?(%User{id: user_id}) do
-    Application.get_env(:any_talker, :owner_id) == user_id
+    AnyTalkerBot.Config.owner_id() == user_id
   end
 
   def chat_member?(user_id, chat_id) do
@@ -85,5 +86,28 @@ defmodule AnyTalker.Accounts do
 
   def display_name(%User{} = user) do
     user.custom_name || user.first_name
+  end
+
+  def preload_current_subscription(%User{current_subscription: %Subscription{}} = user), do: user
+  def preload_current_subscription(%User{current_subscription: nil} = user), do: user
+
+  def preload_current_subscription(%User{} = user) do
+    %{user | current_subscription: get_current_subscription(user)}
+  end
+
+  def get_current_subscription(%User{id: user_id}) do
+    now = DateTime.utc_now()
+
+    query =
+      from sub in Subscription,
+        where: ^user_id == sub.user_id and (is_nil(sub.expires_at) or sub.expires_at > ^now)
+
+    Repo.one(query)
+  end
+
+  def activate_pro_subscription(%User{} = user) do
+    expires_at = DateTime.add(DateTime.utc_now(), 30, :day)
+
+    Repo.insert(%Subscription{user_id: user.id, plan: :pro, expires_at: expires_at})
   end
 end
