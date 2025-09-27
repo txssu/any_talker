@@ -1,5 +1,17 @@
 defmodule AnyTalker.Accounts.User do
-  @moduledoc false
+  @moduledoc """
+  Telegram user representation.
+
+  ## Fields
+
+  | Field Name | Type | Description |
+  |------------|------|-------------|
+  | username | string | Telegram username |
+  | custom_name | string | Custom display name (max 20 chars) |
+  | first_name | string | Telegram first name (required) |
+  | last_name | string | Telegram last name |
+  | photo_url | string | Telegram profile photo URL |
+  """
   use Ecto.Schema
 
   import Ecto.Changeset
@@ -12,6 +24,8 @@ defmodule AnyTalker.Accounts.User do
     field :first_name, :string
     field :last_name, :string
     field :photo_url, :string
+
+    has_one :current_subscription, AnyTalker.Accounts.Subscription
 
     timestamps(type: :utc_datetime)
   end

@@ -100,13 +100,15 @@ defmodule AnyTalker.Settings do
     end
   end
 
-  defp merge_configs(chat, global) do
+  defp merge_configs(%ChatConfig{} = chat, %GlobalConfig{} = global) do
     %{
       chat
       | ask_model: chat.ask_model || global.ask_model,
         ask_rate_limit: chat.ask_rate_limit || global.ask_rate_limit,
         ask_rate_limit_scale_ms: chat.ask_rate_limit_scale_ms || global.ask_rate_limit_scale_ms,
-        ask_prompt: chat.ask_prompt || global.ask_prompt
+        ask_prompt: chat.ask_prompt || global.ask_prompt,
+        ask_pro_rate_limit: chat.ask_pro_rate_limit || global.ask_pro_rate_limit,
+        ask_pro_rate_limit_scale_ms: chat.ask_pro_rate_limit_scale_ms || global.ask_pro_rate_limit_scale_ms
     }
   end
 end

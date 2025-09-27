@@ -11,7 +11,7 @@ defmodule AnyTalkerBot.Reply do
             halt: false,
             mode: :html,
             on_sent: nil,
-            as_reply?: nil,
+            as_reply?: false,
             for_dm: false,
             message: nil,
             context: nil
@@ -58,7 +58,7 @@ defmodule AnyTalkerBot.Reply do
   end
 
   defp dm_success_message do
-    ~i"Ответ отправлен в личные сообщения\."
+    "Ответ отправлен в личные сообщения."
   end
 
   defp dm_error_message do
@@ -99,12 +99,12 @@ defmodule AnyTalkerBot.Reply do
   defp maybe_add_markdown(options, _reply), do: options
 
   defp maybe_add_reply_to(options, reply) do
-    if reply.context.update.message.chat.type == "private" or not is_nil(reply.as_reply?) do
-      options
-    else
+    if reply.context.update.message.chat.type != "private" or reply.as_reply? do
       message = reply.context.update.message
       reply_to = %ExGram.Model.ReplyParameters{message_id: message.message_id, chat_id: message.chat.id}
       [{:reply_parameters, reply_to} | options]
+    else
+      options
     end
   end
 end
