@@ -20,7 +20,7 @@ defmodule AnyTalkerBot.BuyProCommand do
 
     case Accounts.get_current_subscription(user) do
       %Subscription{} = sub ->
-        %{reply | text: already_subscribed_message(sub)}
+        %{reply | text: already_subscribed_message(sub), for_dm: true}
 
       nil ->
         send_invoice_or_error(reply, msg.chat.id)
@@ -61,11 +61,11 @@ defmodule AnyTalkerBot.BuyProCommand do
 
     case Accounts.activate_pro_subscription(user) do
       {:ok, sub} ->
-        %{reply | text: activation_success_message(sub)}
+        %{reply | text: activation_success_message(sub), for_dm: true}
 
       {:error, error} ->
         log_activation_error(user.id, error)
-        %{reply | text: activation_error_message()}
+        %{reply | text: activation_error_message(), for_dm: true}
     end
   end
 
@@ -86,11 +86,11 @@ defmodule AnyTalkerBot.BuyProCommand do
   defp send_invoice_or_error(reply, chat_id) do
     case send_invoice(chat_id) do
       {:ok, _msg} ->
-        %{reply | halt: true}
+        %{reply | halt: true, for_dm: true}
 
       {:error, error} ->
         Logger.error("Can't send invoice.", error_details: error)
-        %{reply | text: "Что-то не работает, попробуй позже"}
+        %{reply | text: "Что-то не работает, попробуй позже", for_dm: true}
     end
   end
 
@@ -143,12 +143,9 @@ defmodule AnyTalkerBot.BuyProCommand do
 
   defp description do
     """
-    🔥 Подписка PRO открывает доступ к расширенным возможностям:
+    🔥 Подписка PRO: больше запросов, приоритет в обработке.
 
-    • Существенно больше запросов
-    • Минимальные паузы после достижения лимита
-    • Приоритет в обработке
-    • Возможность делать запросы в любом чате и даже в личных сообщениях
+    Подробности в /que_pro
     """
   end
 end

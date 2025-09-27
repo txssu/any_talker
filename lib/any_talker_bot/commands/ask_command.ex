@@ -37,30 +37,32 @@ defmodule AnyTalkerBot.AskCommand do
     end
   end
 
-  defp error_reply({:error, :not_group}, reply) do
+  defp error_reply({:error, :not_group}, %Reply{} = reply) do
     text = """
-    разговаривать приватно с серой массой — всё равно что обсуждать "Войну и мир" с шулерами, господин, я предпочитаю лишь публичные трибуны для демонстрации своего величия.
-    (команда доступна только в чатах)
+    TODO: Написать описание, что команда доступна либо в групповых чатах, либо в личных при условии наличия PRO подписки
     """
 
     %{reply | text: text}
   end
 
-  defp error_reply({:error, :not_enabled}, reply) do
-    text =
-      "Я тут, чтобы наслаждаться своим внутренним fonk, а не выдавать поток слов.\n(в этом чате команда недоступна)"
+  defp error_reply({:error, :not_enabled}, %Reply{} = reply) do
+    text = """
+    TODO: Написать описание, что команда не доступна в этом групповом чате, для включения нужно либо обратиться \
+    к администратору либо купить подписку PRO
+    """
 
     %{reply | text: text}
   end
 
-  defp error_reply({:error, :empty_text}, reply) do
+  defp error_reply({:error, :empty_text}, %Reply{} = reply) do
     %{reply | text: "Не вижу вопроса!"}
   end
 
-  defp error_reply({:error, :rate_limit, time_left_ms}, reply) do
+  defp error_reply({:error, :rate_limit, time_left_ms}, %Reply{} = reply) do
     %{
       reply
-      | text: "Отстань, я занят!!\n(достигнут лимит запросов, попробуй через #{format_time(time_left_ms)})"
+      | text: "Отстань, я занят!!\n(достигнут лимит запросов, попробуй через #{format_time(time_left_ms)})",
+        as_reply?: true
     }
   end
 
@@ -85,7 +87,7 @@ defmodule AnyTalkerBot.AskCommand do
       |> AI.ask(build_context(reply), history_key: history_key(message.reply_to_message))
       |> handle_ask_response(config)
 
-    %{reply | text: reply_text, on_sent: reply_callback, mode: :html}
+    %{reply | text: reply_text, on_sent: reply_callback, mode: :html, as_reply?: true}
   end
 
   defp history_key(nil) do
@@ -139,7 +141,7 @@ defmodule AnyTalkerBot.AskCommand do
     result
   end
 
-  defp add_reply(result, message, bot_id) do
+  defp add_reply(%AnyTalker.AI.Message{} = result, %Message{} = message, bot_id) do
     original_reply = message.reply_to_message
     role = if original_reply.from.id == bot_id, do: :assistant, else: :user
     quote_text = message.quote && message.quote.text

@@ -9,7 +9,8 @@ defmodule AnyTalkerBot.Dispatcher do
 
   command("privacy", description: "Политика конфиденциальности")
   command("ask", description: "Задать вопрос мудрецу")
-  command("que_pro", description: "que pro")
+  command("buy_pro", description: "Приобрести подписку PRO")
+  command("que_pro", description: "Информация о подписке PRO")
 
   middleware(AnyTalkerBot.AddTelemetryDataMiddleware)
   middleware(AnyTalkerBot.SaveUpdateMiddleware)
@@ -58,6 +59,10 @@ defmodule AnyTalkerBot.Dispatcher do
   end
 
   defp execute_command(reply, {:command, :que_pro, _msg}) do
+    AnyTalkerBot.ProInfoCommand.call(reply)
+  end
+
+  defp execute_command(reply, {:command, :buy_pro, _msg}) do
     AnyTalkerBot.BuyProCommand.call(reply)
   end
 
