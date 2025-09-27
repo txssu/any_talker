@@ -3,9 +3,12 @@ defmodule AnyTalkerBot.AskCommand do
   use AnyTalkerBot, :command
 
   alias AnyTalker.Accounts
+  alias AnyTalker.Accounts.Subscription
+  alias AnyTalker.Accounts.User
   alias AnyTalker.AI
   alias AnyTalker.AI.History
   alias AnyTalker.Settings
+  alias AnyTalker.Settings.ChatConfig
   alias AnyTalkerBot.Attachments
   alias AnyTalkerBot.Reply
   alias ExGram.Model.Chat
@@ -17,43 +20,49 @@ defmodule AnyTalkerBot.AskCommand do
   @impl AnyTalkerBot.Command
   def call(%Reply{message: {:command, :ask, message}} = reply) do
     bot_id = reply.context.bot_info.id
+    is_group = reply.context.extra.is_group
 
+    user_with_sub = Accounts.preload_current_subscription(reply.context.extra.user)
     config = Settings.get_full_chat_config(message.chat.id)
 
-    with :ok <- validate_is_group(reply.context.extra.is_group),
-         :ok <- validate_config(config),
+    maybe_wait(user_with_sub)
+
+    with :ok <- validate_chat_type(user_with_sub, is_group),
+         :ok <- validate_config(user_with_sub, config),
          :ok <- validate_not_empty(message, bot_id),
-         :ok <- validate_rate(message.from.id, config) do
+         :ok <- validate_rate_limit(user_with_sub, config) do
       reply(reply, message, reply.context.bot_info.id)
     else
       error -> error_reply(error, reply)
     end
   end
 
-  defp error_reply({:error, :not_group}, reply) do
+  defp error_reply({:error, :not_group}, %Reply{} = reply) do
     text = """
-    разговаривать приватно с серой массой — всё равно что обсуждать "Войну и мир" с шулерами, господин, я предпочитаю лишь публичные трибуны для демонстрации своего величия.
-    (команда доступна только в чатах)
+    TODO: Написать описание, что команда доступна либо в групповых чатах, либо в личных при условии наличия PRO подписки
     """
 
     %{reply | text: text}
   end
 
-  defp error_reply({:error, :not_enabled}, reply) do
-    text =
-      "Я тут, чтобы наслаждаться своим внутренним fonk, а не выдавать поток слов.\n(в этом чате команда недоступна)"
+  defp error_reply({:error, :not_enabled}, %Reply{} = reply) do
+    text = """
+    TODO: Написать описание, что команда не доступна в этом групповом чате, для включения нужно либо обратиться \
+    к администратору либо купить подписку PRO
+    """
 
     %{reply | text: text}
   end
 
-  defp error_reply({:error, :empty_text}, reply) do
+  defp error_reply({:error, :empty_text}, %Reply{} = reply) do
     %{reply | text: "Не вижу вопроса!"}
   end
 
-  defp error_reply({:error, :rate_limit, time_left_ms}, reply) do
+  defp error_reply({:error, :rate_limit, time_left_ms}, %Reply{} = reply) do
     %{
       reply
-      | text: "Отстань, я занят!!\n(достигнут лимит запросов, попробуй через #{format_time(time_left_ms)})"
+      | text: "Отстань, я занят!!\n(достигнут лимит запросов, попробуй через #{format_time(time_left_ms)})",
+        as_reply?: true
     }
   end
 
@@ -78,7 +87,7 @@ defmodule AnyTalkerBot.AskCommand do
       |> AI.ask(build_context(reply), history_key: history_key(message.reply_to_message))
       |> handle_ask_response(config)
 
-    %{reply | text: reply_text, on_sent: reply_callback, mode: :html}
+    %{reply | text: reply_text, on_sent: reply_callback, mode: :html, as_reply?: true}
   end
 
   defp history_key(nil) do
@@ -132,7 +141,7 @@ defmodule AnyTalkerBot.AskCommand do
     result
   end
 
-  defp add_reply(result, message, bot_id) do
+  defp add_reply(%AnyTalker.AI.Message{} = result, %Message{} = message, bot_id) do
     original_reply = message.reply_to_message
     role = if original_reply.from.id == bot_id, do: :assistant, else: :user
     quote_text = message.quote && message.quote.text
@@ -173,11 +182,15 @@ defmodule AnyTalkerBot.AskCommand do
     }
   end
 
-  defp validate_is_group(true), do: :ok
-  defp validate_is_group(_otherwise), do: {:error, :not_group}
+  defp validate_chat_type(user_with_sub, group?)
+  defp validate_chat_type(%User{current_subscription: %Subscription{plan: :pro}}, _group?), do: :ok
+  defp validate_chat_type(_user, true), do: :ok
+  defp validate_chat_type(_user, false), do: {:error, :not_group}
 
-  defp validate_config(%{ask_command: true}), do: :ok
-  defp validate_config(_chat_config), do: {:error, :not_enabled}
+  defp validate_config(user_with_sub, chat_config)
+  defp validate_config(%User{current_subscription: %Subscription{plan: :pro}}, _chat_config), do: :ok
+  defp validate_config(_user, %ChatConfig{ask_command: true}), do: :ok
+  defp validate_config(_user, _chat_config), do: {:error, :not_enabled}
 
   defp validate_not_empty(%Message{text: t, photo: p}, _bot_id) when not_empty_string(t) or is_list(p), do: :ok
 
@@ -189,8 +202,17 @@ defmodule AnyTalkerBot.AskCommand do
 
   defp validate_not_empty(_otherwise, _bot_id), do: {:error, :empty_text}
 
-  defp validate_rate(user_id, %{ask_rate_limit_scale_ms: scale, ask_rate_limit: limit}) do
-    key = "ask:#{user_id}"
+  def validate_rate_limit(%User{current_subscription: sub} = user, %ChatConfig{} = config) do
+    {scale, limit} =
+      case sub do
+        nil ->
+          {config.ask_rate_limit_scale_ms, config.ask_rate_limit}
+
+        %Subscription{plan: :pro} ->
+          {config.ask_pro_rate_limit_scale_ms, config.ask_pro_rate_limit}
+      end
+
+    key = "ask:#{user.id}"
 
     case AnyTalker.RateLimit.hit(key, scale, limit) do
       {:allow, _count} ->
@@ -199,6 +221,14 @@ defmodule AnyTalkerBot.AskCommand do
       {:deny, time_left_ms} ->
         {:error, :rate_limit, time_left_ms}
     end
+  end
+
+  defp maybe_wait(%User{current_subscription: %Subscription{plan: :pro}}), do: nil
+
+  defp maybe_wait(_user) do
+    [second: 5]
+    |> to_timeout()
+    |> Process.sleep()
   end
 
   defp format_response_with_bot_name(reply_text, config) do

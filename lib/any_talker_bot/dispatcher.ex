@@ -9,6 +9,8 @@ defmodule AnyTalkerBot.Dispatcher do
 
   command("privacy", description: "Политика конфиденциальности")
   command("ask", description: "Задать вопрос мудрецу")
+  command("buy_pro", description: "Приобрести подписку PRO")
+  command("que_pro", description: "Информация о подписке PRO")
 
   middleware(AnyTalkerBot.AddTelemetryDataMiddleware)
   middleware(AnyTalkerBot.SaveUpdateMiddleware)
@@ -54,6 +56,28 @@ defmodule AnyTalkerBot.Dispatcher do
 
   defp execute_command(reply, {:command, :ask, _msg}) do
     AnyTalkerBot.TypingStatus.with_typing(&AnyTalkerBot.AskCommand.call/1, reply)
+  end
+
+  defp execute_command(reply, {:command, :que_pro, _msg}) do
+    AnyTalkerBot.ProInfoCommand.call(reply)
+  end
+
+  defp execute_command(reply, {:command, :buy_pro, _msg}) do
+    AnyTalkerBot.BuyProCommand.call(reply)
+  end
+
+  defp execute_command(
+         reply,
+         {:update, %{pre_checkout_query: %ExGram.Model.PreCheckoutQuery{invoice_payload: "subs:pro"}}}
+       ) do
+    AnyTalkerBot.BuyProCommand.handle_pre_checkout(reply)
+  end
+
+  defp execute_command(
+         reply,
+         {:message, %{successful_payment: %ExGram.Model.SuccessfulPayment{invoice_payload: "subs:pro"}}}
+       ) do
+    AnyTalkerBot.BuyProCommand.handle_successful_payment(reply)
   end
 
   defp execute_command(reply, {:inline_query, query}) do
