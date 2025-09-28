@@ -2,15 +2,15 @@ defmodule AnyTalkerBot.Dispatcher do
   @moduledoc false
   use ExGram.Bot,
     name: :any_talker,
-    setup_commands: true
+    setup_commands: false
 
   alias AnyTalkerBot.Reply
   alias AnyTalkerBot.TextProcessor
 
-  command("privacy", description: "Политика конфиденциальности")
-  command("ask", description: "Задать вопрос мудрецу")
-  command("buy_pro", description: "Приобрести подписку PRO")
-  command("que_pro", description: "Информация о подписке PRO")
+  command("privacy")
+  command("ask")
+  command("buy_pro")
+  command("que_pro")
 
   middleware(AnyTalkerBot.AddTelemetryDataMiddleware)
   middleware(AnyTalkerBot.SaveUpdateMiddleware)
