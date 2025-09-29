@@ -42,7 +42,7 @@ defmodule AnyTalkerBot.Dispatcher do
     if middleware_reply = context.extra[:middleware_reply] do
       middleware_reply
     else
-      %{reply | halt: true}
+      Reply.halt(reply)
     end
   end
 
@@ -88,7 +88,7 @@ defmodule AnyTalkerBot.Dispatcher do
   # Move to Antispam in future
   defp execute_command(%{context: %{update: %{message: %{via_bot: %{id: 6_465_471_545}} = message}}} = reply, _msg) do
     ExGram.delete_message(message.chat.id, message.message_id, bot: bot())
-    %{reply | halt: true}
+    Reply.halt(reply)
   end
 
   # Handle text messages that contain slash commands
@@ -97,10 +97,10 @@ defmodule AnyTalkerBot.Dispatcher do
       ExGram.send_message(message.chat.id, slash_command, bot: bot())
     end
 
-    %{reply | halt: true}
+    Reply.halt(reply)
   end
 
   defp execute_command(reply, _msg) do
-    %{reply | halt: true}
+    Reply.halt(reply)
   end
 end

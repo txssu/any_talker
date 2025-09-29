@@ -48,7 +48,7 @@ defmodule AnyTalkerBot.AskCommand do
     /que_pro — решай сам.
     """
 
-    %{reply | text: text, as_reply?: true}
+    Reply.send_message(reply, text, as_reply?: true)
   end
 
   defp error_reply({:error, :not_enabled}, %Reply{} = reply) do
@@ -63,11 +63,11 @@ defmodule AnyTalkerBot.AskCommand do
     /que_pro — твой выбор.
     """
 
-    %{reply | text: text, as_reply?: true}
+    Reply.send_message(reply, text, as_reply?: true)
   end
 
   defp error_reply({:error, :empty_text}, %Reply{} = reply) do
-    %{reply | text: "Не вижу вопроса!", as_reply?: true}
+    Reply.send_message(reply, "Не вижу вопроса!", as_reply?: true)
   end
 
   defp error_reply({:error, :rate_limit, time_left_ms}, %Reply{} = reply) do
@@ -82,7 +82,7 @@ defmodule AnyTalkerBot.AskCommand do
       👉 /que_pro — решай быстро.
       """
 
-    %{reply | text: text, as_reply?: true}
+    Reply.send_message(reply, text, as_reply?: true)
   end
 
   defp format_time(time_left_ms) do
@@ -106,7 +106,7 @@ defmodule AnyTalkerBot.AskCommand do
       |> AI.ask(build_context(reply), history_key: history_key(message.reply_to_message))
       |> handle_ask_response(config)
 
-    %{reply | text: reply_text, on_sent: reply_callback, mode: :html, as_reply?: true}
+    Reply.send_message(reply, reply_text, on_sent: reply_callback, mode: :html, as_reply?: true)
   end
 
   defp history_key(nil) do
