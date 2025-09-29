@@ -2,13 +2,11 @@ defmodule AnyTalkerBot.PrivacyCommand do
   @moduledoc false
   use AnyTalkerBot, :command
 
+  alias AnyTalkerBot.Reply
+
   @impl AnyTalkerBot.Command
-  def call(reply) do
-    %{
-      reply
-      | text: privacy_policy(),
-        for_dm: true
-    }
+  def call(%Reply{} = reply) do
+    Reply.send_message(reply, privacy_policy(), for_dm: true)
   end
 
   defp privacy_policy do

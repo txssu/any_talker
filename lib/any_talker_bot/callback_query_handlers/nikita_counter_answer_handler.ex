@@ -19,6 +19,6 @@ defmodule AnyTalkerBot.NikitaCounterAnswerHandler do
       Helpers.answer_counter(message.message_id, :nikita, answer_type)
     end
 
-    %{reply | halt: true}
+    Reply.halt(reply)
   end
 end
