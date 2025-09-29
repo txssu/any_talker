@@ -10,7 +10,7 @@ defmodule AnyTalkerBot.AskCommand do
   alias AnyTalker.Settings
   alias AnyTalker.Settings.ChatConfig
   alias AnyTalkerBot.Attachments
-  alias AnyTalkerBot.Reply
+  alias AnyTalkerBot.Reply2
   alias ExGram.Model.Chat
   alias ExGram.Model.Message
   alias ExGram.Model.PhotoSize
@@ -18,7 +18,7 @@ defmodule AnyTalkerBot.AskCommand do
   defguard not_empty_string(s) when is_binary(s) and s != ""
 
   @impl AnyTalkerBot.Command
-  def call(%Reply{message: {:command, :ask, message}} = reply) do
+  def call(%Reply2{message: {:command, :ask, message}} = reply) do
     bot_id = reply.context.bot_info.id
     is_group = reply.context.extra.is_group
 
@@ -37,7 +37,7 @@ defmodule AnyTalkerBot.AskCommand do
     end
   end
 
-  defp error_reply({:error, :not_group}, %Reply{} = reply) do
+  defp error_reply({:error, :not_group}, %Reply2{} = reply) do
     text = """
     Эта команда работает только в группах.
     Без PRO ты здесь никто.
@@ -48,10 +48,10 @@ defmodule AnyTalkerBot.AskCommand do
     /que_pro — решай сам.
     """
 
-    %{reply | text: text, as_reply?: true}
+    Reply2.send_message(reply, text, as_reply?: true)
   end
 
-  defp error_reply({:error, :not_enabled}, %Reply{} = reply) do
+  defp error_reply({:error, :not_enabled}, %Reply2{} = reply) do
     text = """
     Здесь бот для тебя мёртв.
     У тебя нет доступа к его командам.
@@ -63,14 +63,14 @@ defmodule AnyTalkerBot.AskCommand do
     /que_pro — твой выбор.
     """
 
-    %{reply | text: text, as_reply?: true}
+    Reply2.send_message(reply, text, as_reply?: true)
   end
 
-  defp error_reply({:error, :empty_text}, %Reply{} = reply) do
-    %{reply | text: "Не вижу вопроса!", as_reply?: true}
+  defp error_reply({:error, :empty_text}, %Reply2{} = reply) do
+    Reply2.send_message(reply, "Не вижу вопроса!", as_reply?: true)
   end
 
-  defp error_reply({:error, :rate_limit, time_left_ms}, %Reply{} = reply) do
+  defp error_reply({:error, :rate_limit, time_left_ms}, %Reply2{} = reply) do
     text =
       """
       Ты выжал лимит.
@@ -82,7 +82,7 @@ defmodule AnyTalkerBot.AskCommand do
       👉 /que_pro — решай быстро.
       """
 
-    %{reply | text: text, as_reply?: true}
+    Reply2.send_message(reply, text, as_reply?: true)
   end
 
   defp format_time(time_left_ms) do
@@ -97,7 +97,7 @@ defmodule AnyTalkerBot.AskCommand do
   defp format_unit(0, _singular, _few, _many), do: nil
   defp format_unit(n, singular, few, many), do: "#{n} #{pluralize(n, singular, few, many)}"
 
-  defp reply(%Reply{} = reply, message, bot_id) do
+  defp reply(%Reply2{} = reply, message, bot_id) do
     parsed_message = parse_message(message, bot_id)
     config = Settings.get_full_chat_config(message.chat.id)
 
@@ -106,7 +106,7 @@ defmodule AnyTalkerBot.AskCommand do
       |> AI.ask(build_context(reply), history_key: history_key(message.reply_to_message))
       |> handle_ask_response(config)
 
-    %{reply | text: reply_text, on_sent: reply_callback, mode: :html, as_reply?: true}
+    Reply2.send_message(reply, reply_text, on_sent: reply_callback, mode: :html, as_reply?: true)
   end
 
   defp history_key(nil) do
@@ -191,7 +191,7 @@ defmodule AnyTalkerBot.AskCommand do
     |> reply_callback.(message.message_id)
   end
 
-  defp build_context(%Reply{} = reply) do
+  defp build_context(%Reply2{} = reply) do
     message = reply.context.update.message
 
     %AnyTalker.AI.Context{

@@ -5,17 +5,18 @@ defmodule AnyTalkerBot.ProInfoCommand do
 
   alias AnyTalker.Accounts
   alias AnyTalker.Accounts.Subscription
+  alias AnyTalkerBot.Reply2
 
   @doc """
   Executes command by showing detailed PRO subscription information.
   """
-  def call(%{context: %{extra: %{user: user}}} = reply) do
+  def call(%Reply2{context: %{extra: %{user: user}}} = reply) do
     case Accounts.get_current_subscription(user) do
       %Subscription{} = sub ->
-        %{reply | text: subscription_info_message(sub), for_dm: true}
+        Reply2.send_message(reply, subscription_info_message(sub), for_dm: true)
 
       nil ->
-        %{reply | text: no_subscription_message(), for_dm: true}
+        Reply2.send_message(reply, no_subscription_message(), for_dm: true)
     end
   end
 

@@ -2,9 +2,9 @@ defmodule AnyTalkerBot.TypingStatus do
   @moduledoc false
   use GenServer
 
-  alias AnyTalkerBot.Reply
+  alias AnyTalkerBot.Reply2
 
-  def with_typing(fun, %Reply{} = reply) do
+  def with_typing(fun, %Reply2{} = reply) do
     {:ok, pid} = start_link(reply.context.update.message.chat.id)
 
     result = fun.(reply)
