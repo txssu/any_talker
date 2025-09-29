@@ -3,10 +3,10 @@ defmodule AnyTalkerBot.NikitaCounterAnswerHandler do
   use AnyTalkerBot, :command
 
   alias AnyTalker.Counters.Helpers
-  alias AnyTalkerBot.Reply2
+  alias AnyTalkerBot.Reply
 
   @impl AnyTalkerBot.Command
-  def call(%Reply2{message: {:callback_query, callback_query}} = reply) do
+  def call(%Reply{message: {:callback_query, callback_query}} = reply) do
     if Helpers.nikita_id?(callback_query.from.id) do
       message = callback_query.message
 
@@ -19,6 +19,6 @@ defmodule AnyTalkerBot.NikitaCounterAnswerHandler do
       Helpers.answer_counter(message.message_id, :nikita, answer_type)
     end
 
-    Reply2.halt(reply)
+    Reply.halt(reply)
   end
 end

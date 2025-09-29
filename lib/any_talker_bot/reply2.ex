@@ -1,21 +1,21 @@
-defmodule AnyTalkerBot.Reply2 do
+defmodule AnyTalkerBot.Reply do
   @moduledoc """
   An extensible reply system for handling different types of bot actions.
 
   This module provides a general-purpose reply structure that can work with
-  different types of actions through the `Reply2.Action` behaviour. Unlike the
-  original `Reply` module, `Reply2` separates common concerns (context, halt state)
+  different types of actions through the `Reply.Action` behaviour. Unlike the
+  original `Reply` module, `Reply` separates common concerns (context, halt state)
   from action-specific behavior (sending messages, inline callbacks, etc.).
 
   ## Usage
 
-      reply = Reply2.new(context, message)
-      reply = Reply2.put_action(reply, Reply2.Message.new("Hello"))
-      Reply2.execute(reply)
+      reply = Reply.new(context, message)
+      reply = Reply.put_action(reply, Reply.Message.new("Hello"))
+      Reply.execute(reply)
 
   ## Fields
 
-  - `action` - The action to execute (implements `Reply2.Action` behaviour)
+  - `action` - The action to execute (implements `Reply.Action` behaviour)
   - `halt` - If true, execution is skipped
   - `message` - The original message that triggered this reply
   - `context` - The ExGram context
@@ -27,11 +27,11 @@ defmodule AnyTalkerBot.Reply2 do
             context: nil
 
   @doc """
-  Creates a new Reply2 with the given context and message.
+  Creates a new Reply with the given context and message.
 
   ## Example
 
-      Reply2.new(context, message)
+      Reply.new(context, message)
   """
   def new(%ExGram.Cnt{} = context, message) do
     %__MODULE__{context: context, message: message}
@@ -43,7 +43,7 @@ defmodule AnyTalkerBot.Reply2 do
   ## Example
 
       reply
-      |> Reply2.put_action(Reply2.Message.new("Hello"))
+      |> Reply.put_action(Reply.Message.new("Hello"))
   """
   def put_action(%__MODULE__{} = reply, action) do
     %{reply | action: action}
@@ -52,7 +52,7 @@ defmodule AnyTalkerBot.Reply2 do
   @doc """
   Creates and sets a message action with the given text and options.
 
-  This is a convenience function that creates a `Reply2.Message` and sets it as the action.
+  This is a convenience function that creates a `Reply.Message` and sets it as the action.
 
   ## Options
 
@@ -64,18 +64,18 @@ defmodule AnyTalkerBot.Reply2 do
   ## Examples
 
       reply
-      |> Reply2.send_message("Hello")
+      |> Reply.send_message("Hello")
 
       reply
-      |> Reply2.send_message("Hello", mode: :html, as_reply?: true)
+      |> Reply.send_message("Hello", mode: :html, as_reply?: true)
 
       reply
-      |> Reply2.send_message("Hello", for_dm: true, on_sent: fn msg -> IO.inspect(msg) end)
+      |> Reply.send_message("Hello", for_dm: true, on_sent: fn msg -> IO.inspect(msg) end)
   """
   def send_message(%__MODULE__{} = reply, text, opts \\ []) when is_binary(text) do
     message =
       text
-      |> AnyTalkerBot.Reply2.Message.new()
+      |> AnyTalkerBot.Reply.Message.new()
       |> struct(opts)
 
     put_action(reply, message)
@@ -87,7 +87,7 @@ defmodule AnyTalkerBot.Reply2 do
   ## Example
 
       reply
-      |> Reply2.halt()
+      |> Reply.halt()
   """
   def halt(%__MODULE__{} = reply) do
     %{reply | halt: true}
@@ -100,7 +100,7 @@ defmodule AnyTalkerBot.Reply2 do
 
   ## Example
 
-      Reply2.execute(reply)
+      Reply.execute(reply)
   """
   def execute(%__MODULE__{} = reply) do
     reply

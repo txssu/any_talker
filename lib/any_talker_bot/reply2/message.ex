@@ -1,6 +1,6 @@
-defmodule AnyTalkerBot.Reply2.Message do
+defmodule AnyTalkerBot.Reply.Message do
   @moduledoc """
-  A message action for Reply2 that sends text messages to Telegram.
+  A message action for Reply that sends text messages to Telegram.
 
   This module handles sending text messages with various options like parse mode,
   reply-to functionality, and DM forwarding.
@@ -15,16 +15,16 @@ defmodule AnyTalkerBot.Reply2.Message do
 
   ## Example
 
-      Reply2.Message.new("Hello, world!")
+      Reply.Message.new("Hello, world!")
       |> Map.put(:mode, :html)
       |> Map.put(:as_reply?, true)
   """
 
-  @behaviour AnyTalkerBot.Reply2.Action
+  @behaviour AnyTalkerBot.Reply.Action
 
   import AnyTalkerBot.MarkdownUtils
 
-  alias AnyTalkerBot.Reply2
+  alias AnyTalkerBot.Reply
 
   require Logger
 
@@ -39,22 +39,22 @@ defmodule AnyTalkerBot.Reply2.Message do
 
   ## Example
 
-      Reply2.Message.new("Hello")
+      Reply.Message.new("Hello")
   """
   def new(text) when is_binary(text) do
     %__MODULE__{text: text}
   end
 
-  @impl Reply2.Action
-  def execute(%Reply2{action: %__MODULE__{} = message} = reply) do
+  @impl Reply.Action
+  def execute(%Reply{action: %__MODULE__{} = message} = reply) do
     message
     |> check_for_dm(reply)
     |> do_send(reply)
   end
 
-  defp check_for_dm(%Reply2.Message{for_dm: false} = message, %Reply2{}), do: {:cont, message}
+  defp check_for_dm(%Reply.Message{for_dm: false} = message, %Reply{}), do: {:cont, message}
 
-  defp check_for_dm(%Reply2.Message{for_dm: true} = message, %Reply2{} = reply) do
+  defp check_for_dm(%Reply.Message{for_dm: true} = message, %Reply{} = reply) do
     if dm?(reply) do
       {:cont, message}
     else
@@ -62,16 +62,16 @@ defmodule AnyTalkerBot.Reply2.Message do
     end
   end
 
-  defp dm?(%Reply2{context: context}) do
+  defp dm?(%Reply{context: context}) do
     context.update.message.chat.type == "private"
   end
 
-  defp send_to_dm(%Reply2.Message{} = message, %Reply2{} = reply) do
+  defp send_to_dm(%Reply.Message{} = message, %Reply{} = reply) do
     user_id = reply.context.update.message.from.id
 
     case send_message(message, reply, user_id) do
       {:ok, _sent_message} ->
-        success_message = %Reply2.Message{
+        success_message = %Reply.Message{
           text: dm_success_message(),
           mode: :html
         }
@@ -79,7 +79,7 @@ defmodule AnyTalkerBot.Reply2.Message do
         {:cont, success_message}
 
       {:error, _reason} ->
-        error_message = %Reply2.Message{
+        error_message = %Reply.Message{
           text: dm_error_message(),
           mode: :html
         }
@@ -88,12 +88,12 @@ defmodule AnyTalkerBot.Reply2.Message do
     end
   end
 
-  defp do_send({:cont, %Reply2.Message{} = message}, %Reply2{} = reply) do
+  defp do_send({:cont, %Reply.Message{} = message}, %Reply{} = reply) do
     chat_id = reply.context.update.message.chat.id
     send_message(message, reply, chat_id)
   end
 
-  defp send_message(%Reply2.Message{} = message, %Reply2{} = reply, chat_id) do
+  defp send_message(%Reply.Message{} = message, %Reply{} = reply, chat_id) do
     case ExGram.send_message(chat_id, message.text, send_options(message, reply)) do
       {:ok, sent_message} ->
         AnyTalker.Events.save_new_message(sent_message)
@@ -106,13 +106,13 @@ defmodule AnyTalkerBot.Reply2.Message do
     end
   end
 
-  defp run_callback(%Reply2.Message{on_sent: nil}, _sent_message), do: :ok
+  defp run_callback(%Reply.Message{on_sent: nil}, _sent_message), do: :ok
 
-  defp run_callback(%Reply2.Message{on_sent: callback}, sent_message) when is_function(callback, 1) do
+  defp run_callback(%Reply.Message{on_sent: callback}, sent_message) when is_function(callback, 1) do
     callback.(sent_message)
   end
 
-  defp send_options(%Reply2.Message{} = message, %Reply2{} = reply) do
+  defp send_options(%Reply.Message{} = message, %Reply{} = reply) do
     []
     |> add_bot()
     |> maybe_add_markdown(message)
@@ -121,11 +121,11 @@ defmodule AnyTalkerBot.Reply2.Message do
 
   defp add_bot(options), do: [{:bot, AnyTalkerBot.bot()} | options]
 
-  defp maybe_add_markdown(options, %Reply2.Message{mode: nil}), do: options
-  defp maybe_add_markdown(options, %Reply2.Message{mode: :html}), do: [{:parse_mode, "HTML"} | options]
-  defp maybe_add_markdown(options, %Reply2.Message{mode: :markdown}), do: [{:parse_mode, "MarkdownV2"} | options]
+  defp maybe_add_markdown(options, %Reply.Message{mode: nil}), do: options
+  defp maybe_add_markdown(options, %Reply.Message{mode: :html}), do: [{:parse_mode, "HTML"} | options]
+  defp maybe_add_markdown(options, %Reply.Message{mode: :markdown}), do: [{:parse_mode, "MarkdownV2"} | options]
 
-  defp maybe_add_reply_to(options, %Reply2.Message{} = message, %Reply2{} = reply) do
+  defp maybe_add_reply_to(options, %Reply.Message{} = message, %Reply{} = reply) do
     if reply.context.update.message.chat.type != "private" or message.as_reply? do
       original_message = reply.context.update.message
 

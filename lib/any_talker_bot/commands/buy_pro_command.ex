@@ -6,7 +6,7 @@ defmodule AnyTalkerBot.BuyProCommand do
   alias AnyTalker.Accounts
   alias AnyTalker.Accounts.Subscription
   alias AnyTalker.Currency
-  alias AnyTalkerBot.Reply2
+  alias AnyTalkerBot.Reply
   alias ExGram.Model.LabeledPrice
 
   require Logger
@@ -16,12 +16,12 @@ defmodule AnyTalkerBot.BuyProCommand do
   @doc """
   Executes command by sending a payment invoice.
   """
-  def call(%Reply2{context: %{update: %{message: msg}}} = reply) do
+  def call(%Reply{context: %{update: %{message: msg}}} = reply) do
     user = reply.context.extra.user
 
     case Accounts.get_current_subscription(user) do
       %Subscription{} = sub ->
-        Reply2.send_message(reply, already_subscribed_message(sub), for_dm: true)
+        Reply.send_message(reply, already_subscribed_message(sub), for_dm: true)
 
       nil ->
         send_invoice_or_error(reply, msg.chat.id)
@@ -47,7 +47,7 @@ defmodule AnyTalkerBot.BuyProCommand do
         ExGram.answer_pre_checkout_query!(query.id, true, bot: AnyTalkerBot.bot())
     end
 
-    Reply2.halt(reply)
+    Reply.halt(reply)
   end
 
   def handle_pre_checkout(reply), do: reply
@@ -62,11 +62,11 @@ defmodule AnyTalkerBot.BuyProCommand do
 
     case Accounts.activate_pro_subscription(user) do
       {:ok, sub} ->
-        Reply2.send_message(reply, activation_success_message(sub), for_dm: true)
+        Reply.send_message(reply, activation_success_message(sub), for_dm: true)
 
       {:error, error} ->
         log_activation_error(user.id, error)
-        Reply2.send_message(reply, activation_error_message(), for_dm: true)
+        Reply.send_message(reply, activation_error_message(), for_dm: true)
     end
   end
 
@@ -87,11 +87,11 @@ defmodule AnyTalkerBot.BuyProCommand do
   defp send_invoice_or_error(reply, chat_id) do
     case send_invoice(chat_id) do
       {:ok, _msg} ->
-        Reply2.halt(reply)
+        Reply.halt(reply)
 
       {:error, error} ->
         Logger.error("Can't send invoice.", error_details: error)
-        Reply2.send_message(reply, "Что-то не работает, попробуй позже", for_dm: true)
+        Reply.send_message(reply, "Что-то не работает, попробуй позже", for_dm: true)
     end
   end
 

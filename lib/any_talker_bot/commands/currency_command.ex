@@ -2,7 +2,7 @@ defmodule AnyTalkerBot.CurrencyCommand do
   @moduledoc false
 
   alias AnyTalker.Currency.Client
-  alias AnyTalkerBot.Reply2
+  alias AnyTalkerBot.Reply
   alias ExGram.Model.InlineQueryResultArticle
   alias ExGram.Model.InputTextMessageContent
 
@@ -93,7 +93,7 @@ defmodule AnyTalkerBot.CurrencyCommand do
     }
 
     ExGram.answer_inline_query(query.id, [result], bot: AnyTalkerBot.Dispatcher.bot())
-    Reply2.halt(reply)
+    Reply.halt(reply)
   end
 
   defp send_inline_error(reply, query, error_message) do
@@ -108,7 +108,7 @@ defmodule AnyTalkerBot.CurrencyCommand do
     }
 
     ExGram.answer_inline_query(query.id, [result], bot: AnyTalkerBot.Dispatcher.bot())
-    Reply2.halt(reply)
+    Reply.halt(reply)
   end
 
   defp send_inline_help(reply, query) do
@@ -126,7 +126,7 @@ defmodule AnyTalkerBot.CurrencyCommand do
     }
 
     ExGram.answer_inline_query(query.id, [result], bot: AnyTalkerBot.Dispatcher.bot())
-    Reply2.halt(reply)
+    Reply.halt(reply)
   end
 
   defp format_amount(amount, currency_code) do
