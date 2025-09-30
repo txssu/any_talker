@@ -112,35 +112,6 @@ defmodule AnyTalkerBot.Reply do
   end
 
   @doc """
-  Creates and sets a callback query action with the given callback_query_id and options.
-
-  This is a convenience function that creates a `Reply.CallbackQuery` and sets it as the action.
-
-  ## Options
-
-  - `:text` - Text of the notification. If not specified, nothing will be shown to the user
-  - `:show_alert` - If `true`, an alert will be shown by the client instead of a notification
-  - `:url` - URL that will be opened by the user's client
-  - `:cache_time` - The maximum amount of time in seconds that the result may be cached client-side
-
-  ## Examples
-
-      reply
-      |> Reply.answer_callback_query(callback_query_id)
-
-      reply
-      |> Reply.answer_callback_query(callback_query_id, text: "Done!", show_alert: true)
-  """
-  def answer_callback_query(%__MODULE__{} = reply, callback_query_id, opts \\ []) when is_binary(callback_query_id) do
-    callback_query =
-      callback_query_id
-      |> AnyTalkerBot.Reply.CallbackQuery.new()
-      |> struct(opts)
-
-    put_action(reply, callback_query)
-  end
-
-  @doc """
   Marks the reply as halted, preventing execution.
 
   ## Example
