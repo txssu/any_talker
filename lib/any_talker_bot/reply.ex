@@ -82,6 +82,36 @@ defmodule AnyTalkerBot.Reply do
   end
 
   @doc """
+  Creates and sets an inline query action with the given query_id, results and options.
+
+  This is a convenience function that creates a `Reply.InlineQuery` and sets it as the action.
+
+  ## Options
+
+  - `:cache_time` - The maximum amount of time in seconds that the result may be cached on the server
+  - `:is_personal` - Pass `true` if results may be cached on the server side only for the user that sent the query
+  - `:next_offset` - Pass the offset that a client should send in the next query with the same text to receive more results
+  - `:button` - A button to be shown above inline query results
+
+  ## Examples
+
+      reply
+      |> Reply.answer_inline_query(query_id, [result])
+
+      reply
+      |> Reply.answer_inline_query(query_id, [result], cache_time: 300, is_personal: true)
+  """
+  def answer_inline_query(%__MODULE__{} = reply, query_id, results, opts \\ [])
+      when is_binary(query_id) and is_list(results) do
+    inline_query =
+      query_id
+      |> AnyTalkerBot.Reply.InlineQuery.new(results)
+      |> struct(opts)
+
+    put_action(reply, inline_query)
+  end
+
+  @doc """
   Marks the reply as halted, preventing execution.
 
   ## Example

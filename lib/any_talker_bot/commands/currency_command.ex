@@ -92,8 +92,7 @@ defmodule AnyTalkerBot.CurrencyCommand do
       }
     }
 
-    ExGram.answer_inline_query(query.id, [result], bot: AnyTalkerBot.Dispatcher.bot())
-    Reply.halt(reply)
+    Reply.answer_inline_query(reply, query.id, [result])
   end
 
   defp send_inline_error(reply, query, error_message) do
@@ -107,8 +106,7 @@ defmodule AnyTalkerBot.CurrencyCommand do
       }
     }
 
-    ExGram.answer_inline_query(query.id, [result], bot: AnyTalkerBot.Dispatcher.bot())
-    Reply.halt(reply)
+    Reply.answer_inline_query(reply, query.id, [result])
   end
 
   defp send_inline_help(reply, query) do
@@ -125,8 +123,7 @@ defmodule AnyTalkerBot.CurrencyCommand do
       }
     }
 
-    ExGram.answer_inline_query(query.id, [result], bot: AnyTalkerBot.Dispatcher.bot())
-    Reply.halt(reply)
+    Reply.answer_inline_query(reply, query.id, [result])
   end
 
   defp format_amount(amount, currency_code) do
