@@ -141,6 +141,59 @@ defmodule AnyTalkerBot.Reply do
   end
 
   @doc """
+  Creates and sets an invoice action with the given parameters and options.
+
+  This is a convenience function that creates a `Reply.Invoice` and sets it as the action.
+
+  ## Options
+
+  - `:for_dm` - Whether to send the invoice to the user's DM (default: `false`)
+  - `:provider_token` - Payment provider token (required for payments)
+  - `:max_tip_amount` - The maximum accepted amount for tips
+  - `:suggested_tip_amounts` - A list of suggested amounts of tips
+  - `:start_parameter` - Unique deep-linking parameter
+  - `:provider_data` - JSON-serialized data about the invoice
+  - `:photo_url` - URL of the product photo
+  - `:photo_size` - Photo size in bytes
+  - `:photo_width` - Photo width
+  - `:photo_height` - Photo height
+  - `:need_name` - Pass `true` if you require the user's full name
+  - `:need_phone_number` - Pass `true` if you require the user's phone number
+  - `:need_email` - Pass `true` if you require the user's email address
+  - `:need_shipping_address` - Pass `true` if you require the user's shipping address
+  - `:send_phone_number_to_provider` - Pass `true` if the user's phone number should be sent to provider
+  - `:send_email_to_provider` - Pass `true` if the user's email address should be sent to provider
+  - `:is_flexible` - Pass `true` if the final price depends on the shipping method
+  - `:disable_notification` - Sends the message silently
+  - `:protect_content` - Protects the contents of the sent message from forwarding and saving
+  - `:reply_parameters` - Description of the message to reply to
+  - `:reply_markup` - Inline keyboard
+
+  ## Examples
+
+      reply
+      |> Reply.send_invoice("Product", "Description", "payload", "USD", [price], provider_token: token)
+
+      reply
+      |> Reply.send_invoice("Product", "Description", "payload", "RUB", [price],
+        provider_token: token,
+        for_dm: true,
+        need_email: true,
+        photo_url: "https://example.com/photo.jpg"
+      )
+  """
+  def send_invoice(%__MODULE__{} = reply, title, description, payload, currency, prices, opts \\ [])
+      when is_binary(title) and is_binary(description) and is_binary(payload) and is_binary(currency) and
+             is_list(prices) do
+    invoice =
+      title
+      |> AnyTalkerBot.Reply.Invoice.new(description, payload, currency, prices)
+      |> struct(opts)
+
+    put_action(reply, invoice)
+  end
+
+  @doc """
   Marks the reply as halted, preventing execution.
 
   ## Example

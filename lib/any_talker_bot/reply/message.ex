@@ -22,9 +22,8 @@ defmodule AnyTalkerBot.Reply.Message do
 
   @behaviour AnyTalkerBot.Reply.Action
 
-  import AnyTalkerBot.MarkdownUtils
-
   alias AnyTalkerBot.Reply
+  alias AnyTalkerBot.Reply.Common
 
   require Logger
 
@@ -72,7 +71,7 @@ defmodule AnyTalkerBot.Reply.Message do
     case send_message(message, reply, user_id) do
       {:ok, _sent_message} ->
         success_message = %Reply.Message{
-          text: dm_success_message(),
+          text: Common.dm_success_message(),
           mode: :html
         }
 
@@ -80,7 +79,7 @@ defmodule AnyTalkerBot.Reply.Message do
 
       {:error, _reason} ->
         error_message = %Reply.Message{
-          text: dm_error_message(),
+          text: Common.dm_error_message(),
           mode: :html
         }
 
@@ -114,37 +113,8 @@ defmodule AnyTalkerBot.Reply.Message do
 
   defp send_options(%Reply.Message{} = message, %Reply{} = reply) do
     []
-    |> add_bot()
-    |> maybe_add_markdown(message)
-    |> maybe_add_reply_to(message, reply)
-  end
-
-  defp add_bot(options), do: [{:bot, AnyTalkerBot.bot()} | options]
-
-  defp maybe_add_markdown(options, %Reply.Message{mode: nil}), do: options
-  defp maybe_add_markdown(options, %Reply.Message{mode: :html}), do: [{:parse_mode, "HTML"} | options]
-  defp maybe_add_markdown(options, %Reply.Message{mode: :markdown}), do: [{:parse_mode, "MarkdownV2"} | options]
-
-  defp maybe_add_reply_to(options, %Reply.Message{} = message, %Reply{} = reply) do
-    if reply.context.update.message.chat.type != "private" or message.as_reply? do
-      original_message = reply.context.update.message
-
-      reply_to = %ExGram.Model.ReplyParameters{
-        message_id: original_message.message_id,
-        chat_id: original_message.chat.id
-      }
-
-      [{:reply_parameters, reply_to} | options]
-    else
-      options
-    end
-  end
-
-  defp dm_success_message do
-    "Ответ отправлен в личные сообщения."
-  end
-
-  defp dm_error_message do
-    ~i"Не удалось отправить сообщение в личные сообщения\. Пожалуйста, разблокируйте бота и начните с ним диалог командой /start\."
+    |> Common.add_bot()
+    |> Common.maybe_add_markdown(message.mode)
+    |> Common.maybe_add_reply_to(reply, message.as_reply?)
   end
 end
