@@ -49,16 +49,16 @@ defmodule AnyTalkerBot.BuyProCommand do
 
     case Accounts.get_current_subscription(user) do
       %Subscription{} = sub ->
-        ExGram.answer_pre_checkout_query!(query.id, false,
-          bot: AnyTalkerBot.bot(),
+        Reply.answer_pre_checkout_query(
+          reply,
+          query.id,
+          false,
           error_message: already_subscribed_message(sub)
         )
 
       nil ->
-        ExGram.answer_pre_checkout_query!(query.id, true, bot: AnyTalkerBot.bot())
+        Reply.answer_pre_checkout_query(reply, query.id, true)
     end
-
-    Reply.halt(reply)
   end
 
   def handle_pre_checkout(reply), do: reply

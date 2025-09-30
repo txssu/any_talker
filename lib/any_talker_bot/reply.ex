@@ -194,6 +194,33 @@ defmodule AnyTalkerBot.Reply do
   end
 
   @doc """
+  Creates and sets a pre-checkout query action with the given pre_checkout_query_id, ok status and options.
+
+  This is a convenience function that creates a `Reply.PreCheckoutQuery` and sets it as the action.
+
+  ## Options
+
+  - `:error_message` - Error message in human readable form (required if `ok` is `false`)
+
+  ## Examples
+
+      reply
+      |> Reply.answer_pre_checkout_query(pre_checkout_query_id, true)
+
+      reply
+      |> Reply.answer_pre_checkout_query(pre_checkout_query_id, false, error_message: "Already subscribed")
+  """
+  def answer_pre_checkout_query(%__MODULE__{} = reply, pre_checkout_query_id, ok, opts \\ [])
+      when is_binary(pre_checkout_query_id) and is_boolean(ok) do
+    pre_checkout_query =
+      pre_checkout_query_id
+      |> AnyTalkerBot.Reply.PreCheckoutQuery.new(ok)
+      |> struct(opts)
+
+    put_action(reply, pre_checkout_query)
+  end
+
+  @doc """
   Marks the reply as halted, preventing execution.
 
   ## Example
