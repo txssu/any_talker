@@ -34,7 +34,7 @@ config :any_talker, Oban,
   plugins: [
     {Oban.Plugins.Cron,
      crontab: [
-       {"* * * * *", AnyTalker.Counters.NikitaCounterJob}
+       {"30 18 * * *", AnyTalker.Counters.NikitaCounterJob}
      ]}
   ]
 

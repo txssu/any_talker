@@ -19,6 +19,6 @@ defmodule AnyTalkerBot.NikitaCounterAnswerHandler do
       Helpers.answer_counter(message.message_id, :nikita, answer_type)
     end
 
-    Reply.answer_callback_query(reply, callback_query.id)
+    Reply.halt(reply)
   end
 end
