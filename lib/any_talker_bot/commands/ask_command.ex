@@ -33,11 +33,11 @@ defmodule AnyTalkerBot.AskCommand do
          :ok <- validate_rate_limit(user_with_sub, config) do
       reply(reply, message, reply.context.bot_info.id)
     else
-      error -> error_reply(error, reply)
+      error -> error_reply(error, reply, user_with_sub)
     end
   end
 
-  defp error_reply({:error, :not_group}, %Reply{} = reply) do
+  defp error_reply({:error, :not_group}, %Reply{} = reply, _user_with_sub) do
     text = """
     Эта команда работает только в группах.
     Без PRO ты здесь никто.
@@ -51,7 +51,7 @@ defmodule AnyTalkerBot.AskCommand do
     Reply.send_message(reply, text, as_reply?: true)
   end
 
-  defp error_reply({:error, :not_enabled}, %Reply{} = reply) do
+  defp error_reply({:error, :not_enabled}, %Reply{} = reply, _user_with_sub) do
     text = """
     Здесь бот для тебя мёртв.
     У тебя нет доступа к его командам.
@@ -66,21 +66,30 @@ defmodule AnyTalkerBot.AskCommand do
     Reply.send_message(reply, text, as_reply?: true)
   end
 
-  defp error_reply({:error, :empty_text}, %Reply{} = reply) do
+  defp error_reply({:error, :empty_text}, %Reply{} = reply, _user_with_sub) do
     Reply.send_message(reply, "Не вижу вопроса!", as_reply?: true)
   end
 
-  defp error_reply({:error, :rate_limit, time_left_ms}, %Reply{} = reply) do
+  defp error_reply({:error, :rate_limit, time_left_ms}, %Reply{} = reply, user_with_sub) do
     text =
-      """
-      Ты выжал лимит.
-      Следующая попытка будет доступна через #{format_time(time_left_ms)}.
+      case user_with_sub.current_subscription do
+        nil ->
+          """
+          Ты выжал лимит.
+          Следующая попытка будет доступна через #{format_time(time_left_ms)}.
 
-      Не хочешь ждать?
-      Бери PRO-подписку и используй команды без ограничений.
+          Не хочешь ждать?
+          Бери PRO-подписку и используй команды без ограничений.
 
-      👉 /que_pro — решай быстро.
-      """
+          /que_pro — решай быстро.
+          """
+
+        _subscription ->
+          """
+          Ты выжал лимит.
+          Следующая попытка будет доступна через #{format_time(time_left_ms)}.
+          """
+      end
 
     Reply.send_message(reply, text, as_reply?: true)
   end
