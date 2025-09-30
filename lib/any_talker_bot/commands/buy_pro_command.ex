@@ -16,7 +16,7 @@ defmodule AnyTalkerBot.BuyProCommand do
   @doc """
   Executes command by sending a payment invoice.
   """
-  def call(%Reply{context: %{update: %{message: msg}}} = reply) do
+  def call(%Reply{} = reply) do
     user = reply.context.extra.user
 
     case Accounts.get_current_subscription(user) do
@@ -24,7 +24,18 @@ defmodule AnyTalkerBot.BuyProCommand do
         Reply.send_message(reply, already_subscribed_message(sub), for_dm: true)
 
       nil ->
-        send_invoice_or_error(reply, msg.chat.id)
+        Reply.send_invoice(
+          reply,
+          "Подписка PRO 🚀",
+          description(),
+          @pro_payload,
+          "RUB",
+          [
+            %LabeledPrice{label: "PRO доступ", amount: Currency.rub(100)}
+          ],
+          for_dm: true,
+          provider_token: AnyTalkerBot.Config.payment_provider_token()
+        )
     end
   end
 
@@ -84,17 +95,6 @@ defmodule AnyTalkerBot.BuyProCommand do
     """
   end
 
-  defp send_invoice_or_error(reply, chat_id) do
-    case send_invoice(chat_id) do
-      {:ok, _msg} ->
-        Reply.halt(reply)
-
-      {:error, error} ->
-        Logger.error("Can't send invoice.", error_details: error)
-        Reply.send_message(reply, "Что-то не работает, попробуй позже", for_dm: true)
-    end
-  end
-
   defp activation_success_message(%Subscription{expires_at: expires_at}) do
     expires_text = format_date(expires_at)
 
@@ -125,21 +125,6 @@ defmodule AnyTalkerBot.BuyProCommand do
     datetime
     |> DateTime.shift_zone!("Asia/Yekaterinburg")
     |> Calendar.strftime("%d.%m.%Y в %H:%M МСК")
-  end
-
-  defp send_invoice(chat_id) do
-    ExGram.send_invoice(
-      chat_id,
-      "Подписка PRO 🚀",
-      description(),
-      @pro_payload,
-      "RUB",
-      [
-        %LabeledPrice{label: "PRO доступ", amount: Currency.rub(100)}
-      ],
-      bot: AnyTalkerBot.bot(),
-      provider_token: AnyTalkerBot.Config.payment_provider_token()
-    )
   end
 
   defp description do
