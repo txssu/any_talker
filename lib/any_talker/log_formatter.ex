@@ -14,7 +14,7 @@ defmodule AnyTalker.LogFormatter do
   end
 
   defp add_metadata(result, [{key, value} | rest], level_msg) do
-    result = [result, "\n[metadata] ", to_string(key), "=", inspect(value)]
+    result = [result, "\n[metadata] ", to_string(key), "=", inspect(value, pretty: true)]
 
     add_metadata(result, rest, level_msg)
   end
