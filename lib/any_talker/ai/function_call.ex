@@ -2,16 +2,19 @@ defmodule AnyTalker.AI.FunctionCall do
   @moduledoc false
 
   alias AnyTalker.AI.Context
+  alias AnyTalker.AI.Message.FunctionToolCallOutput
   alias AnyTalker.AI.ToolsRegistry
   alias AnyTalker.Parser
 
-  defstruct module: nil, arguments: nil, call_id: nil
+  defstruct module: nil, arguments: nil, call_id: nil, name: nil, arguments_json: nil
 
   def parse(params) do
     parsers = %{
       module: &parse_module/1,
       arguments: &parse_arguments/1,
-      call_id: Parser.not_nil_parser(& &1["call_id"], "function_call.call_id not found")
+      call_id: Parser.not_nil_parser(& &1["call_id"], "function_call.call_id not found"),
+      name: Parser.not_nil_parser(& &1["name"], "function_call.name not found"),
+      arguments_json: Parser.not_nil_parser(& &1["arguments"], "function_call.arguments not found")
     }
 
     Parser.parse(%__MODULE__{}, params, parsers)
@@ -20,11 +23,7 @@ defmodule AnyTalker.AI.FunctionCall do
   def exec(%__MODULE__{module: module, arguments: params, call_id: call_id}, %Context{} = context) do
     call_result = module.exec(params, context)
 
-    %{
-      type: "function_call_output",
-      call_id: call_id,
-      output: Jason.encode!(call_result)
-    }
+    FunctionToolCallOutput.new(call_id, Jason.encode!(call_result))
   end
 
   defp parse_module(function_call) do
