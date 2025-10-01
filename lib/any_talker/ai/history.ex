@@ -3,18 +3,18 @@ defmodule AnyTalker.AI.History do
   alias AnyTalker.AI.History.Key
   alias AnyTalker.Cache
 
-  defstruct response_id: nil, added_messages_ids: []
+  defstruct messages: []
 
   def new do
     %__MODULE__{}
   end
 
-  def new(response_id, added_messages_ids) do
-    %__MODULE__{response_id: response_id, added_messages_ids: added_messages_ids}
+  def new(messages) do
+    %__MODULE__{messages: messages}
   end
 
-  def new(%__MODULE__{} = history, response_id, message_id) do
-    %{history | response_id: response_id, added_messages_ids: [message_id | history.added_messages_ids]}
+  def append(%__MODULE__{} = history, message) do
+    %{history | messages: [message | history.messages]}
   end
 
   @doc """
