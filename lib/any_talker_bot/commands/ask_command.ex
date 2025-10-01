@@ -10,6 +10,7 @@ defmodule AnyTalkerBot.AskCommand do
   alias AnyTalker.Settings
   alias AnyTalker.Settings.ChatConfig
   alias AnyTalkerBot.Attachments
+  alias AnyTalkerBot.HtmlUtils
   alias AnyTalkerBot.Reply
   alias ExGram.Model.Chat
   alias ExGram.Model.Message
@@ -131,7 +132,8 @@ defmodule AnyTalkerBot.AskCommand do
   end
 
   defp handle_ask_response({reply_text, reply_callback}, config) do
-    formatted_text = format_response_with_bot_name(reply_text, config)
+    escaped_text = HtmlUtils.escape_html_preserving_tags(reply_text)
+    formatted_text = format_response_with_bot_name(escaped_text, config)
     {formatted_text, &adjust_params(reply_callback, &1)}
   end
 
