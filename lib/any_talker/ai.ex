@@ -5,6 +5,7 @@ defmodule AnyTalker.AI do
   alias AnyTalker.AI.Context
   alias AnyTalker.AI.FunctionCall
   alias AnyTalker.AI.History
+  alias AnyTalker.AI.Instruction
   alias AnyTalker.AI.Message
   alias AnyTalker.AI.Message.FunctionToolCall
   alias AnyTalker.AI.Message.Input
@@ -26,18 +27,24 @@ defmodule AnyTalker.AI do
     with {:ok, final_message} <- Attachments.download_message_image(message),
          request_history = History.append(history, final_message),
          config = Settings.get_full_chat_config(message.chat_id),
+         system_message = create_system_message(config.ask_prompt),
          common = [
            model: config.ask_model,
-           instructions: instructions(config.ask_prompt),
            tools: ToolsRegistry.list_specs()
          ],
-         {:ok, response, result_history} <- request_response(request_history, common, context) do
+         {:ok, response, result_history} <-
+           request_response(request_history, system_message, common, context) do
       {response.output_text, make_callback(result_history, response)}
     else
       {:error, error} ->
         Logger.error("OpenAiClientError", error_details: error)
         nil
     end
+  end
+
+  defp create_system_message(prompt) do
+    instructions_text = Instruction.build(prompt)
+    Message.new("system", :system, instructions_text, DateTime.utc_now())
   end
 
   defp make_callback(%History{} = history, %Response{} = response) do
@@ -48,8 +55,17 @@ defmodule AnyTalker.AI do
     end
   end
 
-  defp request_response(%History{} = history, common, %Context{} = context) do
-    body = Keyword.put(common, :input, Message.format_list(history.messages))
+  # Prepares messages for API request by formatting history and prepending system message.
+  # System message is added only for the request and is not saved in history.
+  defp prepare_messages(%History{} = history, system_message) do
+    formatted_history = Message.format_list(history.messages)
+    formatted_system = Input.format_message(system_message)
+
+    [formatted_system | formatted_history]
+  end
+
+  defp request_response(%History{} = history, system_message, common, %Context{} = context) do
+    body = Keyword.put(common, :input, prepare_messages(history, system_message))
 
     with {:ok, response} <- OpenAIClient.response(body) do
       hit_metrics(response)
@@ -60,14 +76,15 @@ defmodule AnyTalker.AI do
             FunctionToolCall.new(
               function_call.call_id,
               function_call.name,
-              function_call.arguments_json
+              function_call.arguments_json,
+              function_call.id
             )
 
           history_with_call = History.append(history, tool_call_message)
           call_result = FunctionCall.exec(function_call, context)
           history_with_result = History.append(history_with_call, call_result)
 
-          request_response(history_with_result, common, context)
+          request_response(history_with_result, system_message, common, context)
 
         %Response{} = resp ->
           {:ok, resp, history}
@@ -85,36 +102,5 @@ defmodule AnyTalker.AI do
     )
 
     :ok
-  end
-
-  defp instructions(prompt) do
-    base_prompt = prompt || AnyTalker.GlobalConfig.get(:ask_prompt)
-
-    json_instructions = """
-
-    # Формат сообщений
-
-    Сообщения пользователей приходят в JSON формате со следующими полями:
-    - `text`: основной текст сообщения
-    - `username`: имя отправителя (только для пользователей)
-    - `sent_at`: точное время отправки сообщения
-    - `quote`: цитируемый текст из сообщения, на которое отвечает пользователь (если есть)
-
-    ВАЖНО: Поле `sent_at` показывает реальное время отправки каждого сообщения. Время последнего сообщения в диалоге - это ТЕКУЩЕЕ ВРЕМЯ СЕЙЧАС.
-
-    # Формат ответа
-
-    Не используй markdown в ответе. Не используй JSON в ответе. Только обычный текст.
-    Доступное форматироване:
-    - <b>bold</b>
-    - <i>italic</i>
-    - <u>underline</u>
-    - <a href="http://www.example.com/">inline URL</a>
-    - <code>inline fixed-width code</code>
-    - <pre>pre-formatted fixed-width code block</pre>
-    - <pre><code class="language-python">pre-formatted fixed-width code block written in the Python programming language</code></pre>
-    """
-
-    base_prompt <> json_instructions
   end
 end

@@ -34,6 +34,12 @@ defmodule AnyTalker.Parser do
     end
   end
 
+  def optional_parser(accesser) do
+    fn data ->
+      {:ok, accesser.(data)}
+    end
+  end
+
   def not_nil(nil, msg), do: {:error, msg}
   def not_nil(value, _msg), do: {:ok, value}
 end
