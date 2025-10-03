@@ -79,6 +79,10 @@ defmodule AnyTalker.AI.Message.Input do
     }
   end
 
+  defp build_content(%__MODULE__{role: :system, text: text}) do
+    text
+  end
+
   defp build_content(%__MODULE__{image_url: nil} = message) do
     build_json_content(message)
   end

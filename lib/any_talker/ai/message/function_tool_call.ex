@@ -12,6 +12,7 @@ defmodule AnyTalker.AI.Message.FunctionToolCall do
   | call_id | String | The ID of the tool call |
   | name | String | The name of the function to call |
   | arguments | String | The arguments to call the function with, as JSON |
+  | id | String | Optional ID field |
 
   ## Examples
 
@@ -24,7 +25,8 @@ defmodule AnyTalker.AI.Message.FunctionToolCall do
 
   defstruct call_id: nil,
             name: nil,
-            arguments: nil
+            arguments: nil,
+            id: nil
 
   @doc """
   Creates a new FunctionToolCall message.
@@ -33,21 +35,34 @@ defmodule AnyTalker.AI.Message.FunctionToolCall do
 
       FunctionToolCall.new("call_123", "get_weather", "{\"location\": \"London\"}")
   """
-  def new(call_id, name, arguments) when is_binary(call_id) and is_binary(name) and is_binary(arguments) do
+  def new(call_id, name, arguments, id \\ nil)
+
+  def new(call_id, name, arguments, id) when is_binary(call_id) and is_binary(name) and is_binary(arguments) do
     %__MODULE__{
       call_id: call_id,
       name: name,
-      arguments: arguments
+      arguments: arguments,
+      id: id
     }
   end
 
   @impl AnyTalker.AI.Message.Behaviour
-  def format_message(%__MODULE__{} = message) do
+  def format_message(%__MODULE__{id: nil} = message) do
     %{
       call_id: message.call_id,
       type: "function_call",
       name: message.name,
       arguments: message.arguments
+    }
+  end
+
+  def format_message(%__MODULE__{} = message) do
+    %{
+      call_id: message.call_id,
+      type: "function_call",
+      name: message.name,
+      arguments: message.arguments,
+      id: message.id
     }
   end
 end

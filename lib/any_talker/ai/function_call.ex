@@ -6,7 +6,7 @@ defmodule AnyTalker.AI.FunctionCall do
   alias AnyTalker.AI.ToolsRegistry
   alias AnyTalker.Parser
 
-  defstruct module: nil, arguments: nil, call_id: nil, name: nil, arguments_json: nil
+  defstruct module: nil, arguments: nil, call_id: nil, name: nil, arguments_json: nil, id: nil
 
   def parse(params) do
     parsers = %{
@@ -14,7 +14,8 @@ defmodule AnyTalker.AI.FunctionCall do
       arguments: &parse_arguments/1,
       call_id: Parser.not_nil_parser(& &1["call_id"], "function_call.call_id not found"),
       name: Parser.not_nil_parser(& &1["name"], "function_call.name not found"),
-      arguments_json: Parser.not_nil_parser(& &1["arguments"], "function_call.arguments not found")
+      arguments_json: Parser.not_nil_parser(& &1["arguments"], "function_call.arguments not found"),
+      id: Parser.optional_parser(& &1["id"])
     }
 
     Parser.parse(%__MODULE__{}, params, parsers)

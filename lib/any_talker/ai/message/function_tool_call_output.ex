@@ -11,6 +11,7 @@ defmodule AnyTalker.AI.Message.FunctionToolCallOutput do
   |------------|------|-------------|
   | call_id | String | The ID of the tool call this message is responding to |
   | output | String | The output of the tool, as text or JSON |
+  | id | String | Optional ID field |
 
   ## Examples
 
@@ -22,7 +23,8 @@ defmodule AnyTalker.AI.Message.FunctionToolCallOutput do
   @behaviour AnyTalker.AI.Message.Behaviour
 
   defstruct call_id: nil,
-            output: nil
+            output: nil,
+            id: nil
 
   @doc """
   Creates a new FunctionToolCallOutput message.
@@ -34,7 +36,8 @@ defmodule AnyTalker.AI.Message.FunctionToolCallOutput do
   def new(call_id, output) when is_binary(call_id) and is_binary(output) do
     %__MODULE__{
       call_id: call_id,
-      output: output
+      output: output,
+      id: Ecto.UUID.generate()
     }
   end
 
@@ -43,7 +46,8 @@ defmodule AnyTalker.AI.Message.FunctionToolCallOutput do
     %{
       type: "function_call_output",
       call_id: message.call_id,
-      output: message.output
+      output: message.output,
+      id: message.id
     }
   end
 end
