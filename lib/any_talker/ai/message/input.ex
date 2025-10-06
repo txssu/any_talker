@@ -90,7 +90,7 @@ defmodule AnyTalker.AI.Message.Input do
   defp build_content(%__MODULE__{image_url: image_url} = message) do
     [
       %{type: "input_text", text: build_json_content(message)},
-      %{type: "input_image", image_url: image_url}
+      %{type: "input_image", image_url: image_url, detail: "auto"}
     ]
   end
 
