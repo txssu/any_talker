@@ -12,9 +12,9 @@ defmodule AnyTalker.AI.MessageTest do
       ]
 
       expected = [
-        %{content: ~s({"text":"1","sent_at":"2024-01-01T17:00:00+05:00"}), role: :system},
-        %{content: ~s({"text":"2","sent_at":"2024-01-01T17:00:00+05:00"}), role: :system},
-        %{content: ~s({"text":"3","sent_at":"2024-01-01T17:00:00+05:00"}), role: :system}
+        %{content: ~s({"text":"1","sent_at":"2024-01-01T17:00:00+05:00"}), role: :assistant},
+        %{content: ~s({"text":"2","sent_at":"2024-01-01T17:00:00+05:00"}), role: :assistant},
+        %{content: ~s({"text":"3","sent_at":"2024-01-01T17:00:00+05:00"}), role: :assistant}
       ]
 
       assert expected == Message.format_list(messages)
@@ -234,7 +234,7 @@ defmodule AnyTalker.AI.MessageTest do
 
   defp message(text, options) do
     id = Keyword.get_lazy(options, :id, &System.unique_integer/0)
-    role = Keyword.get(options, :role, :system)
+    role = Keyword.get(options, :role, :assistant)
     sent_at = Keyword.get(options, :sent_at, ~U[2024-01-01 12:00:00Z])
 
     Message.new(id, role, text, sent_at, options)

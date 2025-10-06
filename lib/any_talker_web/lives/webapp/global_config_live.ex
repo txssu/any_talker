@@ -18,7 +18,7 @@ defmodule AnyTalkerWeb.WebApp.GlobalConfigLive do
       <:header>Настройки</:header>
       <.form for={@form} phx-change="validate" phx-submit="save">
         <div class="space-y-3">
-          <.tg_input label="Модель /ask" field={@form[:ask_model]} />
+          <.tg_input label="Модели /ask" field={@form[:ask_model]} />
           <.tg_input type="number" label="Лимит запросов /ask" field={@form[:ask_rate_limit]} />
           <.tg_input type="number" label="Период лимита /ask (мс)" field={@form[:ask_rate_limit_scale_ms]} />
           <.tg_input type="number" label="Лимит запросов /ask PRO" field={@form[:ask_pro_rate_limit]} />

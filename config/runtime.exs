@@ -21,7 +21,7 @@ if System.get_env("PHX_SERVER") do
   config :any_talker, AnyTalkerWeb.Endpoint, server: true
 end
 
-config :any_talker, AnyTalker.AI.OpenAIClient,
+config :any_talker, AnyTalker.AI.OpenRouterClient,
   api_url: System.get_env("OPENAI_URL", "https://api.openai.com/"),
   api_key: System.get_env("OPENAI_KEY"),
   proxy_uri: System.get_env("OPENAI_PROXY_URL")
