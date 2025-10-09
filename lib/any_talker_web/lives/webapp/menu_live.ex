@@ -39,6 +39,14 @@ defmodule AnyTalkerWeb.WebApp.MenuLive do
             <span class="text-[15px] py-2.5">Пользователи</span>
           </.link>
         </li>
+        <li>
+          <.link
+            navigate={~p"/webapp/all_reminders"}
+            class="border-tg-section-separator hover-effect h-[42px] flex items-center rounded-lg border-b-2 pl-5 last:border-b-0"
+          >
+            <span class="text-[15px] py-2.5">Все напоминания</span>
+          </.link>
+        </li>
       </ul>
       <p class="text-tg-hint mt-2 text-center text-xs">Версия {BuildInfo.git_short_hash()}</p>
     </.section>
@@ -52,6 +60,14 @@ defmodule AnyTalkerWeb.WebApp.MenuLive do
             class="border-tg-section-separator hover-effect h-[42px] flex items-center rounded-lg border-b-2 pl-5 last:border-b-0"
           >
             <span class="text-[15px] py-2.5">Настройки</span>
+          </.link>
+        </li>
+        <li>
+          <.link
+            navigate={~p"/webapp/reminders"}
+            class="border-tg-section-separator hover-effect h-[42px] flex items-center rounded-lg border-b-2 pl-5 last:border-b-0"
+          >
+            <span class="text-[15px] py-2.5">Напоминания</span>
           </.link>
         </li>
       </ul>

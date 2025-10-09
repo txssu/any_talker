@@ -66,6 +66,7 @@ defmodule AnyTalkerWeb.Router do
       on_mount: [{AnyTalkerWeb.AuthPlug, :ensure_authenticated}] do
       live "/", MenuLive
       live "/profile", ProfileLive
+      live "/reminders", RemindersLive
       live "/c/:chat_id", ChatLive
     end
 
@@ -76,6 +77,7 @@ defmodule AnyTalkerWeb.Router do
       ] do
       live "/global", GlobalConfigLive
       live "/users", UsersLive
+      live "/all_reminders", AllRemindersLive
       live "/profile/:id", ProfileLive
     end
   end
