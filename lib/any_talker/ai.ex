@@ -71,20 +71,23 @@ defmodule AnyTalker.AI do
       hit_metrics(response)
 
       case response do
-        %Response{function_call: %FunctionCall{} = function_call} ->
-          tool_call_message =
-            FunctionToolCall.new(
-              function_call.call_id,
-              function_call.name,
-              function_call.arguments_json,
-              function_call.id
-            )
+        %Response{function_calls: [_first_call | _rest_calls] = function_calls} ->
+          history_with_calls =
+            Enum.reduce(function_calls, history, fn function_call, acc_history ->
+              tool_call_message =
+                FunctionToolCall.new(
+                  function_call.call_id,
+                  function_call.name,
+                  function_call.arguments_json,
+                  function_call.id
+                )
 
-          history_with_call = History.append(history, tool_call_message)
-          call_result = FunctionCall.exec(function_call, context)
-          history_with_result = History.append(history_with_call, call_result)
+              history_with_call = History.append(acc_history, tool_call_message)
+              call_result = FunctionCall.exec(function_call, context)
+              History.append(history_with_call, call_result)
+            end)
 
-          request_response(history_with_result, system_message, common, context)
+          request_response(history_with_calls, system_message, common, context)
 
         %Response{} = resp ->
           {:ok, resp, history}

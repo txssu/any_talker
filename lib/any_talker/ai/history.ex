@@ -13,6 +13,10 @@ defmodule AnyTalker.AI.History do
     %__MODULE__{messages: messages}
   end
 
+  def append(%__MODULE__{} = history, messages) when is_list(messages) do
+    Enum.reduce(messages, history, &append(&2, &1))
+  end
+
   def append(%__MODULE__{} = history, message) do
     %{history | messages: [message | history.messages]}
   end

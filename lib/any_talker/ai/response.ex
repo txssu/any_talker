@@ -9,7 +9,7 @@ defmodule AnyTalker.AI.Response do
             output_text: nil,
             total_tokens: nil,
             model: nil,
-            function_call: nil
+            function_calls: []
 
   def parse(params) do
     parsers = %{
@@ -17,7 +17,7 @@ defmodule AnyTalker.AI.Response do
       total_tokens: Parser.not_nil_parser(& &1["usage"]["total_tokens"], "response.usage.total_tokens not found"),
       model: Parser.not_nil_parser(& &1["model"], "response.model not found"),
       output_text: &cast_output_text/1,
-      function_call: &cast_function_call/1
+      function_calls: &cast_function_calls/1
     }
 
     Parser.parse(%__MODULE__{}, params, parsers)
@@ -38,11 +38,19 @@ defmodule AnyTalker.AI.Response do
     {:ok, text}
   end
 
-  defp cast_function_call(api_response) do
-    case from_output(api_response, "function_call") do
-      [function_call] -> AnyTalker.AI.FunctionCall.parse(function_call)
-      _other -> {:ok, nil}
-    end
+  defp cast_function_calls(api_response) do
+    function_calls =
+      api_response
+      |> from_output("function_call")
+      |> Enum.map(fn fc ->
+        case AnyTalker.AI.FunctionCall.parse(fc) do
+          {:ok, parsed} -> parsed
+          {:error, _parse_error} -> nil
+        end
+      end)
+      |> Enum.reject(&is_nil/1)
+
+    {:ok, function_calls}
   end
 
   defp from_output(data, type, next_path \\ nil) do
