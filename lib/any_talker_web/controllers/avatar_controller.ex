@@ -1,6 +1,8 @@
 defmodule AnyTalkerWeb.AvatarController do
   use AnyTalkerWeb, :controller
 
+  alias AnyTalker.Accounts
+  alias AnyTalker.AvatarGenerator
   alias AnyTalker.Settings
 
   def show(conn, %{"chat_id" => chat_id}) do
@@ -22,6 +24,27 @@ defmodule AnyTalkerWeb.AvatarController do
 
       _invalid_parse_result ->
         send_resp(conn, 400, "Invalid chat ID")
+    end
+  end
+
+  def user(conn, %{"user_id" => user_id}) do
+    case Integer.parse(user_id) do
+      {id, ""} ->
+        case Accounts.get_user(id) do
+          nil ->
+            send_resp(conn, 404, "User not found")
+
+          user ->
+            svg = AvatarGenerator.generate(user.first_name, user.last_name, user.id)
+
+            conn
+            |> put_resp_content_type("image/svg+xml")
+            |> put_resp_header("cache-control", "public, max-age=3600")
+            |> send_resp(200, svg)
+        end
+
+      _invalid_parse_result ->
+        send_resp(conn, 400, "Invalid user ID")
     end
   end
 end

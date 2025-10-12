@@ -1,6 +1,7 @@
 defmodule AnyTalkerWeb.Router do
   use AnyTalkerWeb, :router
 
+  import AnyTalkerWeb.AdminPlug
   import AnyTalkerWeb.AuthPlug
   import AnyTalkerWeb.ChatMemberPlug
 
@@ -51,6 +52,12 @@ defmodule AnyTalkerWeb.Router do
     pipe_through [:browser, :require_authenticated_user, :require_chat_member]
 
     get "/avatar/:chat_id", AvatarController, :show
+  end
+
+  scope "/", AnyTalkerWeb do
+    pipe_through [:browser, :require_authenticated_user, :require_admin_user]
+
+    get "/user_avatar/:user_id", AvatarController, :user
   end
 
   scope "/", AnyTalkerWeb do

@@ -142,7 +142,7 @@ defmodule AnyTalkerWeb.TelegramComponents do
             class="border-tg-section-separator hover-effect flex items-center gap-3 rounded-lg border-b-2 px-3 py-2 last:border-b-0"
           >
             <img
-              src={user.photo_url}
+              src={user.photo_url || ~p"/user_avatar/#{user.id}"}
               class="size-10 flex-shrink-0 rounded-full"
               alt="User photo"
             />

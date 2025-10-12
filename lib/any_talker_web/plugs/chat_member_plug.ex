@@ -7,8 +7,8 @@ defmodule AnyTalkerWeb.ChatMemberPlug do
   def require_chat_member(conn, _opts) do
     with chat_id when is_binary(chat_id) <- conn.path_params["chat_id"],
          {id, ""} <- Integer.parse(chat_id),
-         %{id: user_id} <- conn.assigns[:current_user],
-         true <- Accounts.chat_member?(user_id, id) do
+         %{id: user_id} = user <- conn.assigns[:current_user],
+         true <- Accounts.chat_member?(user_id, id) or Accounts.owner?(user) do
       conn
     else
       _error ->
