@@ -139,9 +139,24 @@ defmodule AnyTalkerWeb.TelegramComponents do
         <li :for={user <- @users}>
           <.link
             navigate={~p"/webapp/profile/#{user.id}"}
-            class="border-tg-section-separator hover-effect h-[42px] flex items-center rounded-lg border-b-2 pl-5 last:border-b-0"
+            class="border-tg-section-separator hover-effect flex items-center gap-3 rounded-lg border-b-2 px-3 py-2 last:border-b-0"
           >
-            <span class="text-[15px] py-2.5">{user.username || user.id}</span>
+            <img
+              src={user.photo_url}
+              class="size-10 flex-shrink-0 rounded-full"
+              alt="User photo"
+            />
+            <div class="flex min-w-0 flex-1 flex-col">
+              <span class="text-[15px] truncate font-medium">
+                {user.first_name} {user.last_name}
+              </span>
+              <span :if={user.custom_name} class="text-[13px] text-tg-hint truncate">
+                {user.custom_name}
+              </span>
+              <span :if={user.username} class="text-[13px] text-tg-hint truncate">
+                @{user.username}
+              </span>
+            </div>
           </.link>
         </li>
       </ul>
