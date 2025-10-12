@@ -4,8 +4,8 @@ defmodule AnyTalker.AI.CreateTaskAtTool do
 
   alias AnyTalker.AI.Context
   alias AnyTalker.AI.Function
-  alias AnyTalker.AI.SendReminderJob
   alias AnyTalker.AI.Tool
+  alias AnyTalker.Reminders
 
   @impl Tool
   def spec do
@@ -47,16 +47,18 @@ defmodule AnyTalker.AI.CreateTaskAtTool do
     with {:ok, reminder_at} <- parse_datetime(params["reminder_at"]),
          delay_seconds = DateTime.diff(reminder_at, DateTime.utc_now(), :second),
          :ok <- validate_minimum_delay(delay_seconds * 1000) do
-      %{
-        "message" => params["message"],
-        "chat_id" => cid,
-        "user_id" => uid,
-        "reply_to_id" => mid
+      attrs = %{
+        message: params["message"],
+        chat_id: cid,
+        user_id: uid,
+        reply_to_id: mid,
+        scheduled_at: reminder_at
       }
-      |> SendReminderJob.new(scheduled_at: reminder_at)
-      |> Oban.insert()
 
-      "ok"
+      case Reminders.create_reminder(attrs) do
+        {:ok, _reminder} -> "ok"
+        {:error, _changeset} -> %{"error" => "Failed to create reminder"}
+      end
     else
       {:error, reason} -> %{"error" => "Invalid reminder_at format: #{reason}"}
     end

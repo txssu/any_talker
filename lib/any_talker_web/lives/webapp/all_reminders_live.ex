@@ -5,6 +5,7 @@ defmodule AnyTalkerWeb.WebApp.AllRemindersLive do
   import AnyTalkerWeb.ReminderCard
   import AnyTalkerWeb.TelegramComponents
 
+  alias AnyTalker.Accounts
   alias AnyTalker.Reminders
 
   @impl Phoenix.LiveView
@@ -24,8 +25,8 @@ defmodule AnyTalkerWeb.WebApp.AllRemindersLive do
         :for={reminder <- @reminders}
         message={reminder.message}
         scheduled_at={reminder.scheduled_at}
-        chat_title={reminder.chat_title}
-        user_name={reminder.user_name}
+        chat_title={(reminder.chat_config && reminder.chat_config.title) || "Неизвестный чат"}
+        user_name={Accounts.display_name(reminder.user) || "Неизвестный"}
       />
     </div>
     """
@@ -33,7 +34,7 @@ defmodule AnyTalkerWeb.WebApp.AllRemindersLive do
 
   @impl Phoenix.LiveView
   def mount(_params, _session, socket) do
-    reminders = Reminders.list_all_reminders()
+    reminders = Reminders.list_reminders()
     {:ok, assign(socket, reminders: reminders)}
   end
 

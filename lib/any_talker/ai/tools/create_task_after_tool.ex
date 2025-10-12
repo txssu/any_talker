@@ -4,8 +4,8 @@ defmodule AnyTalker.AI.CreateTaskAfterTool do
 
   alias AnyTalker.AI.Context
   alias AnyTalker.AI.Function
-  alias AnyTalker.AI.SendReminderJob
   alias AnyTalker.AI.Tool
+  alias AnyTalker.Reminders
 
   @impl Tool
   def spec do
@@ -59,16 +59,18 @@ defmodule AnyTalker.AI.CreateTaskAfterTool do
       :ok ->
         scheduled_at = DateTime.add(DateTime.utc_now(), total_minutes * 60, :second)
 
-        %{
-          "message" => params["message"],
-          "chat_id" => cid,
-          "user_id" => uid,
-          "reply_to_id" => mid
+        attrs = %{
+          message: params["message"],
+          chat_id: cid,
+          user_id: uid,
+          reply_to_id: mid,
+          scheduled_at: scheduled_at
         }
-        |> SendReminderJob.new(scheduled_at: scheduled_at)
-        |> Oban.insert()
 
-        "ok"
+        case Reminders.create_reminder(attrs) do
+          {:ok, _reminder} -> "ok"
+          {:error, _changeset} -> %{"error" => "Failed to create reminder"}
+        end
 
       {:error, reason} ->
         %{"error" => reason}

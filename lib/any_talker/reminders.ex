@@ -4,131 +4,91 @@ defmodule AnyTalker.Reminders do
   """
   import Ecto.Query
 
-  alias AnyTalker.Accounts.User
+  alias AnyTalker.AI.SendReminderJob
+  alias AnyTalker.Reminders.Reminder
   alias AnyTalker.Repo
-  alias AnyTalker.Settings.ChatConfig
+  alias Ecto.Multi
+
+  @doc """
+  Gets a single reminder.
+
+  Raises `Ecto.NoResultsError` if the Reminder does not exist.
+
+  ## Examples
+
+      iex> get_reminder!(123)
+      %Reminder{}
+
+      iex> get_reminder!(456)
+      ** (Ecto.NoResultsError)
+  """
+  def get_reminder!(id), do: Repo.get!(Reminder, id)
+
+  @doc """
+  Creates a reminder and schedules an Oban job in a transaction.
+
+  ## Examples
+
+      iex> create_reminder(%{message: "Test", chat_id: 123, user_id: 456, scheduled_at: ~U[2025-01-01 12:00:00.000000Z]})
+      {:ok, %Reminder{}}
+
+      iex> create_reminder(%{message: nil})
+      {:error, %Ecto.Changeset{}}
+  """
+  def create_reminder(attrs) do
+    Multi.new()
+    |> Multi.insert(:reminder, Reminder.changeset(%Reminder{}, attrs))
+    |> Multi.run(:job, fn _repo, %{reminder: reminder} ->
+      %{"reminder_id" => reminder.id}
+      |> SendReminderJob.new(scheduled_at: reminder.scheduled_at)
+      |> Oban.insert()
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{reminder: reminder}} -> {:ok, reminder}
+      {:error, :reminder, changeset, _changes} -> {:error, changeset}
+      {:error, :job, reason, _changes} -> {:error, reason}
+    end
+  end
 
   @doc """
   Lists all scheduled reminders for a user.
 
-  Returns a list of reminders with their details.
+  Returns a list of Reminder structs with preloaded associations.
 
   ## Examples
 
       iex> list_user_reminders(123)
-      [
-        %{
-          id: 1,
-          message: "позвонить маме",
-          scheduled_at: ~U[2025-10-10 15:00:00Z],
-          chat_id: 456,
-          chat_title: "My Chat"
-        }
-      ]
+      [%Reminder{id: 1, message: "позвонить маме", ...}]
   """
   def list_user_reminders(user_id) do
     query =
-      from j in "oban_jobs",
-        where: j.worker == "AnyTalker.AI.SendReminderJob",
-        where: j.state in ["scheduled", "available", "retryable"],
-        where: fragment("(?->>'user_id')::bigint = ?", j.args, ^user_id),
-        select: %{
-          id: j.id,
-          message: fragment("?->>'message'", j.args),
-          scheduled_at: j.scheduled_at,
-          chat_id: fragment("(?->>'chat_id')::bigint", j.args)
-        },
-        order_by: [asc: j.scheduled_at]
+      from r in Reminder,
+        where: r.user_id == ^user_id,
+        where: r.scheduled_at > ^DateTime.utc_now(),
+        order_by: [asc: r.scheduled_at],
+        preload: [:chat_config]
 
-    reminders = Repo.all(query)
-
-    chat_ids =
-      reminders
-      |> Enum.map(& &1.chat_id)
-      |> Enum.uniq()
-
-    chat_titles =
-      from(c in ChatConfig,
-        where: c.id in ^chat_ids,
-        select: {c.id, c.title}
-      )
-      |> Repo.all()
-      |> Map.new()
-
-    Enum.map(reminders, fn reminder ->
-      Map.put(reminder, :chat_title, Map.get(chat_titles, reminder.chat_id, "Неизвестный чат"))
-    end)
+    Repo.all(query)
   end
 
   @doc """
   Lists all scheduled reminders in the system (admin only).
 
-  Returns a list of reminders with their details including user information.
+  Returns a list of Reminder structs with preloaded associations.
 
   ## Examples
 
-      iex> list_all_reminders()
-      [
-        %{
-          id: 1,
-          message: "позвонить маме",
-          scheduled_at: ~U[2025-10-10 15:00:00Z],
-          chat_id: 456,
-          chat_title: "My Chat",
-          user_id: 123,
-          user_name: "John Doe"
-        }
-      ]
+      iex> list_reminders()
+      [%Reminder{id: 1, message: "позвонить маме", ...}]
   """
-  def list_all_reminders do
+  def list_reminders do
     query =
-      from j in "oban_jobs",
-        where: j.worker == "AnyTalker.AI.SendReminderJob",
-        where: j.state in ["scheduled", "available", "retryable"],
-        select: %{
-          id: j.id,
-          message: fragment("?->>'message'", j.args),
-          scheduled_at: j.scheduled_at,
-          chat_id: fragment("(?->>'chat_id')::bigint", j.args),
-          user_id: fragment("(?->>'user_id')::bigint", j.args)
-        },
-        order_by: [asc: j.scheduled_at]
+      from r in Reminder,
+        where: r.scheduled_at > ^DateTime.utc_now(),
+        order_by: [asc: r.scheduled_at],
+        preload: [:user, :chat_config]
 
-    reminders = Repo.all(query)
-
-    chat_ids =
-      reminders
-      |> Enum.map(& &1.chat_id)
-      |> Enum.uniq()
-
-    user_ids =
-      reminders
-      |> Enum.map(& &1.user_id)
-      |> Enum.uniq()
-
-    chat_titles =
-      from(c in ChatConfig,
-        where: c.id in ^chat_ids,
-        select: {c.id, c.title}
-      )
-      |> Repo.all()
-      |> Map.new()
-
-    users =
-      from(u in User,
-        where: u.id in ^user_ids,
-        select: {u.id, u}
-      )
-      |> Repo.all()
-      |> Map.new()
-
-    Enum.map(reminders, fn reminder ->
-      user = Map.get(users, reminder.user_id)
-      user_name = if user, do: user.custom_name || user.first_name, else: "Неизвестный"
-
-      reminder
-      |> Map.put(:chat_title, Map.get(chat_titles, reminder.chat_id, "Неизвестный чат"))
-      |> Map.put(:user_name, user_name)
-    end)
+    Repo.all(query)
   end
 end

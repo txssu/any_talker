@@ -24,7 +24,7 @@ defmodule AnyTalkerWeb.WebApp.RemindersLive do
         :for={reminder <- @reminders}
         message={reminder.message}
         scheduled_at={reminder.scheduled_at}
-        chat_title={reminder.chat_title}
+        chat_title={(reminder.chat_config && reminder.chat_config.title) || "Неизвестный чат"}
       />
     </div>
     """
