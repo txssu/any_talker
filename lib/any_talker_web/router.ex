@@ -20,7 +20,7 @@ defmodule AnyTalkerWeb.Router do
 
     plug :put_secure_browser_headers, %{
       "content-security-policy" =>
-        "default-src 'self'; script-src-elem 'self' https://telegram.org; connect-src 'self'; img-src 'self' data: blob: https://t.me https://*.cdn-telegram.org; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; frame-ancestors https://web.telegram.org"
+        "default-src 'self'; script-src-elem 'self' https://telegram.org; connect-src 'self'; img-src 'self' data: blob: https://t.me https://*.cdn-telegram.org https://*.telesco.pe; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; frame-ancestors https://web.telegram.org"
     }
   end
 
