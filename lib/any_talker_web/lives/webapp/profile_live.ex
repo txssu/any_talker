@@ -11,6 +11,13 @@ defmodule AnyTalkerWeb.WebApp.ProfileLive do
     ~H"""
     <div id="back-init" phx-hook="TelegramBack" data-state="on"></div>
     <.section class="pt-[30px] pb-[15px]">
+      <div class="flex justify-center">
+        <img
+          src={@profile_user.photo_url || ~p"/user_avatar/#{@profile_user.id}"}
+          class="size-20 rounded-full"
+          alt="User photo"
+        />
+      </div>
       <h1 class="mt-[15px] text-center text-xl font-bold">Настройки профиля</h1>
     </.section>
 
