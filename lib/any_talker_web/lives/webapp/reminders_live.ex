@@ -35,9 +35,4 @@ defmodule AnyTalkerWeb.WebApp.RemindersLive do
     reminders = Reminders.list_user_reminders(socket.assigns.current_user.id)
     {:ok, assign(socket, reminders: reminders)}
   end
-
-  @impl Phoenix.LiveView
-  def handle_event("back", _params, socket) do
-    {:noreply, push_navigate(socket, to: ~p"/webapp")}
-  end
 end

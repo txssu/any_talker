@@ -53,11 +53,6 @@ defmodule AnyTalkerWeb.WebApp.GlobalConfigLive do
   end
 
   @impl Phoenix.LiveView
-  def handle_event("back", _params, socket) do
-    {:noreply, push_navigate(socket, to: ~p"/webapp")}
-  end
-
-  @impl Phoenix.LiveView
   def handle_event("validate", %{"global_config" => attrs}, socket) do
     config = socket.assigns.global_config
 

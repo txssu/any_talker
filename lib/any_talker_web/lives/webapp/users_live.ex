@@ -36,9 +36,4 @@ defmodule AnyTalkerWeb.WebApp.UsersLive do
 
     {:ok, assign(socket, users: users)}
   end
-
-  @impl Phoenix.LiveView
-  def handle_event("back", _params, socket) do
-    {:noreply, push_navigate(socket, to: ~p"/webapp")}
-  end
 end

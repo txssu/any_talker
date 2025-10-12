@@ -85,11 +85,6 @@ defmodule AnyTalkerWeb.WebApp.ChatLive do
   end
 
   @impl Phoenix.LiveView
-  def handle_event("back", _params, socket) do
-    {:noreply, push_navigate(socket, to: ~p"/webapp")}
-  end
-
-  @impl Phoenix.LiveView
   def handle_event("validate", %{"chat_config" => attrs}, socket) do
     chat_config = socket.assigns.chat_config
 

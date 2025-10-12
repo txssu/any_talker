@@ -40,7 +40,7 @@ defmodule AnyTalkerWeb.WebApp.ProfileLive do
 
     {:ok,
      socket
-     |> assign(profile_user: profile_user, back: ~p"/webapp/users")
+     |> assign(profile_user: profile_user)
      |> assign_profile_form()}
   end
 
@@ -48,13 +48,8 @@ defmodule AnyTalkerWeb.WebApp.ProfileLive do
   def mount(_params, _session, socket) do
     {:ok,
      socket
-     |> assign(profile_user: socket.assigns.current_user, back: ~p"/webapp")
+     |> assign(profile_user: socket.assigns.current_user)
      |> assign_profile_form()}
-  end
-
-  @impl Phoenix.LiveView
-  def handle_event("back", _params, socket) do
-    {:noreply, push_navigate(socket, to: socket.assigns.back)}
   end
 
   @impl Phoenix.LiveView
