@@ -64,7 +64,7 @@ defmodule AnyTalkerWeb.WebApp.ChatLive do
         </div>
       </.section>
 
-      <.users_section users={@chat_members} />
+      <.users_section :if={@user_owner?} users={@chat_members} />
     </div>
     """
   end
