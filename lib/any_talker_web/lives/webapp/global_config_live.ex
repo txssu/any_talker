@@ -33,6 +33,7 @@ defmodule AnyTalkerWeb.WebApp.GlobalConfigLive do
           <div class="px-3 pt-3">
             <button
               type="submit"
+              phx-disable-with="Сохранение..."
               class="w-full rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-700"
             >
               Сохранить
