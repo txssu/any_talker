@@ -64,6 +64,12 @@ defmodule AnyTalker.Accounts do
     Repo.all(query)
   end
 
+  def list_all_chats do
+    ChatConfig
+    |> order_by(:id)
+    |> Repo.all()
+  end
+
   def list_users do
     User
     |> order_by(:id)

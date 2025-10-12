@@ -92,8 +92,15 @@ defmodule AnyTalkerWeb.WebApp.MenuLive do
 
   @impl Phoenix.LiveView
   def mount(_params, _session, socket) do
-    chats = Accounts.list_user_chats(socket.assigns.current_user.id)
     user_owner? = Accounts.owner?(socket.assigns.current_user)
+
+    chats =
+      if user_owner? do
+        Accounts.list_all_chats()
+      else
+        Accounts.list_user_chats(socket.assigns.current_user.id)
+      end
+
     subscription = Accounts.get_current_subscription(socket.assigns.current_user)
     {:ok, assign(socket, chats: chats, user_owner?: user_owner?, subscription: subscription)}
   end
