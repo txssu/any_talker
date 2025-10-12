@@ -5,7 +5,6 @@
     pre_tool_use: [:compile, :format, :unused_deps],
     subagent_stop: [:compile, :format]
   },
-  mcp_servers: [:tidewave],
   subagents: [
     %{
       name: "Meta Agent",
