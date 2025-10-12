@@ -70,6 +70,18 @@ defmodule AnyTalker.Accounts do
     |> Repo.all()
   end
 
+  def list_chat_members(chat_id) do
+    query =
+      from cm in ChatMember,
+        where: cm.chat_id == ^chat_id,
+        join: u in User,
+        on: u.id == cm.user_id,
+        select: u,
+        order_by: u.id
+
+    Repo.all(query)
+  end
+
   def list_users do
     User
     |> order_by(:id)

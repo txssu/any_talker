@@ -14,19 +14,7 @@ defmodule AnyTalkerWeb.WebApp.UsersLive do
       <h1 class="mt-[15px] text-center text-xl font-bold">Пользователи</h1>
     </.section>
 
-    <.section class="mt-5">
-      <:header>Пользователи</:header>
-      <ul>
-        <li :for={user <- @users}>
-          <.link
-            navigate={~p"/webapp/profile/#{user.id}"}
-            class="mb-2 flex items-center justify-between rounded-lg px-4 py-2 hover:bg-tg-section-hover"
-          >
-            <span class="font-semibold">{user.username || user.id}</span>
-          </.link>
-        </li>
-      </ul>
-    </.section>
+    <.users_section users={@users} />
     """
   end
 

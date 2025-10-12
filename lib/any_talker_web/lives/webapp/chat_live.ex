@@ -63,6 +63,8 @@ defmodule AnyTalkerWeb.WebApp.ChatLive do
           </.form>
         </div>
       </.section>
+
+      <.users_section users={@chat_members} />
     </div>
     """
   end
@@ -73,6 +75,7 @@ defmodule AnyTalkerWeb.WebApp.ChatLive do
 
     chat_config = Settings.get_chat_config(chat_id)
     top_authors = Statistics.get_top_message_authors_today(chat_id, 5)
+    chat_members = Accounts.list_chat_members(chat_id)
 
     Task.async(fn ->
       Settings.get_or_fetch_chat_avatar(chat_id)
@@ -80,7 +83,7 @@ defmodule AnyTalkerWeb.WebApp.ChatLive do
 
     {:ok,
      socket
-     |> assign(user_owner?: user_owner?, top_authors: top_authors)
+     |> assign(user_owner?: user_owner?, top_authors: top_authors, chat_members: chat_members)
      |> assign_chat_config(chat_config)}
   end
 

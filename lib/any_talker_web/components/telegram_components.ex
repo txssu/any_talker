@@ -2,6 +2,11 @@ defmodule AnyTalkerWeb.TelegramComponents do
   @moduledoc false
   use Phoenix.Component
 
+  use Phoenix.VerifiedRoutes,
+    endpoint: AnyTalkerWeb.Endpoint,
+    router: AnyTalkerWeb.Router,
+    statics: AnyTalkerWeb.static_paths()
+
   alias Phoenix.HTML.FormField
 
   attr :class, :string, default: nil
@@ -112,6 +117,35 @@ defmodule AnyTalkerWeb.TelegramComponents do
         class="mx-[3px] mt-2 block w-full rounded-lg text-zinc-900 focus:ring-0 sm:text-sm sm:leading-6"
       />
     </div>
+    """
+  end
+
+  @doc """
+  Renders a section with a list of users.
+
+  ## Example
+
+      <.users_section users={@users} />
+  """
+  attr :class, :string, default: nil
+  attr :users, :list, required: true
+
+  def users_section(assigns) do
+    ~H"""
+    <.section class="mt-5">
+      <:header>Пользователи</:header>
+      <p :if={@users == []} class="text-[15px] text-tg-hint mt-2.5 text-center">Нет пользователей</p>
+      <ul :if={@users != []}>
+        <li :for={user <- @users}>
+          <.link
+            navigate={~p"/webapp/profile/#{user.id}"}
+            class="border-tg-section-separator hover-effect h-[42px] flex items-center rounded-lg border-b-2 pl-5 last:border-b-0"
+          >
+            <span class="text-[15px] py-2.5">{user.username || user.id}</span>
+          </.link>
+        </li>
+      </ul>
+    </.section>
     """
   end
 end
