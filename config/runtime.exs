@@ -22,9 +22,13 @@ if System.get_env("PHX_SERVER") do
 end
 
 config :any_talker, AnyTalker.AI.OpenRouterClient,
-  api_url: System.get_env("OPENAI_URL", "https://api.openai.com/"),
+  api_url: System.get_env("OPENAI_URL", "https://api.openai.com/v1"),
   api_key: System.get_env("OPENAI_KEY"),
   proxy_uri: System.get_env("OPENAI_PROXY_URL")
+
+config :any_talker, AnyTalker.BraveClient,
+  api_url: System.get_env("BRAVE_API_URL", "https://api.search.brave.com/res/v1"),
+  api_key: System.get_env("BRAVE_API_KEY")
 
 config :any_talker, AnyTalkerBot.Config,
   bot_token: System.get_env("TELEGRAM_BOT_TOKEN"),

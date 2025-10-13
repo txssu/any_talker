@@ -6,7 +6,10 @@ defmodule AnyTalker.AI.ToolsRegistry do
     AnyTalker.AI.CreateTaskAtTool,
     AnyTalker.AI.CreateTaskAfterTool,
     AnyTalker.AI.RandomIntTool,
-    AnyTalker.AI.RandomChoiceTool
+    AnyTalker.AI.RandomChoiceTool,
+    AnyTalker.AI.SearchTool,
+    AnyTalker.AI.FetchPageTool,
+    AnyTalker.AI.YouTubeTool
   ]
 
   function_name_mapping =
