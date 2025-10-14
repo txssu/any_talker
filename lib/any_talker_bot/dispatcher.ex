@@ -15,7 +15,7 @@ defmodule AnyTalkerBot.Dispatcher do
   middleware(AnyTalkerBot.AddTelemetryDataMiddleware)
   middleware(AnyTalkerBot.SaveUpdateMiddleware)
   middleware(AnyTalkerBot.CaptionToTextMiddleware)
-  middleware(ExGram.Middleware.IgnoreUsername)
+  middleware(AnyTalkerBot.Middleware.IgnoreUsername)
   middleware(AnyTalkerBot.LoadDataMiddleware)
   middleware(AnyTalkerBot.AntispamMiddleware)
   middleware(AnyTalkerBot.IgnoreForwardedCommandsMiddleware)
