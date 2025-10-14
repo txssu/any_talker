@@ -99,6 +99,11 @@ defmodule AnyTalkerBot.Reply.Message do
         run_callback(message, sent_message)
         {:ok, sent_message}
 
+      {:error, error} when message.mode != nil ->
+        Logger.error("Error sending message: #{inspect(error)}")
+        Logger.warning("Retrying message without formatting")
+        send_message(%{message | mode: nil}, reply, chat_id)
+
       {:error, error} ->
         Logger.error("Error sending message: #{inspect(error)}")
         {:error, error}
