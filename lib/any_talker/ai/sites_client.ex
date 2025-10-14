@@ -18,6 +18,7 @@ defmodule AnyTalker.AI.SitesClient do
   def client do
     Tesla.client(
       [
+        {Tesla.Middleware.FollowRedirects, max_redirects: 5},
         {Tesla.Middleware.Headers, [{"user-agent", user_agent()}]}
       ],
       Tesla.Adapter.Mint
