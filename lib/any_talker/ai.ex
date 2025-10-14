@@ -37,7 +37,7 @@ defmodule AnyTalker.AI do
       {response.output_text, make_callback(result_history, response)}
     else
       {:error, error} ->
-        Logger.error("OpenRouterClientError", error_details: error)
+        Logger.error("OpenRouterClientError", details: error)
         nil
     end
   end

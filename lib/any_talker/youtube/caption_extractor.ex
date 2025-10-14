@@ -245,7 +245,7 @@ defmodule AnyTalker.YouTube.CaptionExtractor do
   end
 
   defp fetch_innertube(endpoint, payload) do
-    Logger.debug("Calling InnerTube endpoint: #{endpoint}")
+    Logger.debug("Calling InnerTube endpoint", details: %{endpoint: endpoint})
     Client.fetch_innertube(endpoint, payload, payload.visitorData)
   end
 
@@ -406,11 +406,11 @@ defmodule AnyTalker.YouTube.CaptionExtractor do
     with {:ok, panel} <- find_transcript_panel(next_data),
          {:ok, token} <- extract_continuation_token(panel, lang),
          {:ok, subtitles} <- fetch_transcript_with_token(token) do
-      Logger.debug("Successfully got #{length(subtitles)} subtitles from transcript API")
+      Logger.debug("Successfully got subtitles from transcript API", details: %{count: length(subtitles)})
       {:ok, subtitles}
     else
       {:error, reason} ->
-        Logger.debug("Transcript API failed: #{reason}")
+        Logger.debug("Transcript API failed", details: %{reason: reason})
         {:error, reason}
     end
   end

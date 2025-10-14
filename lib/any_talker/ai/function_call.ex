@@ -6,6 +6,8 @@ defmodule AnyTalker.AI.FunctionCall do
   alias AnyTalker.AI.ToolsRegistry
   alias AnyTalker.Parser
 
+  require Logger
+
   defstruct module: nil, arguments: nil, call_id: nil, name: nil, arguments_json: nil, id: nil
 
   def parse(params) do
@@ -21,7 +23,9 @@ defmodule AnyTalker.AI.FunctionCall do
     Parser.parse(%__MODULE__{}, params, parsers)
   end
 
-  def exec(%__MODULE__{module: module, arguments: params, call_id: call_id}, %Context{} = context) do
+  def exec(%__MODULE__{module: module, arguments: params, call_id: call_id, name: name}, %Context{} = context) do
+    Logger.info("Executing tool", details: %{name: name, params: params})
+
     call_result = module.exec(params, context)
 
     FunctionToolCallOutput.new(call_id, Jason.encode!(call_result))

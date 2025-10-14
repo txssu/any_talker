@@ -48,7 +48,7 @@ defmodule AnyTalker.AI.YouTubeTool do
         }
 
       {:error, reason} ->
-        Logger.error("YouTube extraction failed: #{inspect(reason)}")
+        Logger.error("YouTube extraction failed", details: %{reason: reason})
         "Не удалось извлечь субтитры: #{reason}"
     end
   end

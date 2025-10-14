@@ -116,7 +116,7 @@ defmodule AnyTalkerBot.BuyProCommand do
   end
 
   defp log_activation_error(user_id, error) do
-    Logger.error("Failed to activate PRO subscription for user #{user_id}", error_details: error)
+    Logger.error("Failed to activate PRO subscription for user", details: %{user_id: user_id, error: error})
   end
 
   defp format_date(nil), do: "бессрочно"

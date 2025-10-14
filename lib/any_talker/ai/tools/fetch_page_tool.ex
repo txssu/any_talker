@@ -39,7 +39,7 @@ defmodule AnyTalker.AI.FetchPageTool do
         markdown_content
 
       {:error, reason} ->
-        Logger.error("Failed to fetch page: #{inspect(reason)}")
+        Logger.error("Failed to fetch page", details: %{reason: reason, url: url})
         "Не удалось получить содержимое страницы"
     end
   end

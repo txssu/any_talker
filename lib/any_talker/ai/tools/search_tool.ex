@@ -40,7 +40,7 @@ defmodule AnyTalker.AI.SearchTool do
         filter_results(body)
 
       {:error, reason} ->
-        Logger.error("Search failed: #{inspect(reason)}")
+        Logger.error("Search failed", details: %{reason: reason})
         "Поиск недоступен"
     end
   end

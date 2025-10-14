@@ -64,7 +64,7 @@ config :ex_gram, adapter: ExGram.Adapter.TeslaNoDebug
 # Configures Elixir's Logger
 config :logger, :default_formatter,
   format: {AnyTalker.LogFormatter, :format},
-  metadata: [:request_id, :error_details]
+  metadata: [:details]
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
