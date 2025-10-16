@@ -34,62 +34,75 @@ defmodule AnyTalkerBot.AskCommand do
          :ok <- validate_rate_limit(user_with_sub, config) do
       reply(reply, message, bot_id)
     else
-      error -> error_reply(error, reply, user_with_sub)
+      error -> error_reply(error, reply, user_with_sub, config)
     end
   end
 
-  defp error_reply({:error, :not_group}, %Reply{} = reply, _user_with_sub) do
-    text = """
-    Эта команда работает только в группах.
-    Без PRO ты здесь никто.
+  defp error_reply({:error, :not_group}, %Reply{} = reply, user_with_sub, config) do
+    text =
+      if is_nil(user_with_sub.current_subscription) and config.promote_pro do
+        """
+        Эта команда работает только в группах.
+        Без PRO ты здесь никто.
 
-    Хочешь использовать её где угодно, даже наедине с ботом?
-    Бери PRO-подписку. Без неё сюда дороги нет.
+        Хочешь использовать её где угодно, даже наедине с ботом?
+        Бери PRO-подписку. Без неё сюда дороги нет.
 
-    /que_pro — решай сам.
-    """
-
-    Reply.send_message(reply, text, as_reply?: true)
-  end
-
-  defp error_reply({:error, :not_enabled}, %Reply{} = reply, _user_with_sub) do
-    text = """
-    Здесь бот для тебя мёртв.
-    У тебя нет доступа к его командам.
-
-    Два пути:
-    — добейся, чтобы админ добавил доступ,
-    — или возьми PRO-подписку и открой всё сам.
-
-    /que_pro — твой выбор.
-    """
+        /que_pro — решай сам.
+        """
+      else
+        """
+        Эта команда работает только в группах.
+        """
+      end
 
     Reply.send_message(reply, text, as_reply?: true)
   end
 
-  defp error_reply({:error, :empty_text}, %Reply{} = reply, _user_with_sub) do
+  defp error_reply({:error, :not_enabled}, %Reply{} = reply, user_with_sub, config) do
+    text =
+      if is_nil(user_with_sub.current_subscription) and config.promote_pro do
+        """
+        Здесь бот для тебя мёртв.
+        У тебя нет доступа к его командам.
+
+        Два пути:
+        — добейся, чтобы админ добавил доступ,
+        — или возьми PRO-подписку и открой всё сам.
+
+        /que_pro — твой выбор.
+        """
+      else
+        """
+        Здесь бот для тебя мёртв.
+        У тебя нет доступа к его командам.
+        """
+      end
+
+    Reply.send_message(reply, text, as_reply?: true)
+  end
+
+  defp error_reply({:error, :empty_text}, %Reply{} = reply, _user_with_sub, _config) do
     Reply.send_message(reply, "Не вижу вопроса!", as_reply?: true)
   end
 
-  defp error_reply({:error, :rate_limit, time_left_ms}, %Reply{} = reply, user_with_sub) do
+  defp error_reply({:error, :rate_limit, time_left_ms}, %Reply{} = reply, user_with_sub, config) do
     text =
-      case user_with_sub.current_subscription do
-        nil ->
-          """
-          Ты выжал лимит.
-          Следующая попытка будет доступна через #{format_time(time_left_ms)}.
+      if is_nil(user_with_sub.current_subscription) and config.promote_pro do
+        """
+        Ты выжал лимит.
+        Следующая попытка будет доступна через #{format_time(time_left_ms)}.
 
-          Не хочешь ждать?
-          Бери PRO-подписку и используй команды без ограничений.
+        Не хочешь ждать?
+        Бери PRO-подписку и используй команды без ограничений.
 
-          /que_pro — решай быстро.
-          """
-
-        _subscription ->
-          """
-          Ты выжал лимит.
-          Следующая попытка будет доступна через #{format_time(time_left_ms)}.
-          """
+        /que_pro — решай быстро.
+        """
+      else
+        """
+        Ты выжал лимит.
+        Следующая попытка будет доступна через #{format_time(time_left_ms)}.
+        """
       end
 
     Reply.send_message(reply, text, as_reply?: true)

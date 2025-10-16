@@ -44,6 +44,7 @@ defmodule AnyTalkerWeb.WebApp.ChatLive do
           <.form for={@form} phx-change="validate" phx-submit="save">
             <.switch label="Антиспам" field={@form[:antispam]} />
             <.switch label="Команда /ask" field={@form[:ask_command]} />
+            <.switch label="Реклама PRO" field={@form[:promote_pro]} />
             <.tg_input label="Имя бота" field={@form[:bot_name]} />
             <.tg_input label="Модели /ask" field={@form[:ask_model]} />
             <.tg_input type="number" label="Лимит запросов /ask" field={@form[:ask_rate_limit]} />
