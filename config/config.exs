@@ -47,6 +47,10 @@ config :any_talker,
   nikita_chat_id: -1_002_634_925_169,
   nikita_counter_timeout_min: 1
 
+config :codepagex, :encodings, [
+  :"VENDORS/MISC/KOI8-R"
+]
+
 config :elixir, :time_zone_database, Tzdata.TimeZoneDatabase
 
 # Configure esbuild (the version is required)

@@ -3,7 +3,7 @@ defmodule AnyTalker.AI.FetchPageTool do
   use AnyTalker.AI.Tool, type: :function
 
   alias AnyTalker.AI.Function
-  alias AnyTalker.AI.SitesClient
+  alias AnyTalker.AI.Sites
   alias AnyTalker.AI.Tool
 
   require Logger
@@ -34,7 +34,7 @@ defmodule AnyTalker.AI.FetchPageTool do
 
   @impl Function
   def exec(%{"url" => url}, _context) do
-    case SitesClient.get(url) do
+    case Sites.get(url) do
       {:ok, markdown_content} ->
         markdown_content
 

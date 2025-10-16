@@ -44,7 +44,7 @@ defmodule AnyTalker.MixProject do
       {:phoenix_html, "~> 4.1"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:phoenix_live_view, "~> 1.1.0"},
-      {:lazy_html, ">= 0.0.0", only: :test},
+      {:lazy_html, ">= 0.0.0"},
       {:phoenix_live_dashboard, "~> 0.8.3"},
       {:esbuild, "~> 0.8", runtime: Mix.env() == :dev},
       {:tailwind, "~> 0.2", runtime: Mix.env() == :dev},
@@ -69,6 +69,7 @@ defmodule AnyTalker.MixProject do
       {:pathex, "~> 2.6"},
       {:ex_cldr_numbers, "~> 2.33"},
       {:html2markdown, "~> 0.3.1"},
+      {:codepagex, "~> 0.1.12"},
       # Telegram
       {:ex_gram, "~> 0.54"},
       {:tesla, "~> 1.2"},
