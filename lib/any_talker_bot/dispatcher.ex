@@ -11,6 +11,7 @@ defmodule AnyTalkerBot.Dispatcher do
   command("ask")
   command("buy_pro")
   command("que_pro")
+  command("move")
 
   middleware(AnyTalkerBot.AddTelemetryDataMiddleware)
   middleware(AnyTalkerBot.SaveUpdateMiddleware)
@@ -64,6 +65,10 @@ defmodule AnyTalkerBot.Dispatcher do
 
   defp execute_command(reply, {:command, :buy_pro, _msg}) do
     AnyTalkerBot.BuyProCommand.call(reply)
+  end
+
+  defp execute_command(reply, {:command, :move, _msg}) do
+    AnyTalkerBot.MoveCommand.call(reply)
   end
 
   defp execute_command(
