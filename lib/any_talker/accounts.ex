@@ -128,4 +128,24 @@ defmodule AnyTalker.Accounts do
 
     Repo.insert(%Subscription{user_id: user.id, plan: :pro, expires_at: expires_at})
   end
+
+  def activate_pro_subscription_for_days(%User{} = user, days) when is_integer(days) and days > 0 do
+    current_subscription = get_current_subscription(user)
+
+    case current_subscription do
+      %Subscription{expires_at: nil} = sub ->
+        {:ok, sub}
+
+      %Subscription{expires_at: current_expires_at} = sub ->
+        new_expires_at = DateTime.add(current_expires_at, days, :day)
+
+        sub
+        |> Ecto.Changeset.change(expires_at: new_expires_at)
+        |> Repo.update()
+
+      nil ->
+        expires_at = DateTime.add(DateTime.utc_now(), days, :day)
+        Repo.insert(%Subscription{user_id: user.id, plan: :pro, expires_at: expires_at})
+    end
+  end
 end
