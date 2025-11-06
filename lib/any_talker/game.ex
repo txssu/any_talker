@@ -17,7 +17,7 @@ defmodule AnyTalker.Game do
   """
   def get_player_stats(user_id) do
     case Repo.get(PlayerStats, user_id) do
-      nil -> %PlayerStats{user_id: user_id, steps_count: 0}
+      nil -> %PlayerStats{user_id: user_id, steps_count: 0, at_fork: false}
       stats -> stats
     end
   end
@@ -34,6 +34,51 @@ defmodule AnyTalker.Game do
   def increment_steps(%PlayerStats{} = stats) do
     stats
     |> PlayerStats.changeset(%{steps_count: stats.steps_count + 1})
+    |> Repo.insert_or_update()
+  end
+
+  @doc """
+  Sets the at_fork flag to true for a player.
+
+  ## Examples
+
+      iex> set_at_fork(%PlayerStats{user_id: 123, at_fork: false})
+      {:ok, %PlayerStats{at_fork: true}}
+
+  """
+  def set_at_fork(%PlayerStats{} = stats) do
+    stats
+    |> PlayerStats.changeset(%{at_fork: true})
+    |> Repo.insert_or_update()
+  end
+
+  @doc """
+  Clears the at_fork flag for a player.
+
+  ## Examples
+
+      iex> clear_fork(%PlayerStats{user_id: 123, at_fork: true})
+      {:ok, %PlayerStats{at_fork: false}}
+
+  """
+  def clear_fork(%PlayerStats{} = stats) do
+    stats
+    |> PlayerStats.changeset(%{at_fork: false})
+    |> Repo.insert_or_update()
+  end
+
+  @doc """
+  Updates the last_fork_step to the current steps_count.
+
+  ## Examples
+
+      iex> update_last_fork_step(%PlayerStats{user_id: 123, steps_count: 20})
+      {:ok, %PlayerStats{last_fork_step: 20}}
+
+  """
+  def update_last_fork_step(%PlayerStats{} = stats) do
+    stats
+    |> PlayerStats.changeset(%{last_fork_step: stats.steps_count})
     |> Repo.insert_or_update()
   end
 end

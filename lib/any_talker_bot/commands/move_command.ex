@@ -7,49 +7,103 @@ defmodule AnyTalkerBot.MoveCommand do
   alias AnyTalker.RateLimit
   alias AnyTalkerBot.Reply
 
-  @rate_limit_scale_ms 3_600_000
+  @rate_limit_scale_ms 1
   @rate_limit 1
   @reward_steps 10
   @reward_days 7
+  @fork_trigger_steps 15
+  @fork_chance 0.1
 
   @impl AnyTalkerBot.Command
   def call(%Reply{message: {:command, :move, message}} = reply) do
     user = reply.context.extra.user
+    stats = Game.get_player_stats(user.id)
 
     case message.text do
+      "forward" when stats.at_fork ->
+        Reply.send_message(reply, "Тропа раздваивается. Выберите направление: left или right")
+
       "forward" ->
-        handle_move_forward(reply, user)
+        handle_move(reply, user, stats, :forward)
+
+      direction when direction in ["left", "right"] and stats.at_fork ->
+        handle_move(reply, user, stats, {:fork_choice, direction})
+
+      direction when direction in ["left", "right"] ->
+        Reply.send_message(reply, "Доступные направления: forward")
+
+      _other when stats.at_fork ->
+        Reply.send_message(reply, "Тропа раздваивается. Выберите направление: left или right")
 
       _other ->
         Reply.send_message(reply, "Доступные направления: forward")
     end
   end
 
-  defp handle_move_forward(reply, user) do
+  defp handle_move(reply, user, stats, move_type) do
     key = "move:#{user.id}"
 
-    case RateLimit.hit(key, @rate_limit_scale_ms, @rate_limit) do
-      {:allow, _count} ->
-        stats = Game.get_player_stats(user.id)
-        {:ok, updated_stats} = Game.increment_steps(stats)
-        new_steps = updated_stats.steps_count
-
-        message =
-          if new_steps == @reward_steps do
-            grant_reward(user)
-            "Вы прошли вперёд\n\nКажется, вы что-то нашли"
-          else
-            "Вы прошли вперёд"
-          end
-
-        Reply.send_message(reply, message)
-
+    with {:allow, _count} <- RateLimit.hit(key, @rate_limit_scale_ms, @rate_limit),
+         {:ok, updated_stats} <- Game.increment_steps(stats) do
+      process_move(reply, user, updated_stats, move_type)
+    else
       {:deny, _time_left_ms} ->
         Reply.send_message(reply, "Вы слишком устали, чтобы двигаться дальше")
     end
   end
 
+  defp process_move(reply, user, stats, :forward) do
+    new_steps = stats.steps_count
+
+    {message, should_trigger_fork} =
+      cond do
+        new_steps == @reward_steps ->
+          grant_reward(user)
+          {"Вы прошли вперёд\n\nКажется, вы что-то нашли", false}
+
+        new_steps > @fork_trigger_steps ->
+          effective_chance = @fork_chance * calculate_fork_chance_multiplier(stats)
+
+          dbg(effective_chance)
+
+          if :rand.uniform() < effective_chance do
+            {"Вы прошли вперёд\n\nТропа раздваивается", true}
+          else
+            {"Вы прошли вперёд", false}
+          end
+
+        true ->
+          {"Вы прошли вперёд", false}
+      end
+
+    if should_trigger_fork do
+      Game.set_at_fork(stats)
+    end
+
+    Reply.send_message(reply, message)
+  end
+
+  defp process_move(reply, _user, stats, {:fork_choice, direction}) do
+    Game.clear_fork(stats)
+    Game.update_last_fork_step(stats)
+
+    message =
+      case direction do
+        "left" -> "Вы пошли налево"
+        "right" -> "Вы пошли направо"
+      end
+
+    Reply.send_message(reply, message)
+  end
+
   defp grant_reward(user) do
     Accounts.activate_pro_subscription_for_days(user, @reward_days)
+  end
+
+  defp calculate_fork_chance_multiplier(stats) do
+    attempts_after_threshold =
+      max(1, stats.steps_count - max(stats.last_fork_step, @fork_trigger_steps))
+
+    :math.pow(1.3, attempts_after_threshold - 1)
   end
 end
