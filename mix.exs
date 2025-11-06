@@ -5,7 +5,7 @@ defmodule AnyTalker.MixProject do
     [
       app: :any_talker,
       version: "0.1.0",
-      elixir: "~> 1.18",
+      elixir: "~> 1.19",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [:phoenix_live_view] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,

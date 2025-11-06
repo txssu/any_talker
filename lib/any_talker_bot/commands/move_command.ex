@@ -64,8 +64,6 @@ defmodule AnyTalkerBot.MoveCommand do
         new_steps > @fork_trigger_steps ->
           effective_chance = @fork_chance * calculate_fork_chance_multiplier(stats)
 
-          dbg(effective_chance)
-
           if :rand.uniform() < effective_chance do
             {"Вы прошли вперёд\n\nТропа раздваивается", true}
           else

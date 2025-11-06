@@ -241,8 +241,7 @@ defmodule AnyTalkerBot.AskCommand do
   defp validate_not_empty(%Message{reply_to_message: %Message{from: %{id: bot_id}}}, bot_id), do: {:error, :empty_text}
 
   defp validate_not_empty(%Message{reply_to_message: %Message{text: t, caption: c, photo: p}}, _bot_id)
-       when not_empty_string(t) or not_empty_string(c) or is_list(p),
-       do: :ok
+       when not_empty_string(t) or not_empty_string(c) or is_list(p), do: :ok
 
   defp validate_not_empty(_otherwise, _bot_id), do: {:error, :empty_text}
 

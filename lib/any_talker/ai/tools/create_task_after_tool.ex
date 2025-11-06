@@ -1,3 +1,4 @@
+# credo:disable-for-this-file Credo.Check.Design.DuplicatedCode
 defmodule AnyTalker.AI.CreateTaskAfterTool do
   @moduledoc false
   use AnyTalker.AI.Tool, type: :function
