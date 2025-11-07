@@ -7,7 +7,7 @@ defmodule AnyTalkerBot.MoveCommand do
   alias AnyTalker.RateLimit
   alias AnyTalkerBot.Reply
 
-  @rate_limit_scale_ms 1
+  @rate_limit_scale_ms 3_600_000
   @rate_limit 1
   @reward_steps 10
   @reward_days 7
