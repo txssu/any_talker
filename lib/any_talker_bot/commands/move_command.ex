@@ -13,6 +13,7 @@ defmodule AnyTalkerBot.MoveCommand do
   @reward_days 7
   @fork_trigger_steps 15
   @fork_chance 0.1
+  @fork_chance_multiplier 1.2
 
   @impl AnyTalkerBot.Command
   def call(%Reply{message: {:command, :move, message}} = reply) do
@@ -102,6 +103,6 @@ defmodule AnyTalkerBot.MoveCommand do
     attempts_after_threshold =
       max(1, stats.steps_count - max(stats.last_fork_step, @fork_trigger_steps))
 
-    :math.pow(1.3, attempts_after_threshold - 1)
+    :math.pow(@fork_chance_multiplier, attempts_after_threshold - 1)
   end
 end
