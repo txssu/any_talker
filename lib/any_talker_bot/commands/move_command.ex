@@ -12,7 +12,7 @@ defmodule AnyTalkerBot.MoveCommand do
   @reward_steps 10
   @reward_days 7
   @fork_trigger_steps 15
-  @fork_chance 0.1
+  @fork_chance 0.05
   @fork_chance_multiplier 1.2
 
   @impl AnyTalkerBot.Command
