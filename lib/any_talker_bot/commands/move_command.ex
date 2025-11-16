@@ -15,6 +15,9 @@ defmodule AnyTalkerBot.MoveCommand do
   @fork_chance 0.05
   @fork_chance_multiplier 1.2
 
+  @move_forward "Вы прошли вперёд"
+  @fork_chose_direction "Тропа раздваивается. Выберите направление: left или right"
+
   @impl AnyTalkerBot.Command
   def call(%Reply{message: {:command, :move, message}} = reply) do
     user = reply.context.extra.user
@@ -22,31 +25,31 @@ defmodule AnyTalkerBot.MoveCommand do
 
     case message.text do
       "forward" when stats.at_fork ->
-        Reply.send_message(reply, "Тропа раздваивается. Выберите направление: left или right")
+        Reply.send_message(reply, @fork_chose_direction)
 
       "forward" ->
-        handle_move(reply, user, stats, :forward)
+        handle_move_forward(reply, user, stats)
 
       direction when direction in ["left", "right"] and stats.at_fork ->
-        handle_move(reply, user, stats, {:fork_choice, direction})
+        process_move(reply, user, stats, {:fork_choice, direction})
 
       direction when direction in ["left", "right"] ->
         Reply.send_message(reply, "Доступные направления: forward")
 
       _other when stats.at_fork ->
-        Reply.send_message(reply, "Тропа раздваивается. Выберите направление: left или right")
+        Reply.send_message(reply, @fork_chose_direction)
 
       _other ->
         Reply.send_message(reply, "Доступные направления: forward")
     end
   end
 
-  defp handle_move(reply, user, stats, move_type) do
+  defp handle_move_forward(reply, user, stats) do
     key = "move:#{user.id}"
 
     with {:allow, _count} <- RateLimit.hit(key, @rate_limit_scale_ms, @rate_limit),
          {:ok, updated_stats} <- Game.increment_steps(stats) do
-      process_move(reply, user, updated_stats, move_type)
+      process_move(reply, user, updated_stats, :forward)
     else
       {:deny, _time_left_ms} ->
         Reply.send_message(reply, "Вы слишком устали, чтобы двигаться дальше")
@@ -60,19 +63,19 @@ defmodule AnyTalkerBot.MoveCommand do
       cond do
         new_steps == @reward_steps ->
           grant_reward(user)
-          {"Вы прошли вперёд\n\nКажется, вы что-то нашли", false}
+          {"#{@move_forward}\n\nКажется, вы что-то нашли", false}
 
         new_steps > @fork_trigger_steps ->
           effective_chance = @fork_chance * calculate_fork_chance_multiplier(stats)
 
           if :rand.uniform() < effective_chance do
-            {"Вы прошли вперёд\n\nТропа раздваивается", true}
+            {"#{@move_forward}\n\n#{@fork_chose_direction}", true}
           else
-            {"Вы прошли вперёд", false}
+            {@move_forward, false}
           end
 
         true ->
-          {"Вы прошли вперёд", false}
+          {@move_forward, false}
       end
 
     if should_trigger_fork do
