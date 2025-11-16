@@ -163,4 +163,61 @@ defmodule AnyTalkerWeb.TelegramComponents do
     </.section>
     """
   end
+
+  @doc """
+  Renders a leaderboard section with player stats.
+
+  ## Example
+
+      <.leaderboard_section players={@players} />
+  """
+  attr :class, :string, default: "mt-5"
+  attr :players, :list, required: true
+
+  def leaderboard_section(assigns) do
+    assigns = assign(assigns, :players_with_position, Enum.with_index(assigns.players, 1))
+
+    ~H"""
+    <.section class={@class}>
+      <:header>Топ игроков</:header>
+      <p :if={@players == []} class="text-[15px] text-tg-hint mt-2.5 text-center">
+        Нет игроков в рейтинге
+      </p>
+      <ul :if={@players != []}>
+        <li :for={{player, position} <- @players_with_position}>
+          <.link
+            navigate={~p"/webapp/profile/#{player.user.id}"}
+            class="border-tg-section-separator hover-effect flex items-center gap-3 rounded-lg border-b-2 px-3 py-2 last:border-b-0"
+          >
+            <div class="text-tg-hint text-[17px] w-8 flex-shrink-0 text-center font-bold">
+              {position}
+            </div>
+            <img
+              src={player.user.photo_url || ~p"/user_avatar/#{player.user.id}"}
+              class="size-10 flex-shrink-0 rounded-full"
+              alt="User photo"
+            />
+            <div class="flex min-w-0 flex-1 flex-col">
+              <span class="text-[15px] truncate font-medium">
+                {player.user.first_name} {player.user.last_name}
+              </span>
+              <span class="text-[13px] text-tg-hint truncate">
+                Последний ход: {format_datetime(player.stats.updated_at)}
+              </span>
+            </div>
+            <div class="text-[17px] flex-shrink-0 font-bold">
+              {player.stats.steps_count}
+            </div>
+          </.link>
+        </li>
+      </ul>
+    </.section>
+    """
+  end
+
+  defp format_datetime(datetime) do
+    datetime
+    |> DateTime.shift_zone!("Asia/Yekaterinburg")
+    |> Calendar.strftime("%d.%m.%Y %H:%M")
+  end
 end

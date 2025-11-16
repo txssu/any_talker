@@ -1,6 +1,9 @@
 defmodule AnyTalker.Game do
   @moduledoc false
 
+  import Ecto.Query
+
+  alias AnyTalker.Accounts.User
   alias AnyTalker.Game.PlayerStats
   alias AnyTalker.Repo
 
@@ -80,5 +83,31 @@ defmodule AnyTalker.Game do
     stats
     |> PlayerStats.changeset(%{last_fork_step: stats.steps_count})
     |> Repo.insert_or_update()
+  end
+
+  @doc """
+  Returns top players ordered by steps count.
+
+  ## Examples
+
+      iex> top_players()
+      [%{user: %User{}, stats: %PlayerStats{steps_count: 100}}, ...]
+
+      iex> top_players(10)
+      [%{user: %User{}, stats: %PlayerStats{steps_count: 100}}, ...]
+
+  """
+  def top_players(limit \\ 50) do
+    query =
+      from(ps in PlayerStats,
+        join: u in User,
+        on: ps.user_id == u.id,
+        where: ps.steps_count > 0,
+        order_by: [desc: ps.steps_count],
+        limit: ^limit,
+        select: %{user: u, stats: ps}
+      )
+
+    Repo.all(query)
   end
 end
