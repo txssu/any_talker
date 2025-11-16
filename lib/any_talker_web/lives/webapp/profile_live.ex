@@ -21,8 +21,20 @@ defmodule AnyTalkerWeb.WebApp.ProfileLive do
       <h1 class="mt-[15px] text-center text-xl font-bold">Настройки профиля</h1>
     </.section>
 
+    <.section :if={@profile_user.username} class="mt-5">
+      <div class="px-3">
+        <a
+          href={"https://t.me/#{@profile_user.username}"}
+          target="_blank"
+          class="flex w-full items-center justify-center rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-700"
+        >
+          Открыть
+        </a>
+      </div>
+    </.section>
+
     <.section class="mt-5">
-      <:header>Профиль</:header>
+      <:header>Настройки</:header>
       <.form for={@form} phx-change="validate" phx-submit="save">
         <div class="space-y-3">
           <.tg_input label="Ник" field={@form[:custom_name]} />
