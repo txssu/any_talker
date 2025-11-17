@@ -56,22 +56,34 @@ defmodule AnyTalkerBot.MoveCommand do
     Reply.send_message(reply, "Вы пошли направо")
   end
 
-  defp send_move_result(reply, %MoveResult{message_key: :move_forward}) do
-    Reply.send_message(reply, "Вы прошли вперёд")
+  defp send_move_result(reply, %MoveResult{message_key: :move_forward, night_bonus: night_bonus}) do
+    message = build_message("Вы прошли вперёд", night_bonus)
+    Reply.send_message(reply, message)
   end
 
-  defp send_move_result(reply, %MoveResult{message_key: :move_forward_with_reward}) do
-    Reply.send_message(reply, "Вы прошли вперёд\n\nКажется, вы что-то нашли")
+  defp send_move_result(reply, %MoveResult{message_key: :move_forward_with_reward, night_bonus: night_bonus}) do
+    message = build_message("Вы прошли вперёд\n\nКажется, вы что-то нашли", night_bonus)
+    Reply.send_message(reply, message)
   end
 
-  defp send_move_result(reply, %MoveResult{message_key: :move_forward_with_fork}) do
-    Reply.send_message(
-      reply,
-      "Вы прошли вперёд\n\nТропа раздваивается. Выберите направление: left или right"
-    )
+  defp send_move_result(reply, %MoveResult{message_key: :move_forward_with_fork, night_bonus: night_bonus}) do
+    message =
+      build_message("Вы прошли вперёд\n\nТропа раздваивается. Выберите направление: left или right", night_bonus)
+
+    Reply.send_message(reply, message)
   end
 
   defp send_fork_prompt(reply) do
     Reply.send_message(reply, "Тропа раздваивается. Выберите направление: left или right")
+  end
+
+  defp build_message(base_message, nil), do: base_message
+
+  defp build_message(base_message, :granted) do
+    base_message <> "\n\nНочь приняла вас. На семь дней вам открыто то, что скрыто для других."
+  end
+
+  defp build_message(base_message, :denied) do
+    base_message <> "\n\nТьма смотрела, но не выбрала вас."
   end
 end

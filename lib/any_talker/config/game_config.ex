@@ -13,6 +13,7 @@ defmodule AnyTalker.Config.GameConfig do
   | fork_trigger_steps | Integer | Minimum steps before fork events can occur |
   | fork_chance | Float | Base probability of fork event occurring (2%) |
   | fork_chance_multiplier | Float | Multiplier applied to fork chance for each step without fork |
+  | night_bonus_chance | Float | Probability of receiving night bonus during 22:00-23:00 Ekaterinburg time (1%) |
   """
 
   @rate_limit_scale_ms 3_600_000
@@ -22,6 +23,7 @@ defmodule AnyTalker.Config.GameConfig do
   @fork_trigger_steps 15
   @fork_chance 0.02
   @fork_chance_multiplier 1.2
+  @night_bonus_chance 0.02
 
   def rate_limit_scale_ms, do: @rate_limit_scale_ms
   def rate_limit, do: @rate_limit
@@ -30,4 +32,5 @@ defmodule AnyTalker.Config.GameConfig do
   def fork_trigger_steps, do: @fork_trigger_steps
   def fork_chance, do: @fork_chance
   def fork_chance_multiplier, do: @fork_chance_multiplier
+  def night_bonus_chance, do: @night_bonus_chance
 end

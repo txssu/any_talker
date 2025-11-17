@@ -22,15 +22,17 @@ defmodule AnyTalker.Game.Movement do
     | message_key | atom | Type of message to display (:move_forward, :move_forward_with_reward, :move_forward_with_fork) |
     | should_trigger_fork | boolean | Whether a fork event was triggered |
     | reward_granted | boolean | Whether a reward was granted to the player |
+    | night_bonus | atom or nil | Night bonus status (:granted, :denied, or nil if not night time) |
     """
 
     @enforce_keys [:message_key, :should_trigger_fork, :reward_granted]
-    defstruct [:message_key, :should_trigger_fork, :reward_granted]
+    defstruct [:message_key, :should_trigger_fork, :reward_granted, night_bonus: nil]
 
     @type t :: %__MODULE__{
             message_key: :move_forward | :move_forward_with_reward | :move_forward_with_fork,
             should_trigger_fork: boolean(),
-            reward_granted: boolean()
+            reward_granted: boolean(),
+            night_bonus: nil | :granted | :denied
           }
   end
 
@@ -89,6 +91,7 @@ defmodule AnyTalker.Game.Movement do
   defp evaluate_move(%PlayerStats{steps_count: steps_count} = stats, user) do
     reward_granted = should_grant_reward?(steps_count)
     should_trigger_fork = should_trigger_fork?(stats, steps_count)
+    night_bonus = process_night_bonus(user)
 
     if reward_granted do
       grant_reward(user)
@@ -97,7 +100,8 @@ defmodule AnyTalker.Game.Movement do
     %MoveResult{
       message_key: determine_message_key(reward_granted, should_trigger_fork),
       should_trigger_fork: should_trigger_fork,
-      reward_granted: reward_granted
+      reward_granted: reward_granted,
+      night_bonus: night_bonus
     }
   end
 
@@ -135,5 +139,22 @@ defmodule AnyTalker.Game.Movement do
 
   defp determine_message_key(false, false) do
     :move_forward
+  end
+
+  defp process_night_bonus(user) do
+    if night_time_in_ekb?() do
+      if :rand.uniform() < GameConfig.night_bonus_chance() do
+        Accounts.activate_pro_subscription_for_days(user, 7)
+        :granted
+      else
+        :denied
+      end
+    end
+  end
+
+  defp night_time_in_ekb? do
+    ekb_time = DateTime.shift_zone!(DateTime.utc_now(), "Asia/Yekaterinburg")
+    hour = ekb_time.hour
+    hour >= 22 and hour < 23
   end
 end
