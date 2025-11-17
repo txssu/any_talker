@@ -4,6 +4,7 @@ defmodule AnyTalker.Game do
   import Ecto.Query
 
   alias AnyTalker.Accounts.User
+  alias AnyTalker.Game.Movement
   alias AnyTalker.Game.PlayerStats
   alias AnyTalker.Repo
 
@@ -110,4 +111,30 @@ defmodule AnyTalker.Game do
 
     Repo.all(query)
   end
+
+  @doc """
+  Processes a forward move for a player.
+
+  Delegates to Movement module for business logic.
+
+  ## Examples
+
+      iex> process_forward_move(stats, user)
+      {:ok, %{message_key: :move_forward, should_trigger_fork: false, reward_granted: false}}
+
+  """
+  defdelegate process_forward_move(stats, user), to: Movement
+
+  @doc """
+  Processes a fork direction choice.
+
+  Delegates to Movement module for business logic.
+
+  ## Examples
+
+      iex> process_fork_choice(stats, "left")
+      {:ok, :chose_left}
+
+  """
+  defdelegate process_fork_choice(stats, direction), to: Movement
 end
