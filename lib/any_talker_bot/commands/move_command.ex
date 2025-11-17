@@ -9,10 +9,10 @@ defmodule AnyTalkerBot.MoveCommand do
 
   @rate_limit_scale_ms 3_600_000
   @rate_limit 1
-  @reward_steps 10
+  @reward_steps [10, 65]
   @reward_days 7
   @fork_trigger_steps 15
-  @fork_chance 0.05
+  @fork_chance 0.02
   @fork_chance_multiplier 1.2
 
   @move_forward "Вы прошли вперёд"
@@ -61,7 +61,7 @@ defmodule AnyTalkerBot.MoveCommand do
 
     {message, should_trigger_fork} =
       cond do
-        new_steps == @reward_steps ->
+        new_steps in @reward_steps ->
           grant_reward(user)
           {"#{@move_forward}\n\nКажется, вы что-то нашли", false}
 
