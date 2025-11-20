@@ -24,6 +24,22 @@ defmodule AnyTalkerBot.BuyProCommand do
         Reply.send_message(reply, already_subscribed_message(sub), for_dm: true)
 
       nil ->
+        provider_data = %{
+          receipt: %{
+            items: [
+              %{
+                description: "PRO подписка на месяц",
+                quantity: "1.00",
+                amount: %{
+                  value: "100.00",
+                  currency: "RUB"
+                },
+                vat_code: 1
+              }
+            ]
+          }
+        }
+
         Reply.send_invoice(
           reply,
           "Подписка PRO 🚀",
@@ -31,10 +47,13 @@ defmodule AnyTalkerBot.BuyProCommand do
           @pro_payload,
           "RUB",
           [
-            %LabeledPrice{label: "PRO доступ", amount: Currency.rub(100)}
+            %LabeledPrice{label: "PRO подписка на месяц", amount: Currency.rub(100)}
           ],
           for_dm: true,
-          provider_token: AnyTalkerBot.Config.payment_provider_token()
+          provider_token: AnyTalkerBot.Config.payment_provider_token(),
+          provider_data: Jason.encode(provider_data),
+          need_email: true,
+          send_email_to_provider: true
         )
     end
   end
