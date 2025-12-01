@@ -6,6 +6,7 @@ defmodule AnyTalker.Accounts do
   alias AnyTalker.Accounts.Subscription
   alias AnyTalker.Accounts.User
   alias AnyTalker.Accounts.UserToken
+  alias AnyTalker.Events.Message
   alias AnyTalker.Repo
   alias AnyTalker.Settings.ChatConfig
 
@@ -147,5 +148,72 @@ defmodule AnyTalker.Accounts do
         expires_at = DateTime.add(DateTime.utc_now(), days, :day)
         Repo.insert(%Subscription{user_id: user.id, plan: :pro, expires_at: expires_at})
     end
+  end
+
+  @doc """
+  Returns list of users ordered by last message date (oldest first).
+
+  Users who never sent messages appear first.
+
+  ## Examples
+
+      iex> inactive_users(50)
+      [%{user: %User{}, last_message_date: nil}, ...]
+
+  """
+  def inactive_users(limit \\ 50) do
+    subquery =
+      from m in Message,
+        group_by: m.from_id,
+        select: %{
+          user_id: m.from_id,
+          last_message_date: max(m.sent_date)
+        }
+
+    query =
+      from(u in User,
+        left_join: lm in subquery(subquery),
+        on: u.id == lm.user_id,
+        order_by: [asc_nulls_first: lm.last_message_date],
+        limit: ^limit,
+        select: %{user: u, last_message_date: lm.last_message_date}
+      )
+
+    Repo.all(query)
+  end
+
+  @doc """
+  Returns list of inactive users for specific chat ordered by last message date (oldest first).
+
+  Users who never sent messages in this chat appear first.
+
+  ## Examples
+
+      iex> inactive_users_by_chat(50, -1001234567890)
+      [%{user: %User{}, last_message_date: nil}, ...]
+
+  """
+  def inactive_users_by_chat(limit \\ 50, chat_id) do
+    subquery =
+      from m in Message,
+        where: m.chat_id == ^chat_id,
+        group_by: m.from_id,
+        select: %{
+          user_id: m.from_id,
+          last_message_date: max(m.sent_date)
+        }
+
+    query =
+      from cm in ChatMember,
+        where: cm.chat_id == ^chat_id,
+        join: u in User,
+        on: u.id == cm.user_id,
+        left_join: lm in subquery(subquery),
+        on: u.id == lm.user_id,
+        order_by: [asc_nulls_first: lm.last_message_date],
+        limit: ^limit,
+        select: %{user: u, last_message_date: lm.last_message_date}
+
+    Repo.all(query)
   end
 end

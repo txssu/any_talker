@@ -22,6 +22,7 @@ import { Socket } from "phoenix";
 import { LiveSocket } from "phoenix_live_view";
 import { hooks } from "phoenix-colocated/any_talker";
 import TelegramBack from "./telegram_back";
+import CopyToClipboard from "./copy_to_clipboard";
 
 let csrfToken = document
   .querySelector("meta[name='csrf-token']")
@@ -29,7 +30,7 @@ let csrfToken = document
 let liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: { _csrf_token: csrfToken },
-  hooks: { TelegramBack, ...hooks },
+  hooks: { TelegramBack, CopyToClipboard, ...hooks },
 });
 
 // connect if there are any LiveViews on the page
