@@ -78,13 +78,6 @@ defmodule AnyTalkerBot.Dispatcher do
     AnyTalkerBot.BuyProCommand.handle_pre_checkout(reply)
   end
 
-  defp execute_command(
-         reply,
-         {:message, %{successful_payment: %ExGram.Model.SuccessfulPayment{invoice_payload: "subs:pro"}}}
-       ) do
-    AnyTalkerBot.BuyProCommand.handle_successful_payment(reply)
-  end
-
   defp execute_command(reply, {:inline_query, query}) do
     route_inline_query(reply, query)
   end

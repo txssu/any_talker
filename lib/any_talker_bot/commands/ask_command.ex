@@ -16,6 +16,8 @@ defmodule AnyTalkerBot.AskCommand do
   alias ExGram.Model.Message
   alias ExGram.Model.PhotoSize
 
+  @time_buffer_ms to_timeout(minute: 5)
+
   defguard not_empty_string(s) when is_binary(s) and s != ""
 
   @impl AnyTalkerBot.Command
@@ -25,8 +27,6 @@ defmodule AnyTalkerBot.AskCommand do
 
     user_with_sub = Accounts.preload_current_subscription(reply.context.extra.user)
     config = Settings.get_full_chat_config(message.chat.id)
-
-    maybe_wait(user_with_sub)
 
     with :ok <- validate_chat_type(user_with_sub, is_group),
          :ok <- validate_config(user_with_sub, config),
@@ -38,7 +38,7 @@ defmodule AnyTalkerBot.AskCommand do
     end
   end
 
-  defp error_reply({:error, :not_group}, %Reply{} = reply, user_with_sub, config) do
+  defp error_reply({:error, :not_group}, %Reply{} = reply, %User{} = user_with_sub, %ChatConfig{} = config) do
     text =
       if is_nil(user_with_sub.current_subscription) and config.promote_pro do
         """
@@ -59,7 +59,7 @@ defmodule AnyTalkerBot.AskCommand do
     Reply.send_message(reply, text, as_reply?: true)
   end
 
-  defp error_reply({:error, :not_enabled}, %Reply{} = reply, user_with_sub, config) do
+  defp error_reply({:error, :not_enabled}, %Reply{} = reply, %User{} = user_with_sub, %ChatConfig{} = config) do
     text =
       if is_nil(user_with_sub.current_subscription) and config.promote_pro do
         """
@@ -86,31 +86,21 @@ defmodule AnyTalkerBot.AskCommand do
     Reply.send_message(reply, "Не вижу вопроса!", as_reply?: true)
   end
 
-  defp error_reply({:error, :rate_limit, time_left_ms}, %Reply{} = reply, user_with_sub, config) do
+  defp error_reply({:error, :rate_limit, time_left_ms}, %Reply{} = reply, _user_with_sub, _config) do
     text =
-      if is_nil(user_with_sub.current_subscription) and config.promote_pro do
-        """
-        Ты выжал лимит.
-        Следующая попытка будет доступна через #{format_time(time_left_ms)}.
-
-        Не хочешь ждать?
-        Бери PRO-подписку и используй команды без ограничений.
-
-        /que_pro — решай быстро.
-        """
-      else
-        """
-        Ты выжал лимит.
-        Следующая попытка будет доступна через #{format_time(time_left_ms)}.
-        """
-      end
+      """
+      Ты выжал лимит.
+      Следующая попытка будет доступна через #{format_time(time_left_ms)}.
+      """
 
     Reply.send_message(reply, text, as_reply?: true)
   end
 
   defp format_time(time_left_ms) do
-    hours = div(time_left_ms, 3_600_000)
-    minutes = div(rem(time_left_ms, 3_600_000), 60_000)
+    time_with_buffer_ms = time_left_ms + @time_buffer_ms
+
+    hours = div(time_with_buffer_ms, 3_600_000)
+    minutes = div(rem(time_with_buffer_ms, 3_600_000), 60_000)
 
     [format_unit(hours, "час", "часа", "часов"), format_unit(minutes, "минуту", "минуты", "минут")]
     |> Enum.reject(&is_nil/1)
@@ -245,15 +235,9 @@ defmodule AnyTalkerBot.AskCommand do
 
   defp validate_not_empty(_otherwise, _bot_id), do: {:error, :empty_text}
 
-  def validate_rate_limit(%User{current_subscription: sub} = user, %ChatConfig{} = config) do
-    {scale, limit} =
-      case sub do
-        nil ->
-          {config.ask_rate_limit_scale_ms, config.ask_rate_limit}
-
-        %Subscription{plan: :pro} ->
-          {config.ask_pro_rate_limit_scale_ms, config.ask_pro_rate_limit}
-      end
+  def validate_rate_limit(%User{} = user, %ChatConfig{} = config) do
+    scale = config.ask_rate_limit_scale_ms
+    limit = config.ask_rate_limit
 
     key = "ask:#{user.id}"
 
@@ -264,14 +248,6 @@ defmodule AnyTalkerBot.AskCommand do
       {:deny, time_left_ms} ->
         {:error, :rate_limit, time_left_ms}
     end
-  end
-
-  defp maybe_wait(%User{current_subscription: %Subscription{plan: :pro}}), do: nil
-
-  defp maybe_wait(_user) do
-    [second: 5]
-    |> to_timeout()
-    |> Process.sleep()
   end
 
   defp format_response_with_bot_name(reply_text, config) do
