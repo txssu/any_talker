@@ -7,7 +7,7 @@ defmodule AnyTalker.AI.IgnoreUserTool do
   alias AnyTalker.AI.Function
   alias AnyTalker.AI.Tool
 
-  @scale to_timeout(hour: 1000)
+  @scale to_timeout(hour: 1)
 
   @tool_description """
   Используется для временного прекращения ответа пользователю, когда продолжение диалога становится невозможным по причинам поведения, а не лексики.
