@@ -18,7 +18,7 @@ defmodule AnyTalkerBot.LoadDataMiddleware do
 
     maybe_user =
       case upsert_result do
-        {:ok, user} -> user
+        {:ok, user} -> Accounts.get_user(user.id)
         _err -> nil
       end
 
