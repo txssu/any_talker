@@ -9,8 +9,7 @@ defmodule AnyTalker.AI.ToolsRegistry do
     AnyTalker.AI.RandomChoiceTool,
     AnyTalker.AI.SearchTool,
     AnyTalker.AI.FetchPageTool,
-    AnyTalker.AI.YouTubeTool,
-    AnyTalker.AI.IgnoreUserTool
+    AnyTalker.AI.YouTubeTool
   ]
 
   function_name_mapping =

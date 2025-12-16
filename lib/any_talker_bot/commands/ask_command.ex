@@ -31,7 +31,6 @@ defmodule AnyTalkerBot.AskCommand do
     with :ok <- validate_chat_type(user_with_sub, is_group),
          :ok <- validate_config(user_with_sub, config),
          :ok <- validate_not_empty(message, bot_id),
-         :ok <- validate_not_ignored(user_with_sub),
          :ok <- validate_rate_limit(user_with_sub, config) do
       reply(reply, message, bot_id)
     else
@@ -85,10 +84,6 @@ defmodule AnyTalkerBot.AskCommand do
 
   defp error_reply({:error, :empty_text}, %Reply{} = reply, _user_with_sub, _config) do
     Reply.send_message(reply, "Не вижу вопроса!", as_reply?: true)
-  end
-
-  defp error_reply({:error, :ignored}, %Reply{} = reply, _user_with_sub, _config) do
-    Reply.send_message(reply, "...", as_reply?: true)
   end
 
   defp error_reply({:error, :rate_limit, time_left_ms}, %Reply{} = reply, _user_with_sub, _config) do
@@ -239,14 +234,6 @@ defmodule AnyTalkerBot.AskCommand do
        when not_empty_string(t) or not_empty_string(c) or is_list(p), do: :ok
 
   defp validate_not_empty(_otherwise, _bot_id), do: {:error, :empty_text}
-
-  defp validate_not_ignored(%User{ask_ignore_until: nil}), do: :ok
-
-  defp validate_not_ignored(%User{} = user) do
-    ignore? = DateTime.before?(DateTime.utc_now(), user.ask_ignore_until)
-
-    if ignore?, do: {:error, :ignored}, else: :ok
-  end
 
   def validate_rate_limit(%User{} = user, %ChatConfig{} = config) do
     scale = config.ask_rate_limit_scale_ms

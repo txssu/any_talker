@@ -151,18 +151,6 @@ defmodule AnyTalker.Accounts do
   end
 
   @doc """
-  Sets ignore time for user in /ask command.
-
-  ## Examples
-
-      ignore_until = DateTime.add(DateTime.utc_now(), 1800, :second)
-      ignore_user(user, ignore_until)
-  """
-  def ignore_user(%User{} = user, %DateTime{} = ignore_until) do
-    update_user(user, %{ask_ignore_until: ignore_until})
-  end
-
-  @doc """
   Returns list of users ordered by last message date (oldest first).
 
   Users who never sent messages appear first.
