@@ -89,6 +89,11 @@ deploy-webhook:
   before_script:
     - apk add --no-cache curl
   script:
+    - |
+      if [ "$IMAGE_CHANGED" != "true" ]; then
+        echo "Image unchanged, skipping deploy"
+        exit 0
+      fi
     - echo "Waiting before deploy..."
     - sleep 5
     - curl -X POST "$DEPLOY_WEBHOOK_URL"
@@ -110,6 +115,6 @@ deploy-webhook:
       echo "Health check failed after 60 seconds"
       exit 1
   rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $IMAGE_CHANGED == "true"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
   needs:
     - build-and-push-image
