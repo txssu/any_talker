@@ -89,7 +89,26 @@ deploy-webhook:
   before_script:
     - apk add --no-cache curl
   script:
+    - echo "Waiting before deploy..."
+    - sleep 5
     - curl -X POST "$DEPLOY_WEBHOOK_URL"
+    - echo "Waiting for deployment to start..."
+    - sleep 10
+    - |
+      echo "Checking health endpoint..."
+      for i in $(seq 1 12); do
+        if curl -sf "$APP_HOST/healthz" > /dev/null 2>&1; then
+          echo "Health check passed!"
+          curl -sf -X POST "https://api.telegram.org/bot${NOTIFY_TG_TOKEN}/sendMessage" \
+            -d "chat_id=${NOTIFY_TG_CHAT_ID}" \
+            -d "text=${NOTIFY_TEXT}"
+          exit 0
+        fi
+        echo "Attempt $i/12 failed, retrying in 5s..."
+        sleep 5
+      done
+      echo "Health check failed after 60 seconds"
+      exit 1
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $IMAGE_CHANGED == "true"
   needs:
