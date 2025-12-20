@@ -1,5 +1,6 @@
 defmodule AnyTalkerBot.MoveCommandTest do
   use AnyTalker.DataCase, async: true
+  use Repatch.ExUnit
 
   alias AnyTalker.Accounts
   alias AnyTalker.Game
@@ -199,13 +200,10 @@ defmodule AnyTalkerBot.MoveCommandTest do
   end
 
   setup do
-    # Clear rate limit cache before each test
-    # This ensures tests don't interfere with each other
-    on_exit(fn ->
-      # Rate limit uses ETS, which is process-specific
-      # Since we're using async: true, each test runs in its own process
-      # So we don't need explicit cleanup
-      :ok
-    end)
+    # Mock DateTime.utc_now/0 to return a time outside of 22:00-23:00 Ekaterinburg time
+    # This prevents the night bonus logic from affecting test results
+    Repatch.patch(DateTime, :utc_now, fn -> ~U[2024-01-01 10:00:00.000000Z] end)
+
+    :ok
   end
 end
