@@ -2,12 +2,10 @@ defmodule AnyTalkerWeb.WebApp.ChatLive do
   @moduledoc false
   use AnyTalkerWeb, :live_view
 
-  import AnyTalker.LocalizationUtils, only: [pluralize: 4]
   import AnyTalkerWeb.TelegramComponents
 
   alias AnyTalker.Accounts
   alias AnyTalker.Settings
-  alias AnyTalker.Statistics
 
   @impl Phoenix.LiveView
   def render(assigns) do
@@ -22,20 +20,13 @@ defmodule AnyTalkerWeb.WebApp.ChatLive do
       </.section>
 
       <.section>
-        <:header>Топ 5 отправителей за сегодня</:header>
-        <p :if={@top_authors == []} class="text-[15px] text-tg-hint mt-2.5 text-center">Сегодня не было сообщений</p>
-        <ul :if={@top_authors != []}>
-          <li :for={author <- @top_authors}>
-            <a
-              href={"https://t.me/#{author.user.username}"}
-              class="border-tg-section-separator hover-effect h-[42px] flex items-center rounded-lg border-b-2 pl-5 last:border-b-0"
-            >
-              <span class="text-[15px] flex-1 py-2.5">
-                {username(author.user)} — {author.message_count} {message_word(author.message_count)}
-              </span>
-            </a>
-          </li>
-        </ul>
+        <.link
+          navigate={~p"/webapp/c/#{@chat_config.id}/statistics"}
+          class="hover-effect text-[15px] flex items-center justify-center gap-2 py-2"
+        >
+          <span>Статистика сообщений</span>
+          <span class="text-tg-hint">→</span>
+        </.link>
       </.section>
 
       <.section :if={@user_owner?}>
@@ -75,7 +66,6 @@ defmodule AnyTalkerWeb.WebApp.ChatLive do
     user_owner? = Accounts.owner?(socket.assigns.current_user)
 
     chat_config = Settings.get_chat_config(chat_id)
-    top_authors = Statistics.get_top_message_authors_today(chat_id, 5)
     chat_members = Accounts.list_chat_members(chat_id)
 
     Task.async(fn ->
@@ -84,7 +74,7 @@ defmodule AnyTalkerWeb.WebApp.ChatLive do
 
     {:ok,
      socket
-     |> assign(user_owner?: user_owner?, top_authors: top_authors, chat_members: chat_members)
+     |> assign(user_owner?: user_owner?, chat_members: chat_members)
      |> assign_chat_config(chat_config)}
   end
 
@@ -128,9 +118,4 @@ defmodule AnyTalkerWeb.WebApp.ChatLive do
 
     assign(socket, form: form, chat_config: chat_config)
   end
-
-  defp username(nil), do: "Неизвестный пользователь"
-  defp username(user), do: Accounts.display_name(user) || user.username
-
-  defp message_word(count), do: pluralize(count, "сообщение", "сообщения", "сообщений")
 end

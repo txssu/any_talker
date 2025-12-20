@@ -75,6 +75,7 @@ defmodule AnyTalkerWeb.Router do
       live "/profile", ProfileLive
       live "/reminders", RemindersLive
       live "/c/:chat_id", ChatLive
+      live "/c/:chat_id/statistics", StatisticsLive
     end
 
     live_session :require_admin_user,

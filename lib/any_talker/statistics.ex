@@ -55,11 +55,24 @@ defmodule AnyTalker.Statistics do
     A list of maps as per `get_top_message_authors/3`.
   """
   def get_top_message_authors_today(chat_id, limit \\ 3) do
-    # Get today's date in UTC at midnight (00:00:00)
-    today_start = DateTime.new!(Date.utc_today(), ~T[00:00:00.000], "Etc/UTC")
-    # End of the day is just before midnight (23:59:59.999)
-    today_end = DateTime.new!(Date.utc_today(), ~T[23:59:59.999], "Etc/UTC")
+    get_top_message_authors_for_date(Date.utc_today(), chat_id, limit)
+  end
 
-    get_top_message_authors(today_start, today_end, chat_id, limit)
+  @doc """
+  Gets the top N message authors for a specific date.
+
+  ## Parameters
+    * date — the date to get statistics for
+    * chat_id — ID of the chat to filter messages by
+    * limit — maximum number of authors to return (defaults to 3)
+
+  ## Returns
+    A list of maps as per `get_top_message_authors/4`.
+  """
+  def get_top_message_authors_for_date(date, chat_id, limit \\ 3) do
+    day_start = DateTime.new!(date, ~T[00:00:00.000], "Etc/UTC")
+    day_end = DateTime.new!(date, ~T[23:59:59.999], "Etc/UTC")
+
+    get_top_message_authors(day_start, day_end, chat_id, limit)
   end
 end
