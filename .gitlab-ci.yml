@@ -1,0 +1,68 @@
+stages:
+  - check
+  - build
+
+variables:
+  MIX_ENV: test
+  POSTGRES_PASSWORD: postgres
+  POSTGRES_HOST: postgres
+  ELIXIR_VERSION: "1.19.2"
+  OTP_VERSION: "28.1.1"
+  DEBIAN_VERSION: "trixie-20251020-slim"
+
+checks:
+  stage: check
+  image: hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-debian-${DEBIAN_VERSION}
+  services:
+    - name: postgres:17
+      alias: postgres
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends git
+    - mix local.hex --force
+    - mix local.rebar --force
+    - mix deps.get
+  script:
+    - mix compile --warnings-as-errors
+    - mix format --check-formatted
+    - mix credo --strict
+    - mix sobelow --config
+    - mix deps.unlock --check-unused
+    - mix deps.audit
+    - mix hex.audit
+    - mix test
+  cache:
+    - key:
+        files:
+          - mix.lock
+      paths:
+        - deps
+    - key: build-$CI_COMMIT_REF_SLUG
+      fallback_keys:
+        - build-$CI_DEFAULT_BRANCH
+      paths:
+        - _build
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+build-and-push-image:
+  stage: build
+  image: docker:27
+  services:
+    - docker:27-dind
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker context create my-builder
+    - docker buildx create my-builder --driver docker-container --use
+  script:
+    - >
+      docker buildx build --push
+      -t $CI_REGISTRY_IMAGE:latest
+      --cache-to type=registry,ref=$CI_REGISTRY_IMAGE/cache-image,mode=max
+      --cache-from type=registry,ref=$CI_REGISTRY_IMAGE/cache-image .
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  needs:
+    - checks
