@@ -42,6 +42,16 @@ defmodule AnyTalkerWeb.Router do
     plug :put_secure_browser_headers, %{"content-security-policy" => "style-src 'unsafe-inline'"}
   end
 
+  pipeline :api do
+    plug :accepts, ["json"]
+  end
+
+  scope "/", AnyTalkerWeb do
+    pipe_through :api
+
+    get "/healthz", HealthController, :index
+  end
+
   scope "/", AnyTalkerWeb do
     pipe_through :browser
 
