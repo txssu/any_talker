@@ -58,11 +58,26 @@ build-and-push-image:
     - docker context create my-builder
     - docker buildx create my-builder --driver docker-container --use
   script:
+    - OLD_DIGEST=$(docker manifest inspect $CI_REGISTRY_IMAGE:latest 2>/dev/null | grep -m1 '"digest"' | cut -d'"' -f4 || echo "none")
+    - echo "Old digest - $OLD_DIGEST"
     - >
       docker buildx build --push
       -t $CI_REGISTRY_IMAGE:latest
       --cache-to type=registry,ref=$CI_REGISTRY_IMAGE/cache-image,mode=max
       --cache-from type=registry,ref=$CI_REGISTRY_IMAGE/cache-image .
+    - NEW_DIGEST=$(docker manifest inspect $CI_REGISTRY_IMAGE:latest | grep -m1 '"digest"' | cut -d'"' -f4)
+    - echo "New digest - $NEW_DIGEST"
+    - |
+      if [ "$OLD_DIGEST" = "$NEW_DIGEST" ]; then
+        echo "IMAGE_CHANGED=false" >> build.env
+        echo "Image unchanged, skipping deploy"
+      else
+        echo "IMAGE_CHANGED=true" >> build.env
+        echo "Image changed, will trigger deploy"
+      fi
+  artifacts:
+    reports:
+      dotenv: build.env
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
   needs:
@@ -76,6 +91,6 @@ deploy-webhook:
   script:
     - curl -X POST "$DEPLOY_WEBHOOK_URL"
   rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $IMAGE_CHANGED == "true"
   needs:
     - build-and-push-image
