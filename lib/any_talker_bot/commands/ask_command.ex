@@ -136,7 +136,8 @@ defmodule AnyTalkerBot.AskCommand do
 
   defp handle_ask_response({reply_text, reply_callback}, config) do
     escaped_text = HtmlUtils.escape_html_preserving_tags(reply_text)
-    formatted_text = format_response_with_bot_name(escaped_text, config)
+    replaced_text = replace_keywords(escaped_text)
+    formatted_text = format_response_with_bot_name(replaced_text, config)
     {formatted_text, adjust_params(reply_callback)}
   end
 
@@ -248,6 +249,12 @@ defmodule AnyTalkerBot.AskCommand do
       {:deny, time_left_ms} ->
         {:error, :rate_limit, time_left_ms}
     end
+  end
+
+  defp replace_keywords(text) do
+    text
+    |> String.replace(~r/достаточно/iu, "#достаточно")
+    |> String.replace(~r/не\s+нужно/iu, "#ненужно")
   end
 
   defp format_response_with_bot_name(reply_text, config) do
