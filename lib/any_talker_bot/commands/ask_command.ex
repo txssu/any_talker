@@ -5,16 +5,15 @@ defmodule AnyTalkerBot.AskCommand do
   alias AnyTalker.Accounts
   alias AnyTalker.Accounts.Subscription
   alias AnyTalker.Accounts.User
-  alias AnyTalker.AI
-  alias AnyTalker.AI.History
   alias AnyTalker.Settings
   alias AnyTalker.Settings.ChatConfig
-  alias AnyTalkerBot.Attachments
+  alias AnyTalker.TypedStructAccess
   alias AnyTalkerBot.HtmlUtils
   alias AnyTalkerBot.Reply
-  alias ExGram.Model.Chat
   alias ExGram.Model.Message
-  alias ExGram.Model.PhotoSize
+
+  require Logger
+  require TypedStructAccess
 
   @time_buffer_ms to_timeout(minute: 5)
 
@@ -32,7 +31,8 @@ defmodule AnyTalkerBot.AskCommand do
          :ok <- validate_config(user_with_sub, config),
          :ok <- validate_not_empty(message, bot_id),
          :ok <- validate_rate_limit(user_with_sub, config) do
-      reply(reply, message, bot_id)
+      envelope_context = %AnyTalker.AI.Envelope.Context{chat: config, author: user_with_sub, bot_id: bot_id}
+      reply(reply, message, envelope_context)
     else
       error -> error_reply(error, reply, user_with_sub, config)
     end
@@ -110,111 +110,32 @@ defmodule AnyTalkerBot.AskCommand do
   defp format_unit(0, _singular, _few, _many), do: nil
   defp format_unit(n, singular, few, many), do: "#{n} #{pluralize(n, singular, few, many)}"
 
-  defp reply(%Reply{} = reply, message, bot_id) do
-    parsed_message = parse_message(message, bot_id)
-    config = Settings.get_full_chat_config(message.chat.id)
+  defp reply(%Reply{} = reply, message, envelope_context) do
+    result =
+      message
+      |> AnyTalker.AI.Envelope.Source.to_envelope(envelope_context)
+      |> AnyTalker.AI.request()
 
-    {reply_text, reply_callback} =
-      parsed_message
-      |> AI.ask(build_context(reply), history_key: history_key(message.reply_to_message))
-      |> handle_ask_response(config)
+    case result do
+      {:ok, response, history} ->
+        text =
+          response.data.content
+          |> HtmlUtils.escape_html_preserving_tags()
+          |> replace_keywords()
+          |> format_response_with_bot_name(envelope_context.chat)
 
-    Reply.send_message(reply, reply_text, on_sent: reply_callback, mode: :html, as_reply?: true)
-  end
+        Reply.send_message(reply, text,
+          mode: :html,
+          as_reply?: true,
+          on_sent: fn %Message{} = msg ->
+            AnyTalker.AI.save_request_history(history, msg)
+          end
+        )
 
-  defp history_key(nil) do
-    nil
-  end
-
-  defp history_key(%Message{chat: %Chat{id: chat_id}, message_id: message_id}) do
-    History.Key.new(chat_id, message_id)
-  end
-
-  defp handle_ask_response(nil, _config) do
-    {"Да не", nil}
-  end
-
-  defp handle_ask_response({reply_text, reply_callback}, config) do
-    escaped_text = HtmlUtils.escape_html_preserving_tags(reply_text)
-    replaced_text = replace_keywords(escaped_text)
-    formatted_text = format_response_with_bot_name(replaced_text, config)
-    {formatted_text, adjust_params(reply_callback)}
-  end
-
-  defp parse_message(%Message{text: t, caption: c, photo: p} = message, bot_id)
-       when not_empty_string(t) or not_empty_string(c) or not is_nil(p) do
-    message
-    |> build_message(bot_id)
-    |> add_reply(message, bot_id)
-  end
-
-  defp parse_message(%Message{reply_to_message: %Message{} = message}, bot_id) do
-    parse_message(message, bot_id)
-  end
-
-  defp display_name(%Message{from: from}) do
-    from.id
-    |> Accounts.get_user()
-    |> Accounts.display_name()
-    |> Kernel.||(from.first_name)
-  end
-
-  defp build_message(message, bot_id) do
-    role = if message.from.id == bot_id, do: :assistant, else: :user
-
-    AI.Message.new(message.message_id, role, message.text || message.caption, DateTime.from_unix!(message.date),
-      username: display_name(message),
-      user_id: message.from.id,
-      message_id: message.message_id,
-      chat_id: message.chat.id,
-      image_url: get_image_url(message)
-    )
-  end
-
-  defp add_reply(result, %Message{reply_to_message: nil}, _bot_id) do
-    result
-  end
-
-  defp add_reply(result, %Message{} = message, bot_id) do
-    original_reply = message.reply_to_message
-    role = if original_reply.from.id == bot_id, do: :assistant, else: :user
-    quote_text = message.quote && message.quote.text
-
-    message_text = original_reply.text || original_reply.caption
-
-    reply =
-      AI.Message.new(original_reply.message_id, role, message_text, DateTime.from_unix!(original_reply.date),
-        username: display_name(original_reply),
-        quote: quote_text,
-        image_url: get_image_url(original_reply)
-      )
-
-    %{result | reply: reply}
-  end
-
-  defp get_image_url(%Message{photo: nil}), do: nil
-
-  defp get_image_url(%Message{photo: photos}) do
-    %PhotoSize{file_id: photo_id} = Attachments.best_fit_photo(photos, 1536 * 1024)
-
-    Attachments.get_file_link(photo_id)
-  end
-
-  defp adjust_params(reply_callback) do
-    fn %Message{} = message ->
-      key = history_key(message)
-      reply_callback.(key, message.message_id)
+      {:error, reason} ->
+        Logger.error("AI request failed", details: %{reason: reason})
+        Reply.send_message(reply, "Да не", as_reply?: true)
     end
-  end
-
-  defp build_context(%Reply{} = reply) do
-    message = reply.context.update.message
-
-    %AnyTalker.AI.Context{
-      chat_id: message.chat.id,
-      user_id: message.from.id,
-      message_id: message.message_id
-    }
   end
 
   defp validate_chat_type(user_with_sub, group?)

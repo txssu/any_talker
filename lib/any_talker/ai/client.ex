@@ -1,19 +1,11 @@
 defmodule AnyTalker.AI.OpenRouterClient do
   @moduledoc false
 
-  alias AnyTalker.AI.Response
+  def completions(%AnyTalker.AI.Request{} = req) do
+    body = AnyTalker.AI.OpenRouter.Completions.Encoder.encode(req)
 
-  require Logger
-
-  def response(options) do
-    body = %{
-      input: Keyword.fetch!(options, :input),
-      models: Keyword.fetch!(options, :models),
-      tools: Keyword.get(options, :tools, [])
-    }
-
-    with {:ok, %{body: resp_body}} <- Tesla.post(client(), "/responses", body) do
-      Response.parse(resp_body)
+    with {:ok, %{body: resp_body}} <- Tesla.post(client(), "/v1/chat/completions", body) do
+      AnyTalker.AI.OpenRouter.Completions.Decoder.decode(resp_body)
     end
   end
 

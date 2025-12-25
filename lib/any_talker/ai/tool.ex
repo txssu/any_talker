@@ -1,28 +1,52 @@
 defmodule AnyTalker.AI.Tool do
   @moduledoc false
+  alias AnyTalker.AI.FunctionContext
+  alias AnyTalker.AI.Response.ToolCall
+  alias AnyTalker.AI.Tool.CallResult
+  alias AnyTalker.AI.Tool.Registry
 
-  @callback spec() :: map()
+  require Logger
 
-  @callback type() :: atom()
+  @callback spec() :: AnyTalker.AI.Tool.Function.t()
+  @callback call(map(), FunctionContext.t()) :: term()
 
-  defmacro __using__(type: type) do
-    quote do
-      @behaviour unquote(__MODULE__)
+  @continue_text """
+  Достигнут лимит вызовов (2 за ход).
+  Перестань вызывать инструменты, расскажи пользователю что уже сделано,
+  и попроси его написать "продолжай" чтобы ты мог завершить задачу.
+  """
 
-      unquote(extensions_by_type(type))
-    end
+  def execute(%ToolCall{} = tool_call, %FunctionContext{} = context, call_index) do
+    Logger.info("Executing tool",
+      details: %{id: tool_call.tool_call_id, function_name: tool_call.function_name, params: tool_call.arguments}
+    )
+
+    returned_value =
+      if call_index < 2 do
+        module = Registry.get_module_by_func_name(tool_call.function_name)
+
+        module.call(tool_call.arguments, context)
+      else
+        {:error, @continue_text}
+      end
+
+    returned_value
+    |> CallResult.new(tool_call)
+    |> with_call_result_log(tool_call)
   end
 
-  def extensions_by_type(:basic) do
-    quote do
-      def type, do: :tool
-    end
-  end
+  def with_call_result_log(%CallResult{} = call_result, %ToolCall{} = tool_call) do
+    result =
+      if call_result.success do
+        %{value: call_result.value}
+      else
+        %{error: call_result.error}
+      end
 
-  def extensions_by_type(:function) do
-    quote do
-      @behaviour AnyTalker.AI.Function
-      def type, do: :function
-    end
+    Logger.info("Executing tool result",
+      details: Map.merge(result, %{id: tool_call.tool_call_id, success: call_result.success})
+    )
+
+    call_result
   end
 end

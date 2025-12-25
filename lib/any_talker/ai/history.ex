@@ -1,5 +1,6 @@
 defmodule AnyTalker.AI.History do
   @moduledoc false
+
   alias AnyTalker.AI.History.Key
   alias AnyTalker.Cache
 
@@ -10,7 +11,7 @@ defmodule AnyTalker.AI.History do
   end
 
   def new(messages) do
-    %__MODULE__{messages: messages}
+    %__MODULE__{messages: Enum.reverse(messages)}
   end
 
   def append(%__MODULE__{} = history, messages) when is_list(messages) do
@@ -21,12 +22,27 @@ defmodule AnyTalker.AI.History do
     %{history | messages: [message | history.messages]}
   end
 
+  def messages(%__MODULE__{messages: messages}) do
+    messages
+    |> Enum.reverse()
+    |> Enum.uniq_by(fn msg ->
+      case msg.uniq_key do
+        nil -> make_ref()
+        key -> key
+      end
+    end)
+  end
+
+  def set_last_uniq_key(%__MODULE__{messages: [last | rest]}, uniq_key) do
+    %__MODULE__{messages: [%{last | uniq_key: uniq_key} | rest]}
+  end
+
   @doc """
   Returns response_id and added_messages_ids
   """
   def get(%Key{} = key) do
     case Cache.get(key) do
-      nil -> %__MODULE__{}
+      nil -> new()
       %__MODULE__{} = history -> history
     end
   end

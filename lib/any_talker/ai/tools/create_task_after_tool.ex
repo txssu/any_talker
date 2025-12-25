@@ -1,88 +1,68 @@
-# credo:disable-for-this-file Credo.Check.Design.DuplicatedCode
 defmodule AnyTalker.AI.CreateTaskAfterTool do
   @moduledoc false
-  use AnyTalker.AI.Tool, type: :function
+  @behaviour AnyTalker.AI.Tool
 
-  alias AnyTalker.AI.Context
-  alias AnyTalker.AI.Function
-  alias AnyTalker.AI.Tool
+  alias AnyTalker.AI.FunctionContext
+  alias AnyTalker.AI.Tool.Function
+  alias AnyTalker.AI.Tool.FunctionArg
   alias AnyTalker.Reminders
 
-  @impl Tool
   def spec do
-    %{
-      type: "function",
-      name: name(),
+    %Function{
+      name: "create_task_after",
       description: "Creates a task reminder that will be sent after a specific duration from now",
-      strict: true,
-      parameters: %{
-        type: "object",
-        additionalProperties: false,
-        properties: %{
-          message: %{
-            type: "string",
-            description: """
-            The message that will be sent to the user as a reminder from the AI assistant.
-            Write it as if you (the AI) are speaking directly to the user.
-            The user's name will be automatically added as a mention at the beginning.
-            DO NOT repeat this message to the user in your response - it will be sent automatically at the scheduled time.
-            Example: 'напоминаю тебе позвонить маме' will become '@username, напоминаю тебе позвонить маме'
-            """
-          },
-          hours: %{
-            type: "integer",
-            description: "Number of hours to wait before sending the reminder",
-            minimum: 0
-          },
-          minutes: %{
-            type: "integer",
-            description: "Number of minutes to wait before sending the reminder",
-            minimum: 0
-          }
+      args: [
+        %FunctionArg{
+          name: "message",
+          type: "string",
+          description: """
+          The message that will be sent to the user as a reminder from the AI assistant.
+          Write it as if you (the AI) are speaking directly to the user.
+          The user's name will be automatically added as a mention at the beginning.
+          DO NOT repeat this message to the user in your response - it will be sent automatically at the scheduled time.
+          Example: 'напоминаю тебе позвонить маме' will become '@username, напоминаю тебе позвонить маме'
+          """
         },
-        required: ["message", "hours", "minutes"]
-      }
+        %FunctionArg{
+          name: "hours",
+          type: "integer",
+          description: "Number of hours to wait before sending the reminder",
+          minimum: 0
+        },
+        %FunctionArg{
+          name: "minutes",
+          type: "integer",
+          description: "Number of minutes to wait before sending the reminder",
+          minimum: 0
+        }
+      ]
     }
   end
 
-  @impl Function
-  def name, do: "create_task_after"
-
-  @impl Function
-  def exec(params, %Context{chat_id: cid, user_id: uid, message_id: mid}) do
-    hours = params["hours"]
-    minutes = params["minutes"]
-
+  def call(%{"message" => message, "hours" => hours, "minutes" => minutes}, %FunctionContext{} = ctx) do
     total_minutes = hours * 60 + minutes
-    delay_milliseconds = total_minutes * 60 * 1000
 
-    case validate_minimum_delay(delay_milliseconds) do
-      :ok ->
-        scheduled_at = DateTime.add(DateTime.utc_now(), total_minutes * 60, :second)
+    with :ok <- validate_minimum_delay(total_minutes) do
+      scheduled_at = DateTime.add(DateTime.utc_now(), total_minutes * 60, :second)
 
-        attrs = %{
-          message: params["message"],
-          chat_id: cid,
-          user_id: uid,
-          reply_to_id: mid,
-          scheduled_at: scheduled_at
-        }
+      attrs = %{
+        message: message,
+        chat_id: ctx.chat.id,
+        user_id: ctx.user.id,
+        reply_to_id: ctx.message.message_id,
+        scheduled_at: scheduled_at
+      }
 
-        case Reminders.create_reminder(attrs) do
-          {:ok, _reminder} -> "ok"
-          {:error, _changeset} -> %{"error" => "Failed to create reminder"}
-        end
-
-      {:error, reason} ->
-        %{"error" => reason}
+      case Reminders.create_reminder(attrs) do
+        {:ok, _reminder} -> {:ok, "ok"}
+        {:error, _changeset} -> {:error, "Failed to create reminder"}
+      end
     end
   end
 
-  defp validate_minimum_delay(delay) do
-    if delay < 60_000 do
-      {:error, "Reminder must be scheduled at least 1 minute in the future"}
-    else
-      :ok
-    end
+  defp validate_minimum_delay(delay) when delay < 1 do
+    {:error, "Reminder must be scheduled at least 1 minute in the future"}
   end
+
+  defp validate_minimum_delay(_delay), do: :ok
 end

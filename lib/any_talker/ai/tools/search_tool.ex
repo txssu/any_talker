@@ -1,47 +1,36 @@
 defmodule AnyTalker.AI.SearchTool do
   @moduledoc false
-  use AnyTalker.AI.Tool, type: :function
+  @behaviour AnyTalker.AI.Tool
 
-  alias AnyTalker.AI.Function
-  alias AnyTalker.AI.Tool
+  alias AnyTalker.AI.Tool.Function
+  alias AnyTalker.AI.Tool.FunctionArg
   alias AnyTalker.BraveClient
 
   require Logger
 
-  @impl Tool
   def spec do
-    %{
-      type: "function",
-      name: name(),
+    %Function{
+      name: "search",
       description:
         "Search the web using Brave Search API. Use this tool when you don't know about the topic or need current information. If you need additional details from search results, use fetch_page tool with the URL.",
-      strict: true,
-      parameters: %{
-        additionalProperties: false,
-        type: "object",
-        properties: %{
-          query: %{
-            type: "string",
-            description: "Search query"
-          }
-        },
-        required: ["query"]
-      }
+      args: [
+        %FunctionArg{
+          name: "query",
+          type: "string",
+          description: "Search query"
+        }
+      ]
     }
   end
 
-  @impl Function
-  def name, do: "search"
-
-  @impl Function
-  def exec(%{"query" => query}, _context) do
+  def call(%{"query" => query}, _context) do
     case BraveClient.search(query) do
       {:ok, body} ->
-        filter_results(body)
+        {:ok, filter_results(body)}
 
       {:error, reason} ->
         Logger.error("Search failed", details: %{reason: reason})
-        "Поиск недоступен"
+        {:error, "Поиск недоступен"}
     end
   end
 
