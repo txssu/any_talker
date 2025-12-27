@@ -9,6 +9,7 @@ defmodule AnyTalker.Game.Movement do
   alias AnyTalker.Accounts
   alias AnyTalker.Config.GameConfig
   alias AnyTalker.Game
+  alias AnyTalker.Game.NewYearEvent
   alias AnyTalker.Game.PlayerStats
 
   defmodule MoveResult do
@@ -89,9 +90,11 @@ defmodule AnyTalker.Game.Movement do
   end
 
   defp evaluate_move(%PlayerStats{steps_count: steps_count} = stats, user) do
-    reward_granted = should_grant_reward?(steps_count)
-    should_trigger_fork = should_trigger_fork?(stats, steps_count)
-    night_bonus = process_night_bonus(user)
+    event_active = NewYearEvent.event_active?()
+
+    reward_granted = not event_active and should_grant_reward?(steps_count)
+    should_trigger_fork = not event_active and should_trigger_fork?(stats, steps_count)
+    night_bonus = if event_active, do: nil, else: process_night_bonus(user)
 
     if reward_granted do
       grant_reward(user)
