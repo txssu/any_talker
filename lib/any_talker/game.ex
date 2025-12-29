@@ -21,7 +21,7 @@ defmodule AnyTalker.Game do
   """
   def get_player_stats(user_id) do
     case Repo.get(PlayerStats, user_id) do
-      nil -> %PlayerStats{user_id: user_id, steps_count: 0, at_fork: false}
+      nil -> %PlayerStats{user_id: user_id, steps_count: 0, at_fork: false, has_taken_final_step: false}
       stats -> stats
     end
   end
@@ -83,6 +83,21 @@ defmodule AnyTalker.Game do
   def update_last_fork_step(%PlayerStats{} = stats) do
     stats
     |> PlayerStats.changeset(%{last_fork_step: stats.steps_count})
+    |> Repo.insert_or_update()
+  end
+
+  @doc """
+  Marks that the player has taken their final step (New Year event).
+
+  ## Examples
+
+      iex> mark_final_step_taken(%PlayerStats{user_id: 123})
+      {:ok, %PlayerStats{has_taken_final_step: true}}
+
+  """
+  def mark_final_step_taken(%PlayerStats{} = stats) do
+    stats
+    |> PlayerStats.changeset(%{has_taken_final_step: true})
     |> Repo.insert_or_update()
   end
 
