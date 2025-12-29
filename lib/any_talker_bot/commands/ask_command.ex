@@ -240,9 +240,13 @@ defmodule AnyTalkerBot.AskCommand do
     scale = config.ask_rate_limit_scale_ms
     limit = config.ask_rate_limit
 
+    max_offset = div(scale, 10)
+    offset = if max_offset > 0, do: rem(user.id, max_offset), else: 0
+    adjusted_scale = scale + offset
+
     key = "ask:#{user.id}"
 
-    case AnyTalker.RateLimit.hit(key, scale, limit) do
+    case AnyTalker.RateLimit.hit(key, adjusted_scale, limit) do
       {:allow, _count} ->
         :ok
 
