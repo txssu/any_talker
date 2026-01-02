@@ -1,14 +1,12 @@
 set shell := ["sh", "-eu", "-o", "pipefail", "-c"]
 
-[parallel]
-server-tunnel: tunnel server
-
 server:
     iex -S mix phx.server
 
-tunnel:
-    tuna tunnel clear
-    tuna http 4000 --no-colors --domain=$PHX_HOST > tmp/tuna.log 2>&1
+branch name:
+    git checkout main
+    git pull
+    git checkout -b {{name}}
 
 setup:
     docker compose up -d database
