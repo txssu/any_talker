@@ -97,7 +97,6 @@ defmodule AnyTalkerWeb.Router do
       live "/global", GlobalConfigLive
       live "/users", UsersLive
       live "/all_reminders", AllRemindersLive
-      live "/leaderboard", LeaderboardLive
       live "/inactive_users", InactiveUsersLive
       live "/profile/:id", ProfileLive
     end
