@@ -29,6 +29,16 @@ defmodule AnyTalkerWeb.WebApp.ChatLive do
         </.link>
       </.section>
 
+      <.section>
+        <.link
+          navigate={~p"/webapp/c/#{@chat_config.id}/move_stats"}
+          class="hover-effect text-[15px] flex items-center justify-center gap-2 py-2"
+        >
+          <span>Статистика /move</span>
+          <span class="text-tg-hint">→</span>
+        </.link>
+      </.section>
+
       <.section :if={@user_owner?}>
         <:header>Настройки</:header>
         <div class="px-2">
