@@ -1,26 +1,19 @@
 defmodule AnyTalker.AI.NowTool do
   @moduledoc false
-  use AnyTalker.AI.Tool, type: :function
+  @behaviour AnyTalker.AI.Tool
 
-  alias AnyTalker.AI.Function
-  alias AnyTalker.AI.Tool
+  alias AnyTalker.AI.Tool.Function
 
-  @impl Tool
   def spec do
-    %{
-      type: "function",
-      name: name(),
+    %Function{
+      name: "now",
       description: "Returns current date and time",
-      strict: true,
-      parameters: %{additionalProperties: false, type: "object", properties: %{}}
+      args: []
     }
   end
 
-  @impl Function
-  def name, do: "now"
-
-  @impl Function
-  def exec(_params, _context) do
-    DateTime.utc_now(:second)
+  def call(_params, _context) do
+    now = DateTime.now!("Asia/Yekaterinburg")
+    {:ok, now}
   end
 end

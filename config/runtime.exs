@@ -22,7 +22,7 @@ if System.get_env("PHX_SERVER") do
 end
 
 config :any_talker, AnyTalker.AI.OpenRouterClient,
-  api_url: System.get_env("OPENAI_URL", "https://api.openai.com/v1"),
+  api_url: System.get_env("OPENAI_URL", "https://openrouter.ai/api"),
   api_key: System.get_env("OPENAI_KEY"),
   proxy_uri: System.get_env("OPENAI_PROXY_URL")
 

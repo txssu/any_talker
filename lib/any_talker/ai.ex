@@ -1,109 +1,59 @@
 defmodule AnyTalker.AI do
   @moduledoc false
-
-  alias AnyTalker.AI.Attachments
-  alias AnyTalker.AI.Context
-  alias AnyTalker.AI.FunctionCall
+  alias AnyTalker.AI.Envelope
   alias AnyTalker.AI.History
-  alias AnyTalker.AI.Instruction
-  alias AnyTalker.AI.Message
-  alias AnyTalker.AI.Message.FunctionToolCall
-  alias AnyTalker.AI.Message.Input
-  alias AnyTalker.AI.OpenRouterClient
+  alias AnyTalker.AI.Request
   alias AnyTalker.AI.Response
-  alias AnyTalker.AI.ToolsRegistry
-  alias AnyTalker.Settings
+  alias AnyTalker.AI.ToMessage
+  alias AnyTalker.AI.Tool
 
-  require Logger
+  def request(%Envelope{} = envelope) do
+    history_key = History.Storable.to_key(envelope)
+    history = History.get(history_key)
 
-  def ask(%Input{} = message, %Context{} = context, options) do
-    %History{} =
-      history =
-      case Keyword.get(options, :history_key) do
-        nil -> History.new()
-        key -> History.get(key)
-      end
+    messages =
+      history
+      |> History.append(Envelope.messages(envelope))
+      |> History.messages()
 
-    with {:ok, final_message} <- Attachments.download_message_image(message),
-         request_history = History.append(history, final_message),
-         config = Settings.get_full_chat_config(message.chat_id),
-         system_message = create_system_message(config.ask_prompt),
-         common = [
-           models: String.split(config.ask_model, " ", trim: true),
-           tools: ToolsRegistry.list_specs()
-         ],
-         {:ok, response, result_history} <-
-           request_response(request_history, system_message, common, context) do
-      {response.output_text, make_callback(result_history, response)}
-    else
-      {:error, error} ->
-        Logger.error("OpenRouterClientError", details: error)
-        nil
-    end
+    req = %Request{
+      messages: messages,
+      instructions: Envelope.instructions(envelope),
+      models: envelope.models,
+      tools: Tool.Registry.list(),
+      function_context: Envelope.function_context(envelope)
+    }
+
+    generate(req)
   end
 
-  defp create_system_message(prompt) do
-    instructions_text = Instruction.build(prompt)
-    Message.new("system", :system, instructions_text, DateTime.utc_now())
+  def save_request_history(%History{} = history, %ExGram.Model.Message{} = message) do
+    history_key = History.Storable.to_key(message)
+    updated_history = History.set_last_uniq_key(history, message.message_id)
+    History.put(history_key, updated_history)
   end
 
-  defp make_callback(%History{} = history, %Response{} = response) do
-    fn %History.Key{} = key, message_id ->
-      message = Message.new(message_id, :assistant, response.output_text, DateTime.utc_now())
-
-      History.put(key, History.append(history, message))
-    end
+  def generate(%Request{} = req) do
+    do_generate(req, 0)
   end
 
-  # Prepares messages for API request by formatting history and prepending system message.
-  # System message is added only for the request and is not saved in history.
-  defp prepare_messages(%History{} = history, system_message) do
-    formatted_history = Message.format_list(history.messages)
-    formatted_system = Input.format_message(system_message)
+  def do_generate(%Request{} = req, tool_calls) do
+    with {:ok, %Response{} = response} <- AnyTalker.AI.OpenRouterClient.completions(req) do
+      case response.data do
+        %Response.ToolCall{} ->
+          tool_call_msg = ToMessage.to_message(response)
+          call_result = Tool.execute(response.data, req.function_context, tool_calls)
+          call_result_msg = ToMessage.to_message(call_result)
+          do_generate(%{req | messages: req.messages ++ [tool_call_msg, call_result_msg]}, tool_calls + 1)
 
-    [formatted_system | formatted_history]
-  end
+        _another ->
+          history =
+            req.messages
+            |> History.new()
+            |> History.append(ToMessage.to_message(response))
 
-  defp request_response(%History{} = history, system_message, common, %Context{} = context) do
-    body = Keyword.put(common, :input, prepare_messages(history, system_message))
-
-    with {:ok, response} <- OpenRouterClient.response(body) do
-      hit_metrics(response)
-
-      case response do
-        %Response{function_calls: [_first_call | _rest_calls] = function_calls} ->
-          history_with_calls =
-            Enum.reduce(function_calls, history, fn function_call, acc_history ->
-              tool_call_message =
-                FunctionToolCall.new(
-                  function_call.call_id,
-                  function_call.name,
-                  function_call.arguments_json,
-                  function_call.id
-                )
-
-              history_with_call = History.append(acc_history, tool_call_message)
-              call_result = FunctionCall.exec(function_call, context)
-              History.append(history_with_call, call_result)
-            end)
-
-          request_response(history_with_calls, system_message, common, context)
-
-        %Response{} = resp ->
-          {:ok, resp, history}
+          {:ok, response, history}
       end
     end
-  end
-
-  defp hit_metrics(response) do
-    :telemetry.execute(
-      [:any_talker, :bot, :ai],
-      %{
-        total_tokens: response.total_tokens
-      },
-      %{model: response.model}
-    )
-
-    :ok
   end
 end
