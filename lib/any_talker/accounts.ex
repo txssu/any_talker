@@ -17,7 +17,7 @@ defmodule AnyTalker.Accounts do
   def upsert_user(attrs, keys) do
     %User{}
     |> User.changeset(attrs)
-    |> Repo.insert(on_conflict: {:replace, keys}, conflict_target: [:id])
+    |> Repo.insert(on_conflict: {:replace, keys}, conflict_target: [:id], returning: true)
   end
 
   def update_user(user, attrs) do

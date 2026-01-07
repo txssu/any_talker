@@ -15,10 +15,12 @@ end
 defimpl AnyTalker.AI.Envelope.Source, for: ExGram.Model.Message do
   alias AnyTalker.Accounts
   alias AnyTalker.AI.Envelope
+  alias AnyTalker.AI.Envelope.AnonymousAuthor
   alias AnyTalker.AI.Envelope.Context
   alias AnyTalker.Settings.ChatConfig
   alias AnyTalker.TypedStructAccess
   alias ExGram.Model.Message
+  alias ExGram.Model.MessageOriginHiddenUser
   alias ExGram.Model.MessageOriginUser
   alias ExGram.Model.PhotoSize
   alias ExGram.Model.TextQuote
@@ -114,18 +116,27 @@ defimpl AnyTalker.AI.Envelope.Source, for: ExGram.Model.Message do
     |> Accounts.display_name()
   end
 
+  defp display_name_for(%AnonymousAuthor{display_name: name}), do: name
+
   defp build_reply(nil, _context), do: nil
 
   defp build_reply(%Message{} = reply_message, %Context{} = context) do
-    reply_author_id = get_author_id(reply_message)
-    reply_author = Accounts.get_user(reply_author_id)
-
+    reply_author = get_reply_author(reply_message)
     reply_context = %{context | author: reply_author}
 
     AnyTalker.AI.Envelope.Source.to_envelope(reply_message, reply_context)
   end
 
-  defp get_author_id(%Message{forward_origin: %MessageOriginUser{sender_user: %User{id: id}}}), do: id
+  defp get_reply_author(%Message{} = message) do
+    case message do
+      %{forward_origin: %MessageOriginUser{sender_user: %User{id: id}}} ->
+        Accounts.get_user(id)
 
-  defp get_author_id(%Message{from: %User{id: id}}), do: id
+      %{forward_origin: %MessageOriginHiddenUser{sender_user_name: name}} ->
+        %AnonymousAuthor{display_name: name}
+
+      %{from: %User{id: id}} ->
+        Accounts.get_user(id)
+    end
+  end
 end
