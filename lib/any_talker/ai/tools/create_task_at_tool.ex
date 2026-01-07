@@ -18,9 +18,7 @@ defmodule AnyTalker.AI.CreateTaskAtTool do
           description: """
           The message that will be sent to the user as a reminder from the AI assistant.
           Write it as if you (the AI) are speaking directly to the user.
-          The user's name will be automatically added as a mention at the beginning.
           DO NOT repeat this message to the user in your response - it will be sent automatically at the scheduled time.
-          Example: 'напоминаю тебе позвонить маме' will become '@username, напоминаю тебе позвонить маме'
           """
         },
         %FunctionArg{
