@@ -3,7 +3,6 @@ defmodule AnyTalker.AI.SendReminderJob do
   use Oban.Worker, queue: :default
 
   alias AnyTalker.Accounts
-  alias AnyTalker.Accounts.User
   alias AnyTalker.Reminders
   alias AnyTalker.Reminders.Reminder
   alias AnyTalkerBot.MarkdownUtils
@@ -29,10 +28,7 @@ defmodule AnyTalker.AI.SendReminderJob do
   end
 
   defp send_reminder(%Reminder{} = reminder) do
-    text =
-      reminder.user_id
-      |> Accounts.get_user()
-      |> to_text_with_mention(reminder.message)
+    text = format_text(reminder)
 
     base_options = [
       parse_mode: "MarkdownV2",
@@ -54,16 +50,22 @@ defmodule AnyTalker.AI.SendReminderJob do
     %ExGram.Model.ReplyParameters{message_id: message_id, chat_id: chat_id}
   end
 
-  defp to_text_with_mention(%User{} = user, text) do
+  # When no reply_to_id, prepend username mention for backward compatibility
+  # with reminders that don't reply to a specific message
+  defp format_text(%Reminder{reply_to_id: nil} = reminder) do
+    user = Accounts.get_user(reminder.user_id)
+
     username =
       user
       |> Accounts.display_name()
       |> MarkdownUtils.escape_markdown()
 
-    formatted_text = MarkdownUtils.escape_markdown(text)
+    formatted_text = MarkdownUtils.escape_markdown(reminder.message)
 
-    """
-    [#{username}](tg://user?id=#{user.id}), #{formatted_text}
-    """
+    "[#{username}](tg://user?id=#{user.id}), #{formatted_text}"
+  end
+
+  defp format_text(%Reminder{} = reminder) do
+    MarkdownUtils.escape_markdown(reminder.message)
   end
 end
