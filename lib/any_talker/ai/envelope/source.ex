@@ -19,6 +19,7 @@ defimpl AnyTalker.AI.Envelope.Source, for: ExGram.Model.Message do
   alias AnyTalker.Settings.ChatConfig
   alias AnyTalker.TypedStructAccess
   alias ExGram.Model.Message
+  alias ExGram.Model.MessageOriginUser
   alias ExGram.Model.PhotoSize
   alias ExGram.Model.TextQuote
   alias ExGram.Model.User
@@ -27,7 +28,7 @@ defimpl AnyTalker.AI.Envelope.Source, for: ExGram.Model.Message do
 
   def to_envelope(%Message{} = message, %Context{} = context) do
     quote_text = TypedStructAccess.get(message.quote.text, [TextQuote])
-    reply = message.reply_to_message && AnyTalker.AI.Envelope.Source.to_envelope(message.reply_to_message, context)
+    reply = build_reply(message.reply_to_message, context)
 
     from_id = TypedStructAccess.get(message.from.id, [User])
 
@@ -112,4 +113,19 @@ defimpl AnyTalker.AI.Envelope.Source, for: ExGram.Model.Message do
     |> Accounts.get_user()
     |> Accounts.display_name()
   end
+
+  defp build_reply(nil, _context), do: nil
+
+  defp build_reply(%Message{} = reply_message, %Context{} = context) do
+    reply_author_id = get_author_id(reply_message)
+    reply_author = Accounts.get_user(reply_author_id)
+
+    reply_context = %{context | author: reply_author}
+
+    AnyTalker.AI.Envelope.Source.to_envelope(reply_message, reply_context)
+  end
+
+  defp get_author_id(%Message{forward_origin: %MessageOriginUser{sender_user: %User{id: id}}}), do: id
+
+  defp get_author_id(%Message{from: %User{id: id}}), do: id
 end
