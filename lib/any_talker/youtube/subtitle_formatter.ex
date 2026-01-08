@@ -17,17 +17,19 @@ defmodule AnyTalker.YouTube.SubtitleFormatter do
   alias AnyTalker.YouTube.CaptionExtractor.Subtitle
   alias AnyTalker.YouTube.CaptionExtractor.VideoDetails
 
-  @max_duration_seconds 600
+  @default_max_duration_seconds 600
 
   @doc """
   Joins all subtitles into a single text string.
 
-  Only includes subtitles from the first 10 minutes (600 seconds) of the video.
+  By default, only includes subtitles from the first 10 minutes (600 seconds).
 
   ## Parameters
 
     * `input` - VideoDetails struct or list of Subtitle structs
-    * `separator` - String to use between subtitles (default: " ")
+    * `opts` - Options:
+      * `:separator` - String to use between subtitles (default: " ")
+      * `:max_duration` - Maximum duration in seconds (default: 600)
 
   ## Examples
 
@@ -46,28 +48,34 @@ defmodule AnyTalker.YouTube.SubtitleFormatter do
       ...>   %Subtitle{start: "0.0", duration: "1.5", text: "Hello"},
       ...>   %Subtitle{start: "1.5", duration: "1.0", text: "world"}
       ...> ]
-      iex> SubtitleFormatter.to_text(subtitles, "\\n")
+      iex> SubtitleFormatter.to_text(subtitles, separator: "\\n")
       "Hello\\nworld"
-  """
-  @spec to_text(VideoDetails.t() | [Subtitle.t()], String.t()) :: String.t()
-  def to_text(input, separator \\ " ")
 
-  def to_text(%VideoDetails{subtitles: subtitles}, separator) do
-    to_text(subtitles, separator)
+      iex> SubtitleFormatter.to_text(subtitles, max_duration: 2400)
+      "Hello world"
+  """
+  @spec to_text(VideoDetails.t() | [Subtitle.t()], keyword()) :: String.t()
+  def to_text(input, opts \\ [])
+
+  def to_text(%VideoDetails{subtitles: subtitles}, opts) do
+    to_text(subtitles, opts)
   end
 
-  def to_text([], _separator), do: ""
+  def to_text([], _opts), do: ""
 
-  def to_text(subtitles, separator) when is_list(subtitles) do
+  def to_text(subtitles, opts) when is_list(subtitles) do
+    separator = Keyword.get(opts, :separator, " ")
+    max_duration = Keyword.get(opts, :max_duration, @default_max_duration_seconds)
+
     subtitles
-    |> filter_by_duration()
+    |> filter_by_duration(max_duration)
     |> Enum.map_join(separator, & &1.text)
   end
 
-  defp filter_by_duration(subtitles) do
+  defp filter_by_duration(subtitles, max_duration) do
     Enum.take_while(subtitles, fn subtitle ->
       case Float.parse(subtitle.start) do
-        {start_time, _rest} -> start_time < @max_duration_seconds
+        {start_time, _rest} -> start_time < max_duration
         :error -> true
       end
     end)

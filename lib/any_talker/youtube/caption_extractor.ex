@@ -59,20 +59,22 @@ defmodule AnyTalker.YouTube.CaptionExtractor do
 
     ## Fields
 
-    | Field Name  | Type              | Description                     |
-    |-------------|-------------------|---------------------------------|
-    | title       | String            | Video title                     |
-    | description | String            | Video description               |
-    | subtitles   | List of Subtitle  | List of subtitle entries        |
+    | Field Name       | Type              | Description                              |
+    |------------------|-------------------|------------------------------------------|
+    | title            | String            | Video title                              |
+    | description      | String            | Video description                        |
+    | subtitles        | List of Subtitle  | List of subtitle entries                 |
+    | transcript_error | String or nil     | Error message if transcript unavailable  |
     """
 
     @type t :: %__MODULE__{
             title: String.t(),
             description: String.t(),
-            subtitles: [Subtitle.t()]
+            subtitles: [Subtitle.t()],
+            transcript_error: String.t() | nil
           }
 
-    defstruct [:title, :description, subtitles: []]
+    defstruct [:title, :description, :transcript_error, subtitles: []]
   end
 
   ## Public API
@@ -106,9 +108,15 @@ defmodule AnyTalker.YouTube.CaptionExtractor do
     with {:ok, video_id} <- extract_video_id(video_id_or_url),
          {:ok, %{player_data: player_data, next_data: next_data}} <- fetch_video_info(video_id),
          {:ok, title} <- extract_title(player_data, next_data),
-         {:ok, description} <- extract_description(player_data, next_data),
-         {:ok, subtitles} <- fetch_subtitles_with_fallback(video_id, player_data, next_data, lang) do
-      {:ok, %VideoDetails{title: title, description: description, subtitles: subtitles}}
+         {:ok, description} <- extract_description(player_data, next_data) do
+      case fetch_subtitles_with_fallback(video_id, player_data, next_data, lang) do
+        {:ok, subtitles} ->
+          {:ok, %VideoDetails{title: title, description: description, subtitles: subtitles}}
+
+        {:error, reason} ->
+          Logger.warning("Could not fetch transcript", details: %{video_id: video_id, reason: reason})
+          {:ok, %VideoDetails{title: title, description: description, subtitles: [], transcript_error: reason}}
+      end
     end
   end
 
