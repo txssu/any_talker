@@ -20,7 +20,10 @@ defmodule AnyTalker.AI.Instruction do
   def build(prompt \\ nil) do
     character_description = prompt || AnyTalker.GlobalConfig.get(:ask_prompt)
 
-    Enum.join([message_format(), response_format(), character_prompt(character_description)], "\n")
+    Enum.join(
+      [message_format(), response_format(), character_prompt(character_description), current_date()],
+      "\n"
+    )
   end
 
   defp message_format do
@@ -67,6 +70,20 @@ defmodule AnyTalker.AI.Instruction do
     Эмулируй этого персонажа и отвечай так, будто бы ты и есть он.
 
     #{description}
+    """
+  end
+
+  defp current_date do
+    # Yekaterinburg timezone is UTC+5
+    date =
+      DateTime.utc_now()
+      |> DateTime.add(5, :hour)
+      |> DateTime.to_date()
+
+    """
+    # Текущая дата
+
+    Сегодня #{Date.to_iso8601(date)}.
     """
   end
 end
