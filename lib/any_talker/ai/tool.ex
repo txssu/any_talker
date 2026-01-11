@@ -21,17 +21,17 @@ defmodule AnyTalker.AI.Tool do
       details: %{id: tool_call.tool_call_id, function_name: tool_call.function_name, params: tool_call.arguments}
     )
 
-    returned_value =
+    {returned_value, module} =
       if call_index < 2 do
         module = Registry.get_module_by_func_name(tool_call.function_name)
 
-        module.call(tool_call.arguments, context)
+        {module.call(tool_call.arguments, context), module}
       else
-        {:error, @continue_text}
+        {{:error, @continue_text}, nil}
       end
 
     returned_value
-    |> CallResult.new(tool_call)
+    |> CallResult.new(tool_call, module)
     |> with_call_result_log(tool_call)
   end
 

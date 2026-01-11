@@ -44,7 +44,7 @@ defmodule AnyTalker.AI.CreateTaskAtTool do
       }
 
       case Reminders.create_reminder(attrs) do
-        {:ok, _reminder} -> {:ok, "ok"}
+        {:ok, _reminder} -> {:ok, %{"scheduled_at" => reminder_at}}
         {:error, _changeset} -> {:error, "Failed to create reminder"}
       end
     end

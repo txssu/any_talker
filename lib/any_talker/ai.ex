@@ -1,6 +1,7 @@
 defmodule AnyTalker.AI do
   @moduledoc false
   alias AnyTalker.AI.Envelope
+  alias AnyTalker.AI.Generation
   alias AnyTalker.AI.History
   alias AnyTalker.AI.Request
   alias AnyTalker.AI.Response
@@ -27,24 +28,32 @@ defmodule AnyTalker.AI do
     generate(req)
   end
 
-  def save_request_history(%History{} = history, %ExGram.Model.Message{} = message) do
+  def save_request_history(%Generation{} = gen, %ExGram.Model.Message{} = message) do
     history_key = History.Storable.to_key(message)
-    updated_history = History.set_last_uniq_key(history, message.message_id)
+    updated_history = History.set_last_uniq_key(gen.history, message.message_id)
     History.put(history_key, updated_history)
   end
 
   def generate(%Request{} = req) do
-    do_generate(req, 0)
+    req
+    |> Generation.new()
+    |> do_generate()
   end
 
-  def do_generate(%Request{} = req, tool_calls) do
+  defp do_generate(%Generation{} = gen) do
+    req = gen.request
+
     with {:ok, %Response{} = response} <- AnyTalker.AI.OpenRouterClient.completions(req) do
       case response.data do
         %Response.ToolCall{} ->
           tool_call_msg = ToMessage.to_message(response)
-          call_result = Tool.execute(response.data, req.function_context, tool_calls)
+          call_result = Tool.execute(response.data, req.function_context, gen.tool_calls_count)
           call_result_msg = ToMessage.to_message(call_result)
-          do_generate(%{req | messages: req.messages ++ [tool_call_msg, call_result_msg]}, tool_calls + 1)
+
+          gen
+          |> Generation.add_call_result(call_result)
+          |> Generation.update_messages(req.messages ++ [tool_call_msg, call_result_msg])
+          |> do_generate()
 
         _another ->
           history =
@@ -52,7 +61,12 @@ defmodule AnyTalker.AI do
             |> History.new()
             |> History.append(ToMessage.to_message(response))
 
-          {:ok, response, history}
+          result =
+            gen
+            |> Generation.set_response(response)
+            |> Generation.set_history(history)
+
+          {:ok, result}
       end
     end
   end
