@@ -4,11 +4,11 @@ defmodule AnyTalker.AI.Tool.CallResult do
   alias AnyTalker.AI.Content.Text
   alias AnyTalker.AI.Response.ToolCall
 
-  defstruct [:success, :value, :error, :tool_call]
+  defstruct [:success, :value, :error, :tool_call, :module]
 
-  def new({_res, _data} = tuple, %ToolCall{} = tool_call) do
+  def new({_res, _data} = tuple, %ToolCall{} = tool_call, module) do
     %__MODULE__{} = result = from_tuple(tuple)
-    %{result | tool_call: tool_call}
+    %{result | tool_call: tool_call, module: module}
   end
 
   def to_content(%__MODULE__{success: true, value: value}) do

@@ -5,9 +5,11 @@ defmodule AnyTalkerBot.AskCommand do
   alias AnyTalker.Accounts
   alias AnyTalker.Accounts.Subscription
   alias AnyTalker.Accounts.User
+  alias AnyTalker.AI.Generation
   alias AnyTalker.Settings
   alias AnyTalker.Settings.ChatConfig
   alias AnyTalker.TypedStructAccess
+  alias AnyTalkerBot.AskCommand.ResponseBlock
   alias AnyTalkerBot.HtmlUtils
   alias AnyTalkerBot.Reply
   alias ExGram.Model.Message
@@ -117,18 +119,21 @@ defmodule AnyTalkerBot.AskCommand do
       |> AnyTalker.AI.request()
 
     case result do
-      {:ok, response, history} ->
+      {:ok, %Generation{} = gen} ->
+        user = envelope_context.author
+
         text =
-          response.data.content
+          gen.response.data.content
           |> HtmlUtils.escape_html_preserving_tags()
           |> replace_keywords()
+          |> ResponseBlock.prepend_all(gen, user)
           |> format_response_with_bot_name(envelope_context.chat)
 
         Reply.send_message(reply, text,
           mode: :html,
           as_reply?: true,
           on_sent: fn %Message{} = msg ->
-            AnyTalker.AI.save_request_history(history, msg)
+            AnyTalker.AI.save_request_history(gen, msg)
           end
         )
 
