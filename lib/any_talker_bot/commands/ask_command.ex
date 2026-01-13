@@ -22,9 +22,10 @@ defmodule AnyTalkerBot.AskCommand do
   defguard not_empty_string(s) when is_binary(s) and s != ""
 
   @impl AnyTalkerBot.Command
-  def call(%Reply{message: {:command, :ask, message}} = reply) do
+  def call(%Reply{message: {:command, command, message}} = reply) when command in [:ask, :ask_detailed] do
     bot_id = reply.context.bot_info.id
     is_group = reply.context.extra.is_group
+    response_mode = if command == :ask_detailed, do: :detailed, else: :short
 
     user_with_sub = Accounts.preload_current_subscription(reply.context.extra.user)
     config = Settings.get_full_chat_config(message.chat.id)
@@ -33,7 +34,13 @@ defmodule AnyTalkerBot.AskCommand do
          :ok <- validate_config(user_with_sub, config),
          :ok <- validate_not_empty(message, bot_id),
          :ok <- validate_rate_limit(user_with_sub, config) do
-      envelope_context = %AnyTalker.AI.Envelope.Context{chat: config, author: user_with_sub, bot_id: bot_id}
+      envelope_context = %AnyTalker.AI.Envelope.Context{
+        chat: config,
+        author: user_with_sub,
+        bot_id: bot_id,
+        response_mode: response_mode
+      }
+
       reply(reply, message, envelope_context)
     else
       error -> error_reply(error, reply, user_with_sub, config)
