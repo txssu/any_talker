@@ -8,20 +8,27 @@ defmodule AnyTalker.AI.Instruction do
 
   ## Parameters
     * `prompt` - Custom prompt to use. Falls back to global config if `nil`.
+    * `response_mode` - `:short` (default, up to 5 sentences) or `:detailed` (full responses).
 
   ## Examples
 
       iex> AnyTalker.AI.Instruction.build("You are a helpful assistant")
       "# Формат сообщений...\\n\\nYou are a helpful assistant"
 
-      iex> AnyTalker.AI.Instruction.build(nil)
-      # Uses global config prompt
+      iex> AnyTalker.AI.Instruction.build(nil, :detailed)
+      # Uses global config prompt with detailed response mode
   """
-  def build(prompt \\ nil) do
+  def build(prompt \\ nil, response_mode \\ :short) do
     character_description = prompt || AnyTalker.GlobalConfig.get(:ask_prompt)
 
     Enum.join(
-      [message_format(), response_format(), character_prompt(character_description), current_date()],
+      [
+        message_format(),
+        response_format(),
+        response_length(response_mode),
+        character_prompt(character_description),
+        current_date()
+      ],
       "\n"
     )
   end
@@ -70,6 +77,23 @@ defmodule AnyTalker.AI.Instruction do
     Эмулируй этого персонажа и отвечай так, будто бы ты и есть он.
 
     #{description}
+    """
+  end
+
+  defp response_length(:short) do
+    """
+    # Длина ответа
+
+    ВАЖНО: Отвечай максимально кратко — до 5 предложений. Без лишних объяснений.
+    Прямые ответы. Если нужно больше деталей, пользователь попросит.
+    """
+  end
+
+  defp response_length(:detailed) do
+    """
+    # Длина ответа
+
+    Давай развёрнутые ответы с объяснениями и примерами, когда это уместно.
     """
   end
 

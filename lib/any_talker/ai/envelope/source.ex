@@ -43,7 +43,7 @@ defimpl AnyTalker.AI.Envelope.Source, for: ExGram.Model.Message do
     instructions =
       context.chat.ask_prompt
       |> TypedStructAccess.get([ChatConfig])
-      |> AnyTalker.AI.Instruction.build()
+      |> AnyTalker.AI.Instruction.build(context.response_mode)
 
     model_string = TypedStructAccess.get(context.chat.ask_model, [ChatConfig]) || AnyTalker.GlobalConfig.get(:ask_model)
     models = String.split(model_string, " ", trim: true)

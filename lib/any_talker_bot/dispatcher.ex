@@ -9,6 +9,7 @@ defmodule AnyTalkerBot.Dispatcher do
 
   command("privacy")
   command("ask")
+  command("ask_detailed")
   command("buy_pro")
   command("que_pro")
 
@@ -55,6 +56,10 @@ defmodule AnyTalkerBot.Dispatcher do
   end
 
   defp execute_command(reply, {:command, :ask, _msg}) do
+    AnyTalkerBot.TypingStatus.with_typing(&AnyTalkerBot.AskCommand.call/1, reply)
+  end
+
+  defp execute_command(reply, {:command, :ask_detailed, _msg}) do
     AnyTalkerBot.TypingStatus.with_typing(&AnyTalkerBot.AskCommand.call/1, reply)
   end
 
