@@ -7,6 +7,7 @@ defmodule AnyTalker.Accounts do
   alias AnyTalker.Accounts.User
   alias AnyTalker.Accounts.UserToken
   alias AnyTalker.Events.Message
+  alias AnyTalker.GlobalConfig
   alias AnyTalker.Repo
   alias AnyTalker.Settings.ChatConfig
 
@@ -216,4 +217,22 @@ defmodule AnyTalker.Accounts do
 
     Repo.all(query)
   end
+
+  @doc """
+  Returns timezone string based on hierarchy:
+  1. User's timezone (if set)
+  2. Chat's timezone (if set)
+  3. GlobalConfig timezone (default: Europe/Moscow)
+
+  ## Examples
+
+      iex> get_timezone(user, chat)
+      "Europe/Moscow"
+
+  """
+  def get_timezone(%User{timezone: timezone}, _chat) when is_binary(timezone), do: timezone
+
+  def get_timezone(%User{}, %ChatConfig{timezone: timezone}) when is_binary(timezone), do: timezone
+
+  def get_timezone(%User{}, _chat), do: GlobalConfig.get(:timezone)
 end

@@ -38,6 +38,7 @@ defmodule AnyTalkerWeb.WebApp.ProfileLive do
       <.form for={@form} phx-change="validate" phx-submit="save">
         <div class="space-y-3">
           <.tg_input label="Ник" field={@form[:custom_name]} />
+          <.tg_input label="Таймзона" field={@form[:timezone]} />
           <div class="px-3 pt-3">
             <button
               type="submit"

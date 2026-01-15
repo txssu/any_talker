@@ -9,16 +9,17 @@ defmodule AnyTalker.AI.Instruction do
   ## Parameters
     * `prompt` - Custom prompt to use. Falls back to global config if `nil`.
     * `response_mode` - `:short` (default, up to 5 sentences) or `:detailed` (full responses).
+    * `timezone` - Timezone string for current date/time display.
 
   ## Examples
 
-      iex> AnyTalker.AI.Instruction.build("You are a helpful assistant")
+      iex> AnyTalker.AI.Instruction.build("You are a helpful assistant", :short, "Europe/Moscow")
       "# Формат сообщений...\\n\\nYou are a helpful assistant"
 
-      iex> AnyTalker.AI.Instruction.build(nil, :detailed)
+      iex> AnyTalker.AI.Instruction.build(nil, :detailed, "Europe/Moscow")
       # Uses global config prompt with detailed response mode
   """
-  def build(prompt \\ nil, response_mode \\ :short) do
+  def build(prompt, response_mode, timezone) do
     character_description = prompt || AnyTalker.GlobalConfig.get(:ask_prompt)
 
     Enum.join(
@@ -27,7 +28,7 @@ defmodule AnyTalker.AI.Instruction do
         response_format(),
         response_length(response_mode),
         character_prompt(character_description),
-        current_date()
+        current_datetime(timezone)
       ],
       "\n"
     )
@@ -97,17 +98,17 @@ defmodule AnyTalker.AI.Instruction do
     """
   end
 
-  defp current_date do
-    # Yekaterinburg timezone is UTC+5
-    date =
-      DateTime.utc_now()
-      |> DateTime.add(5, :hour)
-      |> DateTime.to_date()
+  defp current_datetime(timezone) do
+    now = DateTime.now!(timezone)
+    date = DateTime.to_date(now)
+    time = Calendar.strftime(now, "%H:%M")
+    offset = AnyTalker.Timezone.format_utc_offset(now.utc_offset)
 
     """
-    # Текущая дата
+    # Текущие дата и время
 
-    Сегодня #{Date.to_iso8601(date)}.
+    Сейчас #{Date.to_iso8601(date)} #{time} (#{offset}).
+    Таймзона пользователя: #{timezone}.
     """
   end
 end

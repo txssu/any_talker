@@ -2,6 +2,8 @@ defmodule AnyTalker.AI.NowTool do
   @moduledoc false
   @behaviour AnyTalker.AI.Tool
 
+  alias AnyTalker.Accounts
+  alias AnyTalker.AI.FunctionContext
   alias AnyTalker.AI.Tool.Function
 
   def spec do
@@ -12,8 +14,14 @@ defmodule AnyTalker.AI.NowTool do
     }
   end
 
-  def call(_params, _context) do
-    now = DateTime.now!("Asia/Yekaterinburg")
+  def call(_params, %FunctionContext{user: user, chat: chat}) do
+    timezone = Accounts.get_timezone(user, chat)
+
+    now =
+      timezone
+      |> DateTime.now!()
+      |> DateTime.truncate(:second)
+
     {:ok, now}
   end
 end

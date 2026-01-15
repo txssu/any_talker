@@ -18,6 +18,7 @@ defmodule AnyTalker.Settings.ChatConfig do
     field :avatar_blob, :binary
     field :avatar_updated_at, :utc_datetime
     field :promote_pro, :boolean, default: true
+    field :timezone, :string
 
     timestamps(type: :utc_datetime)
   end
@@ -32,7 +33,8 @@ defmodule AnyTalker.Settings.ChatConfig do
       :ask_rate_limit,
       :ask_rate_limit_scale_ms,
       :bot_name,
-      :promote_pro
+      :promote_pro,
+      :timezone
     ])
     |> validate_required([:antispam, :ask_command, :promote_pro])
   end
