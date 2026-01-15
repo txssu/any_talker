@@ -17,6 +17,7 @@ defimpl AnyTalker.AI.Envelope.Source, for: ExGram.Model.Message do
   alias AnyTalker.AI.Envelope
   alias AnyTalker.AI.Envelope.AnonymousAuthor
   alias AnyTalker.AI.Envelope.Context
+  alias AnyTalker.AI.Instruction
   alias AnyTalker.Settings.ChatConfig
   alias AnyTalker.TypedStructAccess
   alias ExGram.Model.Message
@@ -40,10 +41,12 @@ defimpl AnyTalker.AI.Envelope.Source, for: ExGram.Model.Message do
 
     display_name = if not is_bot?, do: display_name_for(context.author || message.from)
 
+    timezone = Accounts.get_timezone(context.author, context.chat)
+
     instructions =
       context.chat.ask_prompt
       |> TypedStructAccess.get([ChatConfig])
-      |> AnyTalker.AI.Instruction.build(context.response_mode)
+      |> Instruction.build(context.response_mode, timezone)
 
     model_string = TypedStructAccess.get(context.chat.ask_model, [ChatConfig]) || AnyTalker.GlobalConfig.get(:ask_model)
     models = String.split(model_string, " ", trim: true)

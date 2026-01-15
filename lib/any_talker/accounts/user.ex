@@ -11,6 +11,7 @@ defmodule AnyTalker.Accounts.User do
   | first_name | string | Telegram first name (required) |
   | last_name | string | Telegram last name |
   | photo_url | string | Telegram profile photo URL |
+  | timezone | string | User's preferred timezone (e.g., "Europe/Moscow") |
   """
   use Ecto.Schema
 
@@ -24,6 +25,7 @@ defmodule AnyTalker.Accounts.User do
     field :first_name, :string
     field :last_name, :string
     field :photo_url, :string
+    field :timezone, :string
 
     has_one :current_subscription, AnyTalker.Accounts.Subscription
 
@@ -33,7 +35,7 @@ defmodule AnyTalker.Accounts.User do
   @doc false
   def changeset(user, attrs) do
     user
-    |> cast(attrs, [:id, :first_name, :last_name, :photo_url, :username, :custom_name])
+    |> cast(attrs, [:id, :first_name, :last_name, :photo_url, :username, :custom_name, :timezone])
     |> validate_required([:first_name])
     |> validate_length(:custom_name, max: 20)
   end

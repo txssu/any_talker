@@ -47,6 +47,7 @@ defmodule AnyTalkerWeb.WebApp.ChatLive do
             <.switch label="Команда /ask" field={@form[:ask_command]} />
             <.switch label="Реклама PRO" field={@form[:promote_pro]} />
             <.tg_input label="Имя бота" field={@form[:bot_name]} />
+            <.tg_input label="Таймзона" field={@form[:timezone]} />
             <.tg_input label="Модели /ask" field={@form[:ask_model]} />
             <.tg_input type="number" label="Лимит запросов /ask" field={@form[:ask_rate_limit]} />
             <.tg_input type="number" label="Период лимита /ask (мс)" field={@form[:ask_rate_limit_scale_ms]} />
