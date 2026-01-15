@@ -7,9 +7,14 @@ defprotocol AnyTalker.AI.Envelope.Source do
 
   @doc """
   Converts the source object into an Envelope
+
+  ## Options
+
+  - `:skip_instructions` - when `true`, skips timezone fetching and instruction building.
+    Used for reply messages where instructions are not needed.
   """
-  @spec to_envelope(t, AnyTalker.AI.Envelope.Context.t()) :: Envelope.t()
-  def to_envelope(source, context)
+  @spec to_envelope(t, AnyTalker.AI.Envelope.Context.t(), keyword()) :: Envelope.t()
+  def to_envelope(source, context, opts \\ [])
 end
 
 defimpl AnyTalker.AI.Envelope.Source, for: ExGram.Model.Message do
@@ -29,7 +34,7 @@ defimpl AnyTalker.AI.Envelope.Source, for: ExGram.Model.Message do
 
   require TypedStructAccess
 
-  def to_envelope(%Message{} = message, %Context{} = context) do
+  def to_envelope(%Message{} = message, %Context{} = context, opts \\ []) do
     quote_text = TypedStructAccess.get(message.quote.text, [TextQuote])
     reply = build_reply(message.reply_to_message, context)
 
@@ -41,15 +46,7 @@ defimpl AnyTalker.AI.Envelope.Source, for: ExGram.Model.Message do
 
     display_name = if not is_bot?, do: display_name_for(context.author || message.from)
 
-    timezone = Accounts.get_timezone(context.author, context.chat)
-
-    instructions =
-      context.chat.ask_prompt
-      |> TypedStructAccess.get([ChatConfig])
-      |> Instruction.build(context.response_mode, timezone)
-
-    model_string = TypedStructAccess.get(context.chat.ask_model, [ChatConfig]) || AnyTalker.GlobalConfig.get(:ask_model)
-    models = String.split(model_string, " ", trim: true)
+    {instructions, models} = build_instructions_and_models(context, opts)
 
     %Envelope{
       message_id: message.message_id,
@@ -121,13 +118,33 @@ defimpl AnyTalker.AI.Envelope.Source, for: ExGram.Model.Message do
 
   defp display_name_for(%AnonymousAuthor{display_name: name}), do: name
 
+  defp build_instructions_and_models(%Context{} = context, opts) do
+    if Keyword.get(opts, :skip_instructions, false) do
+      {nil, []}
+    else
+      timezone = Accounts.get_timezone(context.author, context.chat)
+
+      instructions =
+        context.chat.ask_prompt
+        |> TypedStructAccess.get([ChatConfig])
+        |> Instruction.build(context.response_mode, timezone)
+
+      model_string =
+        TypedStructAccess.get(context.chat.ask_model, [ChatConfig]) || AnyTalker.GlobalConfig.get(:ask_model)
+
+      models = String.split(model_string, " ", trim: true)
+
+      {instructions, models}
+    end
+  end
+
   defp build_reply(nil, _context), do: nil
 
   defp build_reply(%Message{} = reply_message, %Context{} = context) do
     reply_author = get_reply_author(reply_message)
     reply_context = %{context | author: reply_author}
 
-    AnyTalker.AI.Envelope.Source.to_envelope(reply_message, reply_context)
+    AnyTalker.AI.Envelope.Source.to_envelope(reply_message, reply_context, skip_instructions: true)
   end
 
   defp get_reply_author(%Message{} = message) do
