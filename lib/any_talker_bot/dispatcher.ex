@@ -89,13 +89,9 @@ defmodule AnyTalkerBot.Dispatcher do
     Reply.halt(reply)
   end
 
-  # Handle text messages that contain slash commands
-  defp execute_command(reply, {:text, text, message}) when is_binary(text) do
-    if slash_command = TextProcessor.extract_slash_command(text) do
-      ExGram.send_message(message.chat.id, slash_command, bot: bot())
-    end
-
-    Reply.halt(reply)
+  # Handle text messages that contain slash commands or HTTP status codes
+  defp execute_command(reply, {:text, text, _message}) when is_binary(text) do
+    TextProcessor.process(reply)
   end
 
   defp execute_command(reply, _msg) do
