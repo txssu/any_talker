@@ -49,8 +49,13 @@ defmodule AnyTalkerWeb.WebApp.ChatLive do
             <.tg_input label="Имя бота" field={@form[:bot_name]} />
             <.tg_input label="Таймзона" field={@form[:timezone]} />
             <.tg_input label="Модели /ask" field={@form[:ask_model]} />
-            <.tg_input type="number" label="Лимит запросов /ask" field={@form[:ask_rate_limit]} />
-            <.tg_input type="number" label="Период лимита /ask (мс)" field={@form[:ask_rate_limit_scale_ms]} />
+            <.tg_input type="number" label="Макс. токенов /ask" field={@form[:ask_max_tokens]} />
+            <.tg_input
+              type="number"
+              label="Интервал пополнения /ask (мс)"
+              field={@form[:ask_refill_interval_ms]}
+            />
+            <.tg_input type="number" label="Пополнение токенов /ask" field={@form[:ask_refill_amount]} />
             <div class="mt-2">
               <.textarea label="Промпт /ask" field={@form[:ask_prompt]} />
             </div>
