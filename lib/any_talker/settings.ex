@@ -104,8 +104,9 @@ defmodule AnyTalker.Settings do
     %{
       chat
       | ask_model: chat.ask_model || global.ask_model,
-        ask_rate_limit: chat.ask_rate_limit || global.ask_rate_limit,
-        ask_rate_limit_scale_ms: chat.ask_rate_limit_scale_ms || global.ask_rate_limit_scale_ms,
+        ask_max_tokens: chat.ask_max_tokens || global.ask_max_tokens,
+        ask_refill_interval_ms: chat.ask_refill_interval_ms || global.ask_refill_interval_ms,
+        ask_refill_amount: chat.ask_refill_amount || global.ask_refill_amount,
         ask_prompt: chat.ask_prompt || global.ask_prompt
     }
   end

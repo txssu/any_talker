@@ -6,6 +6,9 @@ defmodule AnyTalkerBot.AskCommand do
   alias AnyTalker.Accounts.Subscription
   alias AnyTalker.Accounts.User
   alias AnyTalker.AI.Generation
+  alias AnyTalker.AI.Response
+  alias AnyTalker.RateLimit.Context
+  alias AnyTalker.RateLimit.TokenBucket
   alias AnyTalker.Settings
   alias AnyTalker.Settings.ChatConfig
   alias AnyTalker.TypedStructAccess
@@ -128,13 +131,16 @@ defmodule AnyTalkerBot.AskCommand do
     case result do
       {:ok, %Generation{} = gen} ->
         user = envelope_context.author
+        config = envelope_context.chat
+
+        consume_tokens(user, config, gen.response)
 
         text =
           gen.response.data.content
           |> HtmlUtils.escape_html_preserving_tags()
           |> replace_keywords()
           |> ResponseBlock.prepend_all(gen, user)
-          |> format_response_with_bot_name(envelope_context.chat)
+          |> format_response_with_bot_name(config)
 
         Reply.send_message(reply, text,
           mode: :html,
@@ -147,6 +153,22 @@ defmodule AnyTalkerBot.AskCommand do
       {:error, reason} ->
         Logger.error("AI request failed", details: %{reason: reason})
         Reply.send_message(reply, "Да не", as_reply?: true)
+    end
+  end
+
+  defp consume_tokens(%User{} = user, %ChatConfig{} = config, %Response{} = response) do
+    tokens_used = Response.total_tokens(response)
+
+    if tokens_used > 0 do
+      key = "ask:#{user.id}"
+
+      context = %Context{
+        max_tokens: config.ask_max_tokens,
+        refill_interval_ms: config.ask_refill_interval_ms,
+        refill_amount: config.ask_refill_amount
+      }
+
+      TokenBucket.increase(key, tokens_used, context)
     end
   end
 
@@ -170,21 +192,19 @@ defmodule AnyTalkerBot.AskCommand do
   defp validate_not_empty(_otherwise, _bot_id), do: {:error, :empty_text}
 
   def validate_rate_limit(%User{} = user, %ChatConfig{} = config) do
-    scale = config.ask_rate_limit_scale_ms
-    limit = config.ask_rate_limit
-
-    max_offset = div(scale, 10)
-    offset = if max_offset > 0, do: rem(user.id, max_offset), else: 0
-    adjusted_scale = scale + offset
-
     key = "ask:#{user.id}"
 
-    case AnyTalker.RateLimit.hit(key, adjusted_scale, limit) do
-      {:allow, _count} ->
-        :ok
+    context = %Context{
+      max_tokens: config.ask_max_tokens,
+      refill_interval_ms: config.ask_refill_interval_ms,
+      refill_amount: config.ask_refill_amount
+    }
 
-      {:deny, time_left_ms} ->
-        {:error, :rate_limit, time_left_ms}
+    if TokenBucket.allowed?(key, context) do
+      :ok
+    else
+      time_left_ms = TokenBucket.time_until_allowed(key, context) || context.refill_interval_ms
+      {:error, :rate_limit, time_left_ms}
     end
   end
 

@@ -19,7 +19,7 @@ defmodule AnyTalker.AI.OpenRouter.Completions.Decoder do
   def decode(data) when is_map(data) do
     finish_reason_path = path "choices" / 0 / "finish_reason", :json
     finish_reason = Pathex.get(data, finish_reason_path)
-    {:ok, %Response{data: decode_data(finish_reason, data)}}
+    {:ok, %Response{data: decode_data(finish_reason, data), usage: decode_usage(data)}}
   end
 
   def decode(_data) do
@@ -47,4 +47,10 @@ defmodule AnyTalker.AI.OpenRouter.Completions.Decoder do
   defp decode_arguments(""), do: %{}
   defp decode_arguments(json) when is_binary(json), do: Jason.decode!(json)
   defp decode_arguments(map) when is_map(map), do: map
+
+  defp decode_usage(%{"usage" => %{"total_tokens" => total}}) when is_integer(total) do
+    %Response.Usage{total_tokens: total}
+  end
+
+  defp decode_usage(_data), do: nil
 end

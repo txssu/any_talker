@@ -12,8 +12,9 @@ defmodule AnyTalker.Settings.ChatConfig do
     field :ask_command, :boolean, default: false
     field :ask_prompt, :string
     field :ask_model, :string
-    field :ask_rate_limit, :integer
-    field :ask_rate_limit_scale_ms, :integer
+    field :ask_max_tokens, :integer
+    field :ask_refill_interval_ms, :integer
+    field :ask_refill_amount, :integer
     field :bot_name, :string
     field :avatar_blob, :binary
     field :avatar_updated_at, :utc_datetime
@@ -30,8 +31,9 @@ defmodule AnyTalker.Settings.ChatConfig do
       :ask_command,
       :ask_prompt,
       :ask_model,
-      :ask_rate_limit,
-      :ask_rate_limit_scale_ms,
+      :ask_max_tokens,
+      :ask_refill_interval_ms,
+      :ask_refill_amount,
       :bot_name,
       :promote_pro,
       :timezone
