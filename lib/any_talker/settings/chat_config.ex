@@ -20,6 +20,7 @@ defmodule AnyTalker.Settings.ChatConfig do
     field :avatar_updated_at, :utc_datetime
     field :promote_pro, :boolean, default: true
     field :timezone, :string
+    field :antispam_keywords, :string
 
     timestamps(type: :utc_datetime)
   end
@@ -28,6 +29,7 @@ defmodule AnyTalker.Settings.ChatConfig do
     chat_config
     |> cast(attrs, [
       :antispam,
+      :antispam_keywords,
       :ask_command,
       :ask_prompt,
       :ask_model,
