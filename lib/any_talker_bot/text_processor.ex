@@ -30,7 +30,6 @@ defmodule AnyTalkerBot.TextProcessor do
   def process(reply), do: Reply.halt(reply)
 
   @http_codes MapSet.new([
-                0,
                 100,
                 101,
                 102,
