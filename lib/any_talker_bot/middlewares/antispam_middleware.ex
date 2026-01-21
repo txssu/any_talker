@@ -4,11 +4,18 @@ defmodule AnyTalkerBot.AntispamMiddleware do
 
   alias AnyTalker.Antispam
 
+  @dickgrower_bot_id 6_465_471_545
+
   def call(context, _options) do
     case context.extra.chat do
       %{antispam: true} -> do_call(context.update.message, context)
-      _error -> context
+      _other -> context
     end
+  end
+
+  defp do_call(%{via_bot: %{id: @dickgrower_bot_id}} = message, context) do
+    ExGram.delete_message(message.chat.id, message.message_id, bot: AnyTalkerBot.bot())
+    halt(context)
   end
 
   defp do_call(%{new_chat_members: new_chat_members} = message, context) when is_list(new_chat_members) do
