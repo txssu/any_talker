@@ -82,13 +82,6 @@ defmodule AnyTalkerBot.Dispatcher do
     route_inline_query(reply, query)
   end
 
-  # Fast ban @DickGrowerBot
-  # Move to Antispam in future
-  defp execute_command(%{context: %{update: %{message: %{via_bot: %{id: 6_465_471_545}} = message}}} = reply, _msg) do
-    ExGram.delete_message(message.chat.id, message.message_id, bot: bot())
-    Reply.halt(reply)
-  end
-
   # Handle text messages that contain slash commands or HTTP status codes
   defp execute_command(reply, {:text, text, _message}) when is_binary(text) do
     TextProcessor.process(reply)
