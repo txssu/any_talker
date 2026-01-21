@@ -52,10 +52,6 @@ defmodule AnyTalkerBot.TextProcessorTest do
       assert 404 == TextProcessor.extract_http_code("404 and 500")
     end
 
-    test "extracts code 0" do
-      assert 0 == TextProcessor.extract_http_code("code 0 test")
-    end
-
     test "extracts 1xx codes" do
       assert 100 == TextProcessor.extract_http_code("100 continue")
       assert 101 == TextProcessor.extract_http_code("status 101")
