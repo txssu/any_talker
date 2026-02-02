@@ -33,10 +33,8 @@ defmodule AnyTalkerBot.AskCommand do
     user_with_sub = Accounts.preload_current_subscription(reply.context.extra.user)
     config = Settings.get_full_chat_config(message.chat.id)
 
-    with :ok <- validate_chat_type(user_with_sub, is_group),
-         :ok <- validate_config(user_with_sub, config),
-         :ok <- validate_not_empty(message, bot_id),
-         :ok <- validate_rate_limit(user_with_sub, config) do
+    with :ok <- validate_access(user_with_sub, is_group, config),
+         :ok <- validate_not_empty(message, bot_id) do
       envelope_context = %AnyTalker.AI.Envelope.Context{
         chat: config,
         author: user_with_sub,
@@ -172,6 +170,17 @@ defmodule AnyTalkerBot.AskCommand do
     end
   end
 
+  defp validate_access(%User{} = user, group?, %ChatConfig{} = config) do
+    if Accounts.owner?(user) do
+      :ok
+    else
+      with :ok <- validate_chat_type(user, group?),
+           :ok <- validate_config(user, config) do
+        validate_rate_limit(user, config)
+      end
+    end
+  end
+
   defp validate_chat_type(user_with_sub, group?)
   defp validate_chat_type(%User{current_subscription: %Subscription{plan: :pro}}, _group?), do: :ok
   defp validate_chat_type(_user, true), do: :ok
@@ -191,7 +200,7 @@ defmodule AnyTalkerBot.AskCommand do
 
   defp validate_not_empty(_otherwise, _bot_id), do: {:error, :empty_text}
 
-  def validate_rate_limit(%User{} = user, %ChatConfig{} = config) do
+  defp validate_rate_limit(%User{} = user, %ChatConfig{} = config) do
     key = "ask:#{user.id}"
 
     context = %Context{
