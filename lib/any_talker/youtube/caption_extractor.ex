@@ -275,21 +275,30 @@ defmodule AnyTalker.YouTube.CaptionExtractor do
       })
 
     with {:ok, player_data} <- fetch_innertube("/player", payload) do
-      if get_in(player_data, ["playabilityStatus", "status"]) == "LOGIN_REQUIRED" do
+      handle_player_response(player_data, session_data, video_id)
+    end
+  end
+
+  defp handle_player_response(player_data, session_data, video_id) do
+    case get_in(player_data, ["playabilityStatus", "status"]) do
+      "LOGIN_REQUIRED" ->
         Logger.debug("LOGIN_REQUIRED status, trying next endpoint")
+        fetch_next_data(player_data, session_data, video_id)
 
-        next_payload = Map.put(session_data, :videoId, video_id)
-
-        case fetch_innertube("/next", next_payload) do
-          {:ok, next_data} ->
-            {:ok, %{player_data: player_data, next_data: next_data}}
-
-          error ->
-            error
-        end
-      else
+      _status ->
         {:ok, %{player_data: player_data, next_data: nil}}
-      end
+    end
+  end
+
+  defp fetch_next_data(player_data, session_data, video_id) do
+    next_payload = Map.put(session_data, :videoId, video_id)
+
+    case fetch_innertube("/next", next_payload) do
+      {:ok, next_data} ->
+        {:ok, %{player_data: player_data, next_data: next_data}}
+
+      error ->
+        error
     end
   end
 

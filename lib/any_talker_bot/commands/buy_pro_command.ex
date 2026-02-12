@@ -5,8 +5,6 @@ defmodule AnyTalkerBot.BuyProCommand do
 
   alias AnyTalkerBot.Reply
 
-  require Logger
-
   @pro_payload "subs:pro"
 
   @doc """

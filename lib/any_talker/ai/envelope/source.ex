@@ -4,6 +4,7 @@ defprotocol AnyTalker.AI.Envelope.Source do
   """
 
   alias AnyTalker.AI.Envelope
+  alias AnyTalker.AI.Envelope.Context
 
   @doc """
   Converts the source object into an Envelope
@@ -13,8 +14,11 @@ defprotocol AnyTalker.AI.Envelope.Source do
   - `:skip_instructions` - when `true`, skips timezone fetching and instruction building.
     Used for reply messages where instructions are not needed.
   """
-  @spec to_envelope(t, AnyTalker.AI.Envelope.Context.t(), keyword()) :: Envelope.t()
-  def to_envelope(source, context, opts \\ [])
+  @spec to_envelope(t, Context.t()) :: Envelope.t()
+  def to_envelope(source, context)
+
+  @spec to_envelope(t, Context.t(), keyword()) :: Envelope.t()
+  def to_envelope(source, context, opts)
 end
 
 defimpl AnyTalker.AI.Envelope.Source, for: ExGram.Model.Message do
