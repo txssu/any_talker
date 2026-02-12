@@ -5,7 +5,15 @@ defmodule AnyTalker.AI.Generation do
   alias AnyTalker.AI.Response
   alias AnyTalker.AI.Tool.CallResult
 
-  defstruct [:request, :response, :history, tool_calls_count: 0, call_results: []]
+  defstruct [
+    :request,
+    :response,
+    :history,
+    tool_calls_count: 0,
+    call_results: [],
+    total_cost: Decimal.new(0),
+    total_tokens: 0
+  ]
 
   def new(%Request{} = request) do
     %__MODULE__{request: request}
@@ -25,6 +33,14 @@ defmodule AnyTalker.AI.Generation do
 
   def set_history(%__MODULE__{} = gen, %History{} = history) do
     %{gen | history: history}
+  end
+
+  def accumulate_usage(%__MODULE__{} = gen, %Response{} = response) do
+    %{
+      gen
+      | total_cost: Decimal.add(gen.total_cost, Response.cost(response)),
+        total_tokens: gen.total_tokens + Response.total_tokens(response)
+    }
   end
 
   def call_results(%__MODULE__{call_results: call_results}) do

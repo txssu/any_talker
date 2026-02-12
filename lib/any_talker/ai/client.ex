@@ -9,6 +9,12 @@ defmodule AnyTalker.AI.OpenRouterClient do
     end
   end
 
+  def model_info(model_id) do
+    with {:ok, %{body: resp_body}} <- Tesla.get(client(), "/v1/models/#{model_id}/endpoints") do
+      AnyTalker.AI.OpenRouter.Endpoints.Decoder.decode(resp_body)
+    end
+  end
+
   defp api_url do
     fetch_env(:api_url)
   end

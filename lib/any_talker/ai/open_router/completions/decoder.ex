@@ -48,9 +48,20 @@ defmodule AnyTalker.AI.OpenRouter.Completions.Decoder do
   defp decode_arguments(json) when is_binary(json), do: Jason.decode!(json)
   defp decode_arguments(map) when is_map(map), do: map
 
-  defp decode_usage(%{"usage" => %{"total_tokens" => total}}) when is_integer(total) do
-    %Response.Usage{total_tokens: total}
+  defp decode_usage(%{"usage" => %{"total_tokens" => total} = usage}) when is_integer(total) do
+    %Response.Usage{total_tokens: total, cost: decode_cost(usage)}
   end
 
   defp decode_usage(_data), do: nil
+
+  defp decode_cost(%{"cost" => cost}) when is_float(cost) and cost > 0, do: Decimal.from_float(cost)
+  defp decode_cost(%{"cost" => cost}) when is_integer(cost) and cost > 0, do: Decimal.new(cost)
+
+  defp decode_cost(%{"cost_details" => %{"upstream_inference_cost" => cost}}) when is_float(cost) and cost > 0,
+    do: Decimal.from_float(cost)
+
+  defp decode_cost(%{"cost_details" => %{"upstream_inference_cost" => cost}}) when is_integer(cost) and cost > 0,
+    do: Decimal.new(cost)
+
+  defp decode_cost(_usage), do: Decimal.new(0)
 end
