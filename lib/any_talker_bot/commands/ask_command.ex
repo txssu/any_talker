@@ -11,14 +11,12 @@ defmodule AnyTalkerBot.AskCommand do
   alias AnyTalker.RateLimit.TokenBucket
   alias AnyTalker.Settings
   alias AnyTalker.Settings.ChatConfig
-  alias AnyTalker.TypedStructAccess
   alias AnyTalkerBot.AskCommand.ResponseBlock
   alias AnyTalkerBot.HtmlUtils
   alias AnyTalkerBot.Reply
   alias ExGram.Model.Message
 
   require Logger
-  require TypedStructAccess
 
   @time_buffer_ms to_timeout(minute: 5)
 
