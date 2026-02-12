@@ -44,6 +44,8 @@ defmodule AnyTalker.AI do
     req = gen.request
 
     with {:ok, %Response{} = response} <- AnyTalker.AI.OpenRouterClient.completions(req) do
+      gen = Generation.accumulate_usage(gen, response)
+
       case response.data do
         %Response.ToolCall{} ->
           tool_call_msg = ToMessage.to_message(response)
@@ -56,6 +58,8 @@ defmodule AnyTalker.AI do
           |> do_generate()
 
         _another ->
+          response = Response.set_accumulated_usage(response, gen.total_tokens, gen.total_cost)
+
           history =
             req.messages
             |> History.new()
