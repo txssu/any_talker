@@ -46,6 +46,10 @@ defmodule AnyTalkerBot.AskCommand do
     end
   end
 
+  defp error_reply({:error, :banned}, %Reply{} = reply, _user_with_sub, _config) do
+    Reply.halt(reply)
+  end
+
   defp error_reply({:error, :not_group}, %Reply{} = reply, %User{} = user_with_sub, %ChatConfig{} = config) do
     text =
       if is_nil(user_with_sub.current_subscription) and config.promote_pro do
@@ -172,12 +176,16 @@ defmodule AnyTalkerBot.AskCommand do
     if Accounts.owner?(user) do
       :ok
     else
-      with :ok <- validate_chat_type(user, group?),
+      with :ok <- validate_not_banned(user),
+           :ok <- validate_chat_type(user, group?),
            :ok <- validate_config(user, config) do
         validate_rate_limit(user, config)
       end
     end
   end
+
+  defp validate_not_banned(%User{ask_banned: true}), do: {:error, :banned}
+  defp validate_not_banned(%User{}), do: :ok
 
   defp validate_chat_type(user_with_sub, group?)
   defp validate_chat_type(%User{current_subscription: %Subscription{plan: :pro}}, _group?), do: :ok
