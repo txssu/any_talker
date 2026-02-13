@@ -10,6 +10,7 @@ defmodule AnyTalkerBot.Dispatcher do
   command("privacy")
   command("ask")
   command("ask_detailed")
+  command("ban")
   command("buy_pro")
   command("que_pro")
 
@@ -53,6 +54,10 @@ defmodule AnyTalkerBot.Dispatcher do
 
   defp execute_command(reply, {:command, :privacy, _msg}) do
     AnyTalkerBot.PrivacyCommand.call(reply)
+  end
+
+  defp execute_command(reply, {:command, :ban, _msg}) do
+    AnyTalkerBot.BanCommand.call(reply)
   end
 
   defp execute_command(reply, {:command, :ask, _msg}) do

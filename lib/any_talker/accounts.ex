@@ -235,4 +235,10 @@ defmodule AnyTalker.Accounts do
   def get_timezone(%User{}, %ChatConfig{timezone: timezone}) when is_binary(timezone), do: timezone
 
   def get_timezone(%User{}, _chat), do: GlobalConfig.get(:timezone)
+
+  def ban_ask(%User{} = user) do
+    user
+    |> Ecto.Changeset.change(ask_banned: true)
+    |> Repo.update()
+  end
 end
