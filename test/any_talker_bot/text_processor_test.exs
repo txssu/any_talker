@@ -9,15 +9,15 @@ defmodule AnyTalkerBot.TextProcessorTest do
     end
 
     test "extracts code at the start of text" do
-      assert 500 == TextProcessor.extract_http_code("500 internal server error")
+      assert 501 == TextProcessor.extract_http_code("501 internal server error")
     end
 
     test "extracts code at the end of text" do
-      assert 200 == TextProcessor.extract_http_code("status code 200")
+      assert 201 == TextProcessor.extract_http_code("status code 201")
     end
 
     test "extracts code followed by punctuation" do
-      assert 500 == TextProcessor.extract_http_code("got a 500!")
+      assert 501 == TextProcessor.extract_http_code("got a 501!")
       assert 404 == TextProcessor.extract_http_code("error 404.")
       assert 503 == TextProcessor.extract_http_code("returned 503,")
     end
@@ -49,16 +49,14 @@ defmodule AnyTalkerBot.TextProcessorTest do
     end
 
     test "returns first matching code when multiple present" do
-      assert 404 == TextProcessor.extract_http_code("404 and 500")
+      assert 404 == TextProcessor.extract_http_code("404 and 501")
     end
 
     test "extracts 1xx codes" do
-      assert 100 == TextProcessor.extract_http_code("100 continue")
       assert 101 == TextProcessor.extract_http_code("status 101")
     end
 
     test "extracts 2xx codes" do
-      assert 200 == TextProcessor.extract_http_code("200 OK")
       assert 201 == TextProcessor.extract_http_code("201 created")
       assert 204 == TextProcessor.extract_http_code("no content 204")
     end
@@ -69,14 +67,12 @@ defmodule AnyTalkerBot.TextProcessorTest do
     end
 
     test "extracts 4xx codes" do
-      assert 400 == TextProcessor.extract_http_code("bad request 400")
       assert 401 == TextProcessor.extract_http_code("401 unauthorized")
       assert 418 == TextProcessor.extract_http_code("I'm a teapot 418")
       assert 429 == TextProcessor.extract_http_code("429 too many requests")
     end
 
     test "extracts 5xx codes" do
-      assert 500 == TextProcessor.extract_http_code("internal error 500")
       assert 502 == TextProcessor.extract_http_code("bad gateway 502")
       assert 503 == TextProcessor.extract_http_code("service unavailable 503")
     end
@@ -95,7 +91,7 @@ defmodule AnyTalkerBot.TextProcessorTest do
     end
 
     test "extracts code with tabs" do
-      assert 500 == TextProcessor.extract_http_code("error\t500\there")
+      assert 501 == TextProcessor.extract_http_code("error\t501\there")
     end
 
     test "extracts code attached to letter on one side" do
@@ -108,7 +104,7 @@ defmodule AnyTalkerBot.TextProcessorTest do
     end
 
     test "extracts code with hyphen boundary" do
-      assert 500 == TextProcessor.extract_http_code("error-500-server")
+      assert 501 == TextProcessor.extract_http_code("error-501-server")
     end
   end
 
