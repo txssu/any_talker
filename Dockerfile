@@ -34,8 +34,6 @@ RUN mix local.hex --force && \
 # set build ENV
 ENV MIX_ENV="prod"
 
-ARG YT_DLP_URL="https://github.com/yt-dlp/yt-dlp/releases/download/2026.02.04/yt-dlp_linux"
-
 # install mix dependencies
 COPY mix.exs mix.lock ./
 RUN mix deps.get --only $MIX_ENV
@@ -71,7 +69,7 @@ RUN mix release
 FROM ${RUNNER_IMAGE}
 
 RUN apt-get update -y && \
-    apt-get install -y libstdc++6 openssl libncurses6 locales ca-certificates \
+    apt-get install -y libstdc++6 openssl libncurses6 locales ca-certificates python3 \
     && apt-get clean && rm -f /var/lib/apt/lists/*_*
 
 # Set the locale

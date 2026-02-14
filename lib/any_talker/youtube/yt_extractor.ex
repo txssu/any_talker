@@ -7,9 +7,9 @@ defmodule AnyTalker.YouTube.YtExtractor do
 
   ## Configuration
 
-  Set the download URL in `config.exs`:
+  Set the version in `config.exs`:
 
-      config :any_talker, :yt_dlp_url, "https://github.com/yt-dlp/yt-dlp/releases/..."
+      config :any_talker, yt_dlp_version: "2026.02.04"
 
   The binary is downloaded at compile time to `priv/bin/yt-dlp`.
 
@@ -37,15 +37,16 @@ defmodule AnyTalker.YouTube.YtExtractor do
   @external_resource @bin_path
 
   if !File.exists?(@bin_path) and Mix.env() != :test do
-    yt_dlp_url = Application.compile_env!(:any_talker, :yt_dlp_url)
+    version = Application.compile_env!(:any_talker, :yt_dlp_version)
+    yt_dlp_url = "https://github.com/yt-dlp/yt-dlp/releases/download/#{version}/yt-dlp"
 
-    Mix.shell().info("Downloading yt-dlp from #{yt_dlp_url}")
+    Mix.shell().info("Downloading yt-dlp #{version} from #{yt_dlp_url}")
     File.mkdir_p!(@bin_dir)
 
     {_output, 0} = System.cmd("curl", ["-fSL", "-o", @bin_path, yt_dlp_url], env: [])
     File.chmod!(@bin_path, 0o755)
 
-    Mix.shell().info("yt-dlp installed at #{@bin_path}")
+    Mix.shell().info("yt-dlp #{version} installed at #{@bin_path}")
   end
 
   defp bin_dir do
@@ -164,6 +165,7 @@ defmodule AnyTalker.YouTube.YtExtractor do
     end
   end
 
+  # sobelow_skip ["CI.System"]
   defp run_yt_dlp(video_url_or_id) do
     url = normalize_url(video_url_or_id)
     args = ["--dump-json", "--no-warnings", "--no-playlist", "--skip-download", url]
