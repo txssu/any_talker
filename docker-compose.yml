@@ -7,11 +7,6 @@ x-app-common: &app-common
     PHX_HOST: ${PHX_HOST:-localhost}
     METRICS_AUTH_TOKEN: my-super-secret
   env_file: .env
-  logging:
-    driver: "syslog"
-    options:
-      syslog-address: "tcp://localhost:5000"
-      syslog-format: rfc5424
 
 services:
   database:
