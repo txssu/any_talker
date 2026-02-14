@@ -34,6 +34,8 @@ RUN mix local.hex --force && \
 # set build ENV
 ENV MIX_ENV="prod"
 
+ARG YT_DLP_URL="https://github.com/yt-dlp/yt-dlp/releases/download/2026.02.04/yt-dlp_linux"
+
 # install mix dependencies
 COPY mix.exs mix.lock ./
 RUN mix deps.get --only $MIX_ENV
