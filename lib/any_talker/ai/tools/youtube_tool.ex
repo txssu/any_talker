@@ -8,8 +8,8 @@ defmodule AnyTalker.AI.YouTubeTool do
   alias AnyTalker.AI.Summarizer
   alias AnyTalker.AI.Tool.Function
   alias AnyTalker.AI.Tool.FunctionArg
-  alias AnyTalker.YouTube.CaptionExtractor
   alias AnyTalker.YouTube.SubtitleFormatter
+  alias AnyTalker.YouTube.YtExtractor
 
   require Logger
 
@@ -34,7 +34,7 @@ defmodule AnyTalker.AI.YouTubeTool do
   end
 
   def call(%{"video_url" => video_url}, context) do
-    case CaptionExtractor.get_video_details(video_url, "ru") do
+    case YtExtractor.get_video_details(video_url) do
       {:ok, video_details} ->
         {:ok, build_result(video_details, context)}
 

@@ -38,6 +38,16 @@ config :any_talker, Oban,
      ]}
   ]
 
+if config_env() != :test do
+  config :any_talker,
+         :yt_dlp_url,
+         System.get_env("YT_DLP_URL") ||
+           raise("""
+           environment variable YT_DLP_URL is missing.
+           It should point to the yt-dlp binary download URL.
+           """)
+end
+
 config :any_talker,
   ecto_repos: [AnyTalker.Repo],
   generators: [timestamp_type: :utc_datetime]

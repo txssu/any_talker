@@ -7,15 +7,14 @@ defmodule AnyTalker.YouTube.SubtitleFormatter do
 
   ## Usage
 
-      {:ok, video_details} = AnyTalker.YouTube.CaptionExtractor.get_video_details("video_id")
+      {:ok, video_details} = AnyTalker.YouTube.YtExtractor.get_video_details("video_id")
       text = AnyTalker.YouTube.SubtitleFormatter.to_text(video_details)
 
-      {:ok, subtitles} = AnyTalker.YouTube.CaptionExtractor.get_subtitles("video_id")
+      {:ok, subtitles} = AnyTalker.YouTube.YtExtractor.get_subtitles("video_id")
       text = AnyTalker.YouTube.SubtitleFormatter.to_text(subtitles)
   """
 
-  alias AnyTalker.YouTube.CaptionExtractor.Subtitle
-  alias AnyTalker.YouTube.CaptionExtractor.VideoDetails
+  alias AnyTalker.YouTube.YtExtractor.VideoDetails
 
   @default_max_duration_seconds 600
 
@@ -54,7 +53,6 @@ defmodule AnyTalker.YouTube.SubtitleFormatter do
       iex> SubtitleFormatter.to_text(subtitles, max_duration: 2400)
       "Hello world"
   """
-  @spec to_text(VideoDetails.t() | [Subtitle.t()], keyword()) :: String.t()
   def to_text(input, opts \\ [])
 
   def to_text(%VideoDetails{subtitles: subtitles}, opts) do
