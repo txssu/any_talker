@@ -42,6 +42,8 @@ defmodule AnyTalkerBot.Reply.Invoice do
 
   alias AnyTalkerBot.Reply
   alias AnyTalkerBot.Reply.Common
+  alias ExGram.Model.Chat
+  alias ExGram.Model.User
 
   require Logger
 
@@ -108,14 +110,15 @@ defmodule AnyTalkerBot.Reply.Invoice do
     end
   end
 
-  defp dm?(%Reply{context: context}) do
-    context.update.message.chat.type == "private"
+  defp dm?(%Reply{} = reply) do
+    %Chat{} = chat = Reply.chat(reply)
+    chat.type == "private"
   end
 
   defp send_to_dm(%__MODULE__{} = invoice, %Reply{} = reply) do
-    user_id = reply.context.update.message.from.id
+    %User{} = user = Reply.user(reply)
 
-    case send_invoice(invoice, reply, user_id) do
+    case send_invoice(invoice, reply, user.id) do
       {:ok, _sent_message} ->
         success_message = %Reply.Message{
           text: Common.dm_success_message(),
@@ -135,14 +138,14 @@ defmodule AnyTalkerBot.Reply.Invoice do
   end
 
   defp do_send({:cont, %__MODULE__{} = invoice}, %Reply{} = reply) do
-    chat_id = reply.context.update.message.chat.id
-    send_invoice(invoice, reply, chat_id)
+    %Chat{} = chat = Reply.chat(reply)
+    send_invoice(invoice, reply, chat.id)
   end
 
   defp do_send({:cont, %Reply.Message{} = message}, %Reply{} = reply) do
-    chat_id = reply.context.update.message.chat.id
+    %Chat{} = chat = Reply.chat(reply)
 
-    case ExGram.send_message(chat_id, message.text, send_message_options(message, reply)) do
+    case ExGram.send_message(chat.id, message.text, send_message_options(message, reply)) do
       {:ok, sent_message} ->
         AnyTalker.Events.save_new_message(sent_message)
         {:ok, sent_message}

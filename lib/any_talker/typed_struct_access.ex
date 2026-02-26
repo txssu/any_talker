@@ -34,14 +34,26 @@ defmodule AnyTalker.TypedStructAccess do
     end
   end
 
+  defp build_nested_case(expr, [key | rest_keys], [{:__aliases__, _, [:Map]} | rest_types]) do
+    var = Macro.unique_var(:v, __MODULE__)
+    inner = build_nested_case(var, rest_keys, rest_types)
+
+    quote do
+      case unquote(expr).unquote(key) do
+        %{} = unquote(var) -> unquote(inner)
+        _ -> nil
+      end
+    end
+  end
+
   defp build_nested_case(expr, [key | rest_keys], [type | rest_types]) do
     var = Macro.unique_var(:v, __MODULE__)
     inner = build_nested_case(var, rest_keys, rest_types)
 
     quote do
       case unquote(expr).unquote(key) do
-        nil -> nil
         %unquote(type){} = unquote(var) -> unquote(inner)
+        _ -> nil
       end
     end
   end

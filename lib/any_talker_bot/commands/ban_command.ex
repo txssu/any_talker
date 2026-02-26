@@ -12,7 +12,7 @@ defmodule AnyTalkerBot.BanCommand do
 
   @impl AnyTalkerBot.Command
   def call(%Reply{} = reply) do
-    %{user: %User{} = user} = TypedStructAccess.get(reply.context.extra, [ExGram.Cnt])
+    %User{} = user = TypedStructAccess.get(reply.context.extra.user, [ExGram.Cnt, Map])
 
     if Accounts.owner?(user) do
       handle(reply)

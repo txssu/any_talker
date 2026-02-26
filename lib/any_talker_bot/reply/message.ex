@@ -24,6 +24,8 @@ defmodule AnyTalkerBot.Reply.Message do
 
   alias AnyTalkerBot.Reply
   alias AnyTalkerBot.Reply.Common
+  alias ExGram.Model.Chat
+  alias ExGram.Model.User
 
   require Logger
 
@@ -61,14 +63,15 @@ defmodule AnyTalkerBot.Reply.Message do
     end
   end
 
-  defp dm?(%Reply{context: context}) do
-    context.update.message.chat.type == "private"
+  defp dm?(%Reply{} = reply) do
+    %Chat{} = chat = Reply.chat(reply)
+    chat.type == "private"
   end
 
   defp send_to_dm(%Reply.Message{} = message, %Reply{} = reply) do
-    user_id = reply.context.update.message.from.id
+    %User{} = user = Reply.user(reply)
 
-    case send_message(message, reply, user_id) do
+    case send_message(message, reply, user.id) do
       {:ok, _sent_message} ->
         success_message = %Reply.Message{
           text: Common.dm_success_message(),
@@ -88,8 +91,8 @@ defmodule AnyTalkerBot.Reply.Message do
   end
 
   defp do_send({:cont, %Reply.Message{} = message}, %Reply{} = reply) do
-    chat_id = reply.context.update.message.chat.id
-    send_message(message, reply, chat_id)
+    %Chat{} = chat = Reply.chat(reply)
+    send_message(message, reply, chat.id)
   end
 
   defp send_message(%Reply.Message{} = message, %Reply{} = reply, chat_id) do

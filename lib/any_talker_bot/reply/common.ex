@@ -4,6 +4,8 @@ defmodule AnyTalkerBot.Reply.Common do
   """
 
   alias AnyTalkerBot.Reply
+  alias ExGram.Model.Chat
+  alias ExGram.Model.Message
 
   @doc """
   Adds bot to options.
@@ -21,12 +23,13 @@ defmodule AnyTalkerBot.Reply.Common do
   Adds reply_parameters to options if appropriate.
   """
   def maybe_add_reply_to(options, %Reply{} = reply, as_reply? \\ false) do
-    if reply.context.update.message.chat.type != "private" or as_reply? do
-      original_message = reply.context.update.message
+    %Message{} = message = Reply.message(reply)
+    %Chat{} = chat = Reply.chat(reply)
 
+    if chat.type != "private" or as_reply? do
       reply_to = %ExGram.Model.ReplyParameters{
-        message_id: original_message.message_id,
-        chat_id: original_message.chat.id
+        message_id: message.message_id,
+        chat_id: chat.id
       }
 
       [{:reply_parameters, reply_to} | options]

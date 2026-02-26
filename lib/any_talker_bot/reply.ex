@@ -9,7 +9,7 @@ defmodule AnyTalkerBot.Reply do
 
   ## Usage
 
-      reply = Reply.new(context, message)
+      reply = Reply.new(context)
       reply = Reply.put_action(reply, Reply.Message.new("Hello"))
       Reply.execute(reply)
 
@@ -17,24 +17,80 @@ defmodule AnyTalkerBot.Reply do
 
   - `action` - The action to execute (implements `Reply.Action` behaviour)
   - `halt` - If true, execution is skipped
-  - `message` - The original message that triggered this reply
   - `context` - The ExGram context
   """
 
+  alias ExGram.Model.Message
+  alias ExGram.Model.Update
+
+  require AnyTalker.TypedStructAccess
+
   defstruct action: nil,
             halt: false,
-            message: nil,
             context: nil
 
   @doc """
-  Creates a new Reply with the given context and message.
+  Creates a new Reply with the given context.
 
   ## Example
 
-      Reply.new(context, message)
+      Reply.new(context)
   """
-  def new(%ExGram.Cnt{} = context, message) do
-    %__MODULE__{context: context, message: message}
+  def new(%ExGram.Cnt{} = context) do
+    %__MODULE__{context: context}
+  end
+
+  @doc """
+  Returns the message from the update context.
+
+  ## Example
+
+      Reply.message(reply)
+  """
+  def message(%__MODULE__{} = reply) do
+    AnyTalker.TypedStructAccess.get(reply.context.update.message, [ExGram.Cnt, Update])
+  end
+
+  @doc """
+  Returns the callback query from the update context.
+
+  ## Example
+
+      Reply.callback_query(reply)
+  """
+  def callback_query(%__MODULE__{} = reply) do
+    AnyTalker.TypedStructAccess.get(
+      reply.context.update.callback_query,
+      [ExGram.Cnt, Update]
+    )
+  end
+
+  @doc """
+  Returns the chat from the update message.
+
+  ## Example
+
+      Reply.chat(reply)
+  """
+  def chat(%__MODULE__{} = reply) do
+    AnyTalker.TypedStructAccess.get(
+      reply.context.update.message.chat,
+      [ExGram.Cnt, Update, Message]
+    )
+  end
+
+  @doc """
+  Returns the sender (from) from the update message.
+
+  ## Example
+
+      Reply.user(reply)
+  """
+  def user(%__MODULE__{} = reply) do
+    AnyTalker.TypedStructAccess.get(
+      reply.context.update.message.from,
+      [ExGram.Cnt, Update, Message]
+    )
   end
 
   @doc """

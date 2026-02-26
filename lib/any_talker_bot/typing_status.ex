@@ -3,9 +3,11 @@ defmodule AnyTalkerBot.TypingStatus do
   use GenServer
 
   alias AnyTalkerBot.Reply
+  alias ExGram.Model.Chat
 
   def with_typing(fun, %Reply{} = reply) do
-    {:ok, pid} = start_link(reply.context.update.message.chat.id)
+    %Chat{} = chat = Reply.chat(reply)
+    {:ok, pid} = start_link(chat.id)
 
     result = fun.(reply)
 

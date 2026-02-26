@@ -4,6 +4,7 @@ defmodule AnyTalkerBot.TextProcessor do
   """
 
   alias AnyTalkerBot.Reply
+  alias ExGram.Model.Message
 
   @doc """
   Processes text message and returns a Reply.
@@ -12,7 +13,10 @@ defmodule AnyTalkerBot.TextProcessor do
   1. HTTP status codes: returns Reply with http.cat link as reply (ignores text containing "http.cat")
   2. Slash commands: sends message (only if no HTTP code found)
   """
-  def process(%Reply{message: {:text, text, message}} = reply) when is_binary(text) do
+  def process(%Reply{} = reply) do
+    %Message{} = message = Reply.message(reply)
+    text = message.text
+
     http_code = if String.contains?(text, "http.cat"), do: nil, else: extract_http_code(text)
 
     case {http_code, extract_slash_command(text, message)} do
@@ -26,8 +30,6 @@ defmodule AnyTalkerBot.TextProcessor do
         Reply.halt(reply)
     end
   end
-
-  def process(reply), do: Reply.halt(reply)
 
   @http_codes MapSet.new([
                 101,

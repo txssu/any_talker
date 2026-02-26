@@ -6,7 +6,9 @@ defmodule AnyTalkerBot.NikitaCounterAnswerHandler do
   alias AnyTalkerBot.Reply
 
   @impl AnyTalkerBot.Command
-  def call(%Reply{message: {:callback_query, callback_query}} = reply) do
+  def call(%Reply{} = reply) do
+    callback_query = Reply.callback_query(reply)
+
     if Helpers.nikita_id?(callback_query.from.id) do
       message = callback_query.message
 

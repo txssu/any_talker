@@ -32,8 +32,12 @@ config :any_talker, AnyTalker.BraveClient,
 
 config :any_talker, AnyTalkerBot.Config,
   bot_token: System.get_env("TELEGRAM_BOT_TOKEN"),
-  payment_provider_token: System.get_env("PAYMENT_PROVIDER_TOKEN"),
-  owner_id: get_env_and_transform("TELEGRAM_BOT_OWNER_ID", &String.to_integer/1)
+  payment_provider_token: System.get_env("PAYMENT_PROVIDER_TOKEN")
+
+if config_env() != :test do
+  config :any_talker, AnyTalkerBot.Config,
+    owner_id: get_env_and_transform("TELEGRAM_BOT_OWNER_ID", &String.to_integer/1)
+end
 
 config :any_talker, owner_id: get_env_and_transform("TELEGRAM_BOT_OWNER_ID", &String.to_integer/1)
 
