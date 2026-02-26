@@ -16,6 +16,8 @@ config :any_talker, AnyTalker.Repo,
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: System.schedulers_online() * 2
 
+config :any_talker, AnyTalkerBot.Config, owner_id: 1
+
 # We don't run a server during test. If one is required,
 # you can enable the server option below.
 config :any_talker, AnyTalkerWeb.Endpoint,

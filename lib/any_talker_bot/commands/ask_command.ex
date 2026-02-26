@@ -23,7 +23,8 @@ defmodule AnyTalkerBot.AskCommand do
   defguard not_empty_string(s) when is_binary(s) and s != ""
 
   @impl AnyTalkerBot.Command
-  def call(%Reply{message: {:command, command, message}} = reply) when command in [:ask, :ask_detailed] do
+  def call(%Reply{} = reply, command) when command in [:ask, :ask_detailed] do
+    %Message{} = message = Reply.message(reply)
     bot_id = reply.context.bot_info.id
     is_group = reply.context.extra.is_group
     response_mode = if command == :ask_detailed, do: :detailed, else: :short
