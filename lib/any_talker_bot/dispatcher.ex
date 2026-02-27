@@ -30,7 +30,6 @@ defmodule AnyTalkerBot.Dispatcher do
 
   @middleware_pipeline [
     AnyTalkerBot.AddTelemetryDataMiddleware,
-    AnyTalkerBot.SaveUpdateMiddleware,
     AnyTalkerBot.CaptionToTextMiddleware,
     IgnoreUsername,
     AnyTalkerBot.LoadDataMiddleware,
