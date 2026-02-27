@@ -27,15 +27,15 @@ defmodule AnyTalkerBot.Dispatcher do
   def bot, do: :any_talker
 
   def handle(message, context) do
-    message
-    |> build_reply(context)
-    |> Reply.execute()
+    reply = build_reply(message, context)
+
+    Reply.execute(reply)
 
     now = :os.system_time()
 
-    :telemetry.execute([:any_talker, :bot], %{handle_time: now - context.extra.received_at}, %{
+    :telemetry.execute([:any_talker, :bot], %{handle_time: now - reply.context.extra.received_at}, %{
       message: message,
-      context: context
+      context: reply.context
     })
 
     context
