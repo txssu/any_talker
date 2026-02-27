@@ -22,12 +22,18 @@ defmodule AnyTalkerBot.LoadDataMiddleware do
         _err -> nil
       end
 
+    is_group = message_chat.id != message_user.id
+
+    if is_group do
+      Accounts.add_chat_member(message_user.id, message_chat.id, message_chat.title)
+    end
+
     chat = Settings.get_chat_config(message_chat.id)
 
     context
     |> add_extra(:user, maybe_user)
     |> add_extra(:chat, chat)
-    |> add_extra(:is_group, message_chat.id != message_user.id)
+    |> add_extra(:is_group, is_group)
   end
 
   def call(context, _options) do

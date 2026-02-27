@@ -98,7 +98,6 @@ defmodule AnyTalkerBot.Reply.Message do
   defp send_message(%Reply.Message{} = message, %Reply{} = reply, chat_id) do
     case ExGram.send_message(chat_id, message.text, send_options(message, reply)) do
       {:ok, sent_message} ->
-        AnyTalker.Events.save_new_message(sent_message)
         run_callback(message, sent_message)
         {:ok, sent_message}
 

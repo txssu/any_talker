@@ -147,7 +147,6 @@ defmodule AnyTalkerBot.Reply.Invoice do
 
     case ExGram.send_message(chat.id, message.text, send_message_options(message, reply)) do
       {:ok, sent_message} ->
-        AnyTalker.Events.save_new_message(sent_message)
         {:ok, sent_message}
 
       {:error, error} ->
