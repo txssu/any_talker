@@ -8,7 +8,9 @@ defmodule AnyTalker.Settings.ChatConfig do
 
   schema "chat_configs" do
     field :title, :string
-    field :antispam, :boolean, default: false
+    field :antispam_captcha, :boolean, default: false
+    field :antispam_via, :boolean, default: false
+    field :antispam_keywords_enabled, :boolean, default: false
     field :ask_command, :boolean, default: false
     field :ask_prompt, :string
     field :ask_model, :string
@@ -28,7 +30,9 @@ defmodule AnyTalker.Settings.ChatConfig do
   def changeset(chat_config, attrs) do
     chat_config
     |> cast(attrs, [
-      :antispam,
+      :antispam_captcha,
+      :antispam_via,
+      :antispam_keywords_enabled,
       :antispam_keywords,
       :ask_command,
       :ask_prompt,
@@ -40,6 +44,6 @@ defmodule AnyTalker.Settings.ChatConfig do
       :promote_pro,
       :timezone
     ])
-    |> validate_required([:antispam, :ask_command, :promote_pro])
+    |> validate_required([:ask_command, :promote_pro])
   end
 end
