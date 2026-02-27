@@ -66,7 +66,7 @@ defmodule AnyTalkerBot.AskCommandTest do
 
     test "returns AI response for valid message in group" do
       chat_id = unique_id()
-      Repo.insert!(%ChatConfig{id: chat_id, antispam: false, ask_command: true, promote_pro: true})
+      Repo.insert!(%ChatConfig{id: chat_id, ask_command: true, promote_pro: true})
 
       tg_user = user()
       {:ok, db_user} = Accounts.upsert_user(%{id: tg_user.id, first_name: "Test"}, ~w[first_name]a)
@@ -83,7 +83,7 @@ defmodule AnyTalkerBot.AskCommandTest do
 
     test "returns error message when AI request fails" do
       chat_id = unique_id()
-      Repo.insert!(%ChatConfig{id: chat_id, antispam: false, ask_command: true, promote_pro: true})
+      Repo.insert!(%ChatConfig{id: chat_id, ask_command: true, promote_pro: true})
 
       tg_user = user()
       {:ok, db_user} = Accounts.upsert_user(%{id: tg_user.id, first_name: "Test"}, ~w[first_name]a)
@@ -116,7 +116,6 @@ defmodule AnyTalkerBot.AskCommandTest do
 
       Repo.insert!(%ChatConfig{
         id: chat_id,
-        antispam: false,
         ask_command: true,
         promote_pro: true,
         ask_max_tokens: 10,
@@ -154,7 +153,7 @@ defmodule AnyTalkerBot.AskCommandTest do
 
     test "ask_detailed uses detailed response mode" do
       chat_id = unique_id()
-      Repo.insert!(%ChatConfig{id: chat_id, antispam: false, ask_command: true, promote_pro: true})
+      Repo.insert!(%ChatConfig{id: chat_id, ask_command: true, promote_pro: true})
 
       tg_user = user()
       {:ok, db_user} = Accounts.upsert_user(%{id: tg_user.id, first_name: "Test"}, ~w[first_name]a)

@@ -23,7 +23,9 @@ defmodule AnyTalkerWeb.WebApp.ChatLive do
         <:header>Настройки</:header>
         <div class="px-2">
           <.form for={@form} phx-change="validate" phx-submit="save">
-            <.switch label="Антиспам" field={@form[:antispam]} />
+            <.switch label="Капча для новых участников" field={@form[:antispam_captcha]} />
+            <.switch label="Удалять via-сообщения" field={@form[:antispam_via]} />
+            <.switch label="Фильтр ключевых слов" field={@form[:antispam_keywords_enabled]} />
             <.tg_input label="Ключевые слова антиспама" field={@form[:antispam_keywords]} />
             <.switch label="Команда /ask" field={@form[:ask_command]} />
             <.switch label="Реклама PRO" field={@form[:promote_pro]} />
