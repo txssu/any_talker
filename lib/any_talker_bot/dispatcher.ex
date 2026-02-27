@@ -51,10 +51,17 @@ defmodule AnyTalkerBot.Dispatcher do
 
   def build_reply(message, context) do
     context
+    |> sync_message_from_command(message)
     |> run_middlewares()
     |> Reply.new()
     |> execute_command(message)
   end
+
+  defp sync_message_from_command(context, {:command, _name, cmd_message}) do
+    %{context | update: %{context.update | message: cmd_message}}
+  end
+
+  defp sync_message_from_command(context, _message), do: context
 
   defp run_middlewares(context) do
     Enum.reduce_while(@middleware_pipeline, context, fn middleware, ctx ->
