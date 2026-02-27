@@ -16,10 +16,16 @@ defmodule AnyTalkerBot.Dispatcher do
   command("que_pro")
 
   # ExGram calls extract_info/1 (text → {:command, name, msg}) BEFORE our build_reply pipeline runs.
-  # IgnoreUsername in @middleware_pipeline is therefore too late to affect routing:
-  # /privacy@BotUsername would reach CommandHandler as {:command, "privacy@BotUsername", msg}
-  # and fall through to the unknown-command clause.
-  # Registering it here ensures it runs in ExGram's own pipeline, before extract_info.
+  # Middlewares in @middleware_pipeline are therefore too late to affect command routing.
+  # Both middlewares below must run in ExGram's own pipeline, before extract_info:
+  #
+  # CaptionToTextMiddleware — copies caption into text so that photo+caption commands
+  #   (e.g. a photo with caption "/ask ...") are recognised as commands by extract_info.
+  #
+  # IgnoreUsername — strips @BotUsername from commands so that /privacy@BotUsername
+  #   reaches CommandHandler as {:command, :privacy, msg} instead of falling through
+  #   to the unknown-command clause.
+  middleware(AnyTalkerBot.CaptionToTextMiddleware)
   middleware(IgnoreUsername)
 
   @middleware_pipeline [
