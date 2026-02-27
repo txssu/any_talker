@@ -138,8 +138,7 @@ defmodule AnyTalkerBot.AskCommandTest do
     end
 
     test "owner bypasses all validations and gets AI response" do
-      # owner_id from config/test.exs
-      tg_user = user(%{id: 1})
+      tg_user = owner_user()
       {:ok, db_user} = Accounts.upsert_user(%{id: tg_user.id, first_name: "Owner"}, ~w[first_name]a)
 
       mock_gen = build_mock_generation("Owner's answer")

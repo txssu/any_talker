@@ -5,6 +5,7 @@ defmodule AnyTalkerBot.Dispatcher do
     setup_commands: false
 
   alias AnyTalkerBot.Handlers
+  alias AnyTalkerBot.Middleware.IgnoreUsername
   alias AnyTalkerBot.Reply
 
   command("privacy")
@@ -14,11 +15,18 @@ defmodule AnyTalkerBot.Dispatcher do
   command("buy_pro")
   command("que_pro")
 
+  # ExGram calls extract_info/1 (text → {:command, name, msg}) BEFORE our build_reply pipeline runs.
+  # IgnoreUsername in @middleware_pipeline is therefore too late to affect routing:
+  # /privacy@BotUsername would reach CommandHandler as {:command, "privacy@BotUsername", msg}
+  # and fall through to the unknown-command clause.
+  # Registering it here ensures it runs in ExGram's own pipeline, before extract_info.
+  middleware(IgnoreUsername)
+
   @middleware_pipeline [
     AnyTalkerBot.AddTelemetryDataMiddleware,
     AnyTalkerBot.SaveUpdateMiddleware,
     AnyTalkerBot.CaptionToTextMiddleware,
-    AnyTalkerBot.Middleware.IgnoreUsername,
+    IgnoreUsername,
     AnyTalkerBot.LoadDataMiddleware,
     AnyTalkerBot.AntispamMiddleware,
     AnyTalkerBot.IgnoreForwardedCommandsMiddleware

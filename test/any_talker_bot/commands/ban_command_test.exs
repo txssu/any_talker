@@ -17,7 +17,7 @@ defmodule AnyTalkerBot.BanCommandTest do
   end
 
   test "/ban asks to reply to a message when there is no reply_to_message" do
-    owner_msg = message(%{from: user(%{id: 1})})
+    owner_msg = message(%{from: owner_user()})
     {command, ctx} = command(:ban, owner_msg)
 
     reply = Dispatcher.build_reply(command, ctx)
@@ -29,7 +29,7 @@ defmodule AnyTalkerBot.BanCommandTest do
   test "/ban sends error when target user is not found in DB" do
     owner_msg =
       message(%{
-        from: user(%{id: 1}),
+        from: owner_user(),
         reply_to_message: message(%{from: user()})
       })
 
@@ -46,7 +46,7 @@ defmodule AnyTalkerBot.BanCommandTest do
 
     owner_msg =
       message(%{
-        from: user(%{id: 1}),
+        from: owner_user(),
         reply_to_message: message(%{from: tg_target})
       })
 
