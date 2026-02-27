@@ -4,6 +4,24 @@ defmodule AnyTalkerBot.DispatcherTest do
   import AnyTalkerBot.BotFixtures
 
   alias AnyTalkerBot.Dispatcher
+  alias AnyTalkerBot.Reply
+
+  describe "build_reply/2" do
+    # Regression: ExGram strips the command prefix in extract_info/1 and puts the clean
+    # text in the command tuple, but the context.update.message.text still holds the
+    # original "/command text". build_reply must sync the context from the tuple so that
+    # Reply.message(reply).text returns only the arguments, not the full "/command text".
+    test "message text contains only arguments, not the command prefix" do
+      original_msg = message(%{text: "/privacy something"})
+      stripped_msg = %{original_msg | text: "something"}
+      command_tuple = {:command, :privacy, stripped_msg}
+      ctx = context(message: original_msg)
+
+      reply = Dispatcher.build_reply(command_tuple, ctx)
+
+      assert Reply.message(reply).text == "something"
+    end
+  end
 
   describe "handle/2" do
     # Regression for: (KeyError) key :received_at not found in: %{}
