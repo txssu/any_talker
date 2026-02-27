@@ -12,9 +12,18 @@ defmodule AnyTalkerBot.BotFixtures do
 
   def user(attrs \\ %{}) do
     Map.merge(
-      %ExGram.Model.User{id: System.unique_integer([:positive, :monotonic]), is_bot: false, first_name: "Test"},
+      %ExGram.Model.User{id: non_owner_id(), is_bot: false, first_name: "Test"},
       attrs
     )
+  end
+
+  defp non_owner_id do
+    id = System.unique_integer([:positive, :monotonic])
+    if id == AnyTalkerBot.Config.owner_id(), do: non_owner_id(), else: id
+  end
+
+  def owner_user(attrs \\ %{}) do
+    user(Map.merge(%{id: AnyTalkerBot.Config.owner_id()}, attrs))
   end
 
   def chat(attrs \\ %{}) do
