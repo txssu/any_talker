@@ -33,7 +33,7 @@ defmodule AnyTalkerWeb.WebApp.ProfileLive do
       </div>
     </.section>
 
-    <.section class="mt-5">
+    <.section :if={@profile_user.id == @current_user.id or @current_user.admin} class="mt-5">
       <:header>Настройки</:header>
       <.form for={@form} phx-change="validate" phx-submit="save">
         <div class="space-y-3">
@@ -50,6 +50,18 @@ defmodule AnyTalkerWeb.WebApp.ProfileLive do
           </div>
         </div>
       </.form>
+    </.section>
+
+    <.section :if={Accounts.owner?(@current_user)} class="mt-5">
+      <:header>Администратор</:header>
+      <div class="px-3 pt-3">
+        <button
+          phx-click="toggle_admin"
+          class="bg-zk-surface w-full rounded-lg px-4 py-2 font-medium transition-colors hover:opacity-80"
+        >
+          {if @profile_user.admin, do: "Снять права администратора", else: "Сделать администратором"}
+        </button>
+      </div>
     </.section>
     """
   end
@@ -99,6 +111,17 @@ defmodule AnyTalkerWeb.WebApp.ProfileLive do
 
       {:error, _changeset} ->
         {:noreply, assign_profile_form(socket)}
+    end
+  end
+
+  @impl Phoenix.LiveView
+  def handle_event("toggle_admin", _params, socket) do
+    case Accounts.toggle_admin(socket.assigns.profile_user) do
+      {:ok, updated_user} ->
+        {:noreply, assign(socket, profile_user: updated_user)}
+
+      {:error, _changeset} ->
+        {:noreply, socket}
     end
   end
 

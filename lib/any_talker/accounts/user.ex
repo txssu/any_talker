@@ -13,6 +13,7 @@ defmodule AnyTalker.Accounts.User do
   | photo_url | string | Telegram profile photo URL |
   | timezone | string | User's preferred timezone (e.g., "Europe/Moscow") |
   | ask_banned | boolean | Whether the user is banned from using /ask command |
+  | admin | boolean | Whether the user has admin privileges |
   """
   use Ecto.Schema
 
@@ -28,6 +29,7 @@ defmodule AnyTalker.Accounts.User do
     field :photo_url, :string
     field :timezone, :string
     field :ask_banned, :boolean, default: false
+    field :admin, :boolean, default: false
 
     has_one :current_subscription, AnyTalker.Accounts.Subscription
 

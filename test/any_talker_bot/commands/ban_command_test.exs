@@ -4,12 +4,18 @@ defmodule AnyTalkerBot.BanCommandTest do
   import AnyTalkerBot.BotFixtures
 
   alias AnyTalker.Accounts
+  alias AnyTalker.Accounts.User
+  alias AnyTalker.Repo
   alias AnyTalkerBot.Dispatcher
   alias AnyTalkerBot.Reply
 
-  test "/ban halts when user is not the owner" do
-    non_owner_msg = message(%{from: user()})
-    {command, ctx} = command(:ban, non_owner_msg)
+  defp insert_admin_user(tg_user) do
+    Repo.insert!(%User{id: tg_user.id, first_name: tg_user.first_name, admin: true})
+  end
+
+  test "/ban halts when user is not admin" do
+    non_admin_msg = message(%{from: user()})
+    {command, ctx} = command(:ban, non_admin_msg)
 
     reply = Dispatcher.build_reply(command, ctx)
 
@@ -17,8 +23,10 @@ defmodule AnyTalkerBot.BanCommandTest do
   end
 
   test "/ban asks to reply to a message when there is no reply_to_message" do
-    owner_msg = message(%{from: owner_user()})
-    {command, ctx} = command(:ban, owner_msg)
+    tg_admin = user()
+    insert_admin_user(tg_admin)
+    admin_msg = message(%{from: tg_admin})
+    {command, ctx} = command(:ban, admin_msg)
 
     reply = Dispatcher.build_reply(command, ctx)
 
@@ -27,13 +35,16 @@ defmodule AnyTalkerBot.BanCommandTest do
   end
 
   test "/ban sends error when target user is not found in DB" do
-    owner_msg =
+    tg_admin = user()
+    insert_admin_user(tg_admin)
+
+    admin_msg =
       message(%{
-        from: owner_user(),
+        from: tg_admin,
         reply_to_message: message(%{from: user()})
       })
 
-    {command, ctx} = command(:ban, owner_msg)
+    {command, ctx} = command(:ban, admin_msg)
 
     reply = Dispatcher.build_reply(command, ctx)
 
@@ -41,16 +52,19 @@ defmodule AnyTalkerBot.BanCommandTest do
   end
 
   test "/ban bans target user and sends confirmation" do
+    tg_admin = user()
+    insert_admin_user(tg_admin)
+
     tg_target = user()
     {:ok, target_user} = Accounts.upsert_user(%{id: tg_target.id, first_name: tg_target.first_name}, ~w[first_name]a)
 
-    owner_msg =
+    admin_msg =
       message(%{
-        from: owner_user(),
+        from: tg_admin,
         reply_to_message: message(%{from: tg_target})
       })
 
-    {command, ctx} = command(:ban, owner_msg)
+    {command, ctx} = command(:ban, admin_msg)
 
     reply = Dispatcher.build_reply(command, ctx)
 

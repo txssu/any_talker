@@ -14,7 +14,7 @@ defmodule AnyTalkerBot.BanCommand do
   def call(%Reply{} = reply) do
     %User{} = user = TypedStructAccess.get(reply.context.extra.user, [ExGram.Cnt, Map])
 
-    if Accounts.owner?(user) do
+    if user.admin do
       handle(reply)
     else
       Reply.halt(reply)
