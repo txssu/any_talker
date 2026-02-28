@@ -136,19 +136,20 @@ defmodule AnyTalkerBot.AskCommandTest do
       assert String.contains?(text, "Ты выжал лимит")
     end
 
-    test "owner bypasses all validations and gets AI response" do
-      tg_user = owner_user()
-      {:ok, db_user} = Accounts.upsert_user(%{id: tg_user.id, first_name: "Owner"}, ~w[first_name]a)
+    test "admin bypasses all validations and gets AI response" do
+      tg_user = user()
+      {:ok, db_user} = Accounts.upsert_user(%{id: tg_user.id, first_name: "Admin"}, ~w[first_name]a)
+      {:ok, admin_user} = Accounts.toggle_admin(db_user)
 
-      mock_gen = build_mock_generation("Owner's answer")
+      mock_gen = build_mock_generation("Admin's answer")
       Repatch.patch(AnyTalker.AI, :request, fn _envelope -> {:ok, mock_gen} end)
 
-      # Private chat, no PRO subscription, ask_command disabled - owner bypasses all
-      msg = message(%{from: tg_user, text: "Owner question"})
-      reply = build_reply(msg, db_user, is_group: false)
+      # Private chat, no PRO subscription, ask_command disabled - admin bypasses all
+      msg = message(%{from: tg_user, text: "Admin question"})
+      reply = build_reply(msg, admin_user, is_group: false)
 
       assert %Reply{action: %Reply.Message{text: text}} = AskCommand.call(reply, :ask)
-      assert String.contains?(text, "Owner's answer")
+      assert String.contains?(text, "Admin's answer")
     end
 
     test "ask_detailed uses detailed response mode" do

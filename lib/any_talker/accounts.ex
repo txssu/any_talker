@@ -173,4 +173,10 @@ defmodule AnyTalker.Accounts do
     |> Ecto.Changeset.change(ask_banned: true)
     |> Repo.update()
   end
+
+  def toggle_admin(%User{} = user) do
+    user
+    |> Ecto.Changeset.change(admin: !user.admin)
+    |> Repo.update()
+  end
 end

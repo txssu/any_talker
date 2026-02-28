@@ -20,7 +20,7 @@ defmodule AnyTalkerWeb.WebApp.MenuLive do
       <p class="text-tg-hint mt-2.5 text-center text-sm">{subscription_status_text(@subscription)}</p>
     </.section>
 
-    <.section :if={@user_owner?} class="mt-5">
+    <.section :if={@current_user.admin} class="mt-5">
       <:header>Админка</:header>
       <ul>
         <li>

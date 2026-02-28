@@ -138,7 +138,7 @@ defmodule AnyTalkerBot.AskCommand do
   end
 
   defp validate_access(%User{} = user, group?, %ChatConfig{} = config) do
-    if Accounts.owner?(user) do
+    if user.admin do
       :ok
     else
       with :ok <- Ask.validate_not_banned(user),

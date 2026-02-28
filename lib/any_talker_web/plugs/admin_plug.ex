@@ -7,8 +7,10 @@ defmodule AnyTalkerWeb.AdminPlug do
 
   alias AnyTalker.Accounts
 
-  def on_mount(:ensure_owner, _params, _session, socket) do
-    if Accounts.owner?(socket.assigns.current_user) do
+  def on_mount(:ensure_admin, _params, _session, socket) do
+    user = socket.assigns.current_user
+
+    if user.admin or Accounts.owner?(user) do
       {:cont, socket}
     else
       socket = Phoenix.LiveView.redirect(socket, to: ~p"/webapp")
@@ -17,10 +19,12 @@ defmodule AnyTalkerWeb.AdminPlug do
   end
 
   @doc """
-  Used for routes that require the user to be an admin/owner.
+  Used for routes that require the user to be an admin or owner.
   """
   def require_admin_user(conn, _opts) do
-    if conn.assigns[:current_user] && Accounts.owner?(conn.assigns.current_user) do
+    user = conn.assigns[:current_user]
+
+    if user && (user.admin or Accounts.owner?(user)) do
       conn
     else
       conn

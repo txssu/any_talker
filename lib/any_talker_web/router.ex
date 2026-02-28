@@ -90,7 +90,7 @@ defmodule AnyTalkerWeb.Router do
     live_session :require_admin_user,
       on_mount: [
         {AnyTalkerWeb.AuthPlug, :ensure_authenticated},
-        {AnyTalkerWeb.AdminPlug, :ensure_owner}
+        {AnyTalkerWeb.AdminPlug, :ensure_admin}
       ] do
       live "/global", GlobalConfigLive
       live "/users", UsersLive
