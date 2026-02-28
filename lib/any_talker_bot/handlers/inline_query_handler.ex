@@ -6,32 +6,42 @@ defmodule AnyTalkerBot.Handlers.InlineQueryHandler do
   alias ExGram.Model.InputTextMessageContent
 
   def execute(reply, {:inline_query, query}) do
-    case detect_query_type(query.query) do
-      :empty ->
-        send_combined_help(reply, query)
-
-      :url ->
-        AnyTalkerBot.EmbedLinkCommand.handle_inline_query(reply, query)
-
-      :currency ->
-        AnyTalkerBot.CurrencyCommand.handle_inline_query(reply, query)
+    case query_type(query.query) do
+      :empty -> send_combined_help(reply, query)
+      :url -> AnyTalkerBot.EmbedLinkCommand.handle_inline_query(reply, query)
+      :currency -> AnyTalkerBot.CurrencyCommand.handle_inline_query(reply, query)
+      :ask -> AnyTalkerBot.InlineHandlers.AskInlineHandler.handle_inline_query(reply, query)
     end
   end
 
-  defp detect_query_type(""), do: :empty
+  def query_type(query_text) when is_binary(query_text) do
+    case String.trim(query_text) do
+      "" -> :empty
+      trimmed -> classify(trimmed)
+    end
+  end
 
-  defp detect_query_type(query_text) when is_binary(query_text) do
-    trimmed = String.trim(query_text)
-
+  defp classify(trimmed) do
     cond do
-      trimmed == "" ->
-        :empty
+      String.contains?(trimmed, [".com", ".org", ".net", "http://", "https://"]) -> :url
+      currency_format?(trimmed) -> :currency
+      true -> :ask
+    end
+  end
 
-      String.contains?(trimmed, [".com", ".org", ".net", "http://", "https://"]) ->
-        :url
+  defp currency_format?(text) do
+    case String.split(text, " ", trim: true) do
+      [_from, _to, amount] ->
+        expanded =
+          amount
+          |> String.downcase()
+          |> String.replace("kk", "000000")
+          |> String.replace("k", "000")
 
-      true ->
-        :currency
+        match?({v, ""} when v > 0 and v <= 1_000_000_000, Float.parse(expanded))
+
+      _other ->
+        false
     end
   end
 

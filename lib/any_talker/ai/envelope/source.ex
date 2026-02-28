@@ -21,6 +21,47 @@ defprotocol AnyTalker.AI.Envelope.Source do
   def to_envelope(source, context, opts)
 end
 
+defimpl AnyTalker.AI.Envelope.Source, for: ExGram.Model.ChosenInlineResult do
+  alias AnyTalker.Accounts
+  alias AnyTalker.AI.Envelope
+  alias AnyTalker.AI.Envelope.Context
+  alias AnyTalker.AI.Instruction
+  alias AnyTalker.Settings.ChatConfig
+  alias AnyTalker.TypedStructAccess
+  alias ExGram.Model.ChosenInlineResult
+
+  require TypedStructAccess
+
+  def to_envelope(%ChosenInlineResult{} = result, %Context{} = context, _opts \\ []) do
+    timezone = Accounts.get_timezone(context.author, context.chat)
+
+    instructions =
+      context.chat.ask_prompt
+      |> TypedStructAccess.get([ChatConfig])
+      |> Instruction.build(context.response_mode, timezone)
+
+    model_string =
+      TypedStructAccess.get(context.chat.ask_model, [ChatConfig]) || AnyTalker.GlobalConfig.get(:ask_model)
+
+    models = String.split(model_string, " ", trim: true)
+
+    %Envelope{
+      message_id: nil,
+      role: "user",
+      username: Accounts.display_name(context.author),
+      text: result.query,
+      image_base64: nil,
+      quote: nil,
+      reply: nil,
+      instructions: instructions,
+      models: models,
+      chat: context.chat,
+      author: context.author,
+      message: nil
+    }
+  end
+end
+
 defimpl AnyTalker.AI.Envelope.Source, for: ExGram.Model.Message do
   alias AnyTalker.Accounts
   alias AnyTalker.AI.Envelope

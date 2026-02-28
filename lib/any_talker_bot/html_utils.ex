@@ -17,6 +17,24 @@ defmodule AnyTalkerBot.HtmlUtils do
   @simple_close_tag_pattern Enum.join(@simple_tags, "|")
 
   @doc """
+  Escapes HTML special characters in plain text for use in Telegram HTML parse_mode.
+
+  Replaces `&`, `<`, and `>` with their HTML entities.
+
+  ## Examples
+
+      iex> escape_html("Hello <world> & friends")
+      "Hello &lt;world&gt; &amp; friends"
+
+  """
+  def escape_html(text) when is_binary(text) do
+    text
+    |> String.replace("&", "&amp;")
+    |> String.replace("<", "&lt;")
+    |> String.replace(">", "&gt;")
+  end
+
+  @doc """
   Escapes HTML special characters while preserving valid Telegram HTML tags.
 
   This function:

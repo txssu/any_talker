@@ -3,22 +3,17 @@ defmodule AnyTalkerBot.AskCommand do
   use AnyTalkerBot, :command
 
   alias AnyTalker.Accounts
-  alias AnyTalker.Accounts.Subscription
   alias AnyTalker.Accounts.User
   alias AnyTalker.AI.Generation
-  alias AnyTalker.AI.Response
-  alias AnyTalker.RateLimit.Context
-  alias AnyTalker.RateLimit.TokenBucket
   alias AnyTalker.Settings
   alias AnyTalker.Settings.ChatConfig
   alias AnyTalkerBot.AskCommand.ResponseBlock
   alias AnyTalkerBot.HtmlUtils
   alias AnyTalkerBot.Reply
+  alias AnyTalkerBot.Shared.Ask
   alias ExGram.Model.Message
 
   require Logger
-
-  @time_buffer_ms to_timeout(minute: 5)
 
   defguard not_empty_string(s) when is_binary(s) and s != ""
 
@@ -100,28 +95,13 @@ defmodule AnyTalkerBot.AskCommand do
   end
 
   defp error_reply({:error, :rate_limit, time_left_ms}, %Reply{} = reply, _user_with_sub, _config) do
-    text =
-      """
-      Ты выжал лимит.
-      Следующая попытка будет доступна через #{format_time(time_left_ms)}.
-      """
+    text = """
+    Ты выжал лимит.
+    Следующая попытка будет доступна через #{Ask.format_time(time_left_ms)}.
+    """
 
     Reply.send_message(reply, text, as_reply?: true)
   end
-
-  defp format_time(time_left_ms) do
-    time_with_buffer_ms = time_left_ms + @time_buffer_ms
-
-    hours = div(time_with_buffer_ms, 3_600_000)
-    minutes = div(rem(time_with_buffer_ms, 3_600_000), 60_000)
-
-    [format_unit(hours, "час", "часа", "часов"), format_unit(minutes, "минуту", "минуты", "минут")]
-    |> Enum.reject(&is_nil/1)
-    |> Enum.join(" ")
-  end
-
-  defp format_unit(0, _singular, _few, _many), do: nil
-  defp format_unit(n, singular, few, many), do: "#{n} #{pluralize(n, singular, few, many)}"
 
   defp reply(%Reply{} = reply, message, envelope_context) do
     result =
@@ -134,12 +114,12 @@ defmodule AnyTalkerBot.AskCommand do
         user = envelope_context.author
         config = envelope_context.chat
 
-        consume_tokens(user, config, gen.response)
+        Ask.consume_tokens(user, config, gen.response)
 
         text =
           gen.response.data.content
           |> HtmlUtils.escape_html_preserving_tags()
-          |> replace_keywords()
+          |> Ask.replace_keywords()
           |> ResponseBlock.prepend_all(gen, user)
           |> format_response_with_bot_name(config)
 
@@ -157,46 +137,29 @@ defmodule AnyTalkerBot.AskCommand do
     end
   end
 
-  defp consume_tokens(%User{} = user, %ChatConfig{} = config, %Response{} = response) do
-    tokens_used = Response.total_tokens(response)
-
-    if tokens_used > 0 do
-      key = "ask:#{user.id}"
-
-      context = %Context{
-        max_tokens: config.ask_max_tokens,
-        refill_interval_ms: config.ask_refill_interval_ms,
-        refill_amount: config.ask_refill_amount
-      }
-
-      TokenBucket.increase(key, tokens_used, context)
-    end
-  end
-
   defp validate_access(%User{} = user, group?, %ChatConfig{} = config) do
     if Accounts.owner?(user) do
       :ok
     else
-      with :ok <- validate_not_banned(user),
-           :ok <- validate_chat_type(user, group?),
-           :ok <- validate_config(user, config) do
-        validate_rate_limit(user, config)
+      with :ok <- Ask.validate_not_banned(user),
+           :ok <- validate_group_and_config(user, group?, config) do
+        Ask.validate_rate_limit(user, config)
       end
     end
   end
 
-  defp validate_not_banned(%User{ask_banned: true}), do: {:error, :banned}
-  defp validate_not_banned(%User{}), do: :ok
+  defp validate_group_and_config(user, group?, config) do
+    with {:error, :not_pro} <- Ask.validate_pro(user),
+         :ok <- validate_chat_type(group?) do
+      validate_config(config)
+    end
+  end
 
-  defp validate_chat_type(user_with_sub, group?)
-  defp validate_chat_type(%User{current_subscription: %Subscription{plan: :pro}}, _group?), do: :ok
-  defp validate_chat_type(_user, true), do: :ok
-  defp validate_chat_type(_user, false), do: {:error, :not_group}
+  defp validate_chat_type(true), do: :ok
+  defp validate_chat_type(false), do: {:error, :not_group}
 
-  defp validate_config(user_with_sub, chat_config)
-  defp validate_config(%User{current_subscription: %Subscription{plan: :pro}}, _chat_config), do: :ok
-  defp validate_config(_user, %ChatConfig{ask_command: true}), do: :ok
-  defp validate_config(_user, _chat_config), do: {:error, :not_enabled}
+  defp validate_config(%ChatConfig{ask_command: true}), do: :ok
+  defp validate_config(_chat_config), do: {:error, :not_enabled}
 
   defp validate_not_empty(%Message{text: t, photo: p}, _bot_id) when not_empty_string(t) or is_list(p), do: :ok
 
@@ -206,29 +169,6 @@ defmodule AnyTalkerBot.AskCommand do
        when not_empty_string(t) or not_empty_string(c) or is_list(p), do: :ok
 
   defp validate_not_empty(_otherwise, _bot_id), do: {:error, :empty_text}
-
-  defp validate_rate_limit(%User{} = user, %ChatConfig{} = config) do
-    key = "ask:#{user.id}"
-
-    context = %Context{
-      max_tokens: config.ask_max_tokens,
-      refill_interval_ms: config.ask_refill_interval_ms,
-      refill_amount: config.ask_refill_amount
-    }
-
-    if TokenBucket.allowed?(key, context) do
-      :ok
-    else
-      time_left_ms = TokenBucket.time_until_allowed(key, context) || context.refill_interval_ms
-      {:error, :rate_limit, time_left_ms}
-    end
-  end
-
-  defp replace_keywords(text) do
-    text
-    |> String.replace(~r/достаточно/iu, "#достаточно")
-    |> String.replace(~r/не\s+нужно/iu, "#ненужно")
-  end
 
   defp format_response_with_bot_name(reply_text, config) do
     bot_name = config.bot_name
