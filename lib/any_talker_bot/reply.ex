@@ -277,6 +277,37 @@ defmodule AnyTalkerBot.Reply do
   end
 
   @doc """
+  Edits the text of an inline message and halts the reply.
+
+  Used for messages sent via inline mode (`chosen_inline_result` flow), where the message
+  is identified by `inline_message_id` rather than `chat_id` + `message_id`.
+
+  ## Options
+
+  - `:parse_mode` - Parse mode for the message text (e.g., `"HTML"`)
+  - `:reply_markup` - New inline keyboard markup
+
+  ## Example
+
+      reply
+      |> Reply.edit_inline_message(inline_message_id, "Done!", parse_mode: "HTML")
+
+  """
+  def edit_inline_message(%__MODULE__{} = reply, inline_message_id, text, opts \\ [])
+      when is_binary(inline_message_id) and is_binary(text) do
+    # ExGram bug: editMessageText with inline_message_id returns `true` from Telegram,
+    # but ExGram always tries to cast it as Message, crashing in process_struct/2.
+    # Remove rescue once fixed: https://github.com/rockneurotiko/ex_gram/issues/196
+    try do
+      ExGram.edit_message_text(text, [inline_message_id: inline_message_id, bot: AnyTalkerBot.bot()] ++ opts)
+    rescue
+      FunctionClauseError -> :ok
+    end
+
+    halt(reply)
+  end
+
+  @doc """
   Marks the reply as halted, preventing execution.
 
   ## Example

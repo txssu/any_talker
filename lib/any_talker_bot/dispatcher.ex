@@ -91,6 +91,9 @@ defmodule AnyTalkerBot.Dispatcher do
   defp execute_command(reply, {:callback_query, _query} = message),
     do: Handlers.CallbackQueryHandler.execute(reply, message)
 
+  defp execute_command(reply, {:update, %{chosen_inline_result: %ExGram.Model.ChosenInlineResult{}}} = message),
+    do: Handlers.ChosenInlineResultHandler.execute(reply, message)
+
   defp execute_command(reply, {:update, _data} = message), do: Handlers.PaymentHandler.execute(reply, message)
   defp execute_command(reply, {:text, _text, _msg} = message), do: Handlers.TextHandler.execute(reply, message)
   defp execute_command(reply, _message), do: Reply.halt(reply)
