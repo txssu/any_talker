@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="[scrollbar-gutter:stable]">
+<html lang="en" class="overscoll-none">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -19,9 +19,11 @@
     <% end %>
   </head>
   <body class="bg-tg-secondary-bg text-tg-text">
-    <div class="pt-tg-safe-top pb-tg-safe-bottom pl-tg-safe-left pr-tg-safe-right">
-      <div class="p-4">
-        {@inner_content}
+    <div id="root" class="no-scrollbar h-screen overflow-y-auto overscroll-contain">
+      <div class="pt-tg-safe-top pb-tg-safe-bottom pl-tg-safe-left pr-tg-safe-right">
+        <div class="p-4">
+          {@inner_content}
+        </div>
       </div>
     </div>
   </body>
