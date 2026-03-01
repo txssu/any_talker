@@ -15,7 +15,11 @@ defmodule AnyTalker.AI.OpenRouter.Completions.Decoder do
   @doc """
   Decodes a map from OpenRouter Completions API to Response struct.
   """
-  @spec decode(map()) :: Response.t()
+  @spec decode(map()) :: {:ok, Response.t()} | {:error, term()}
+  def decode(%{"error" => %{"message" => message} = error}) do
+    {:error, {:api_error, error["code"], message}}
+  end
+
   def decode(data) when is_map(data) do
     finish_reason_path = path "choices" / 0 / "finish_reason", :json
     finish_reason = Pathex.get(data, finish_reason_path)
