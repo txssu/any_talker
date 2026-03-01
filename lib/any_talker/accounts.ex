@@ -150,6 +150,31 @@ defmodule AnyTalker.Accounts do
     end
   end
 
+  def set_pro_subscription(%User{} = user, expires_at \\ nil) do
+    user
+    |> get_current_subscription()
+    |> do_set_pro_subscription(user, expires_at)
+  end
+
+  defp do_set_pro_subscription(%Subscription{} = sub, _user, expires_at) do
+    sub
+    |> Ecto.Changeset.change(expires_at: expires_at)
+    |> Repo.update()
+  end
+
+  defp do_set_pro_subscription(nil, user, expires_at) do
+    Repo.insert(%Subscription{user_id: user.id, plan: :pro, expires_at: expires_at})
+  end
+
+  def revoke_subscription(%User{} = user) do
+    user
+    |> get_current_subscription()
+    |> do_revoke_subscription()
+  end
+
+  defp do_revoke_subscription(%Subscription{} = sub), do: Repo.delete(sub)
+  defp do_revoke_subscription(nil), do: {:ok, nil}
+
   @doc """
   Returns timezone string based on hierarchy:
   1. User's timezone (if set)
