@@ -71,7 +71,7 @@ defmodule AnyTalker.MixProject do
       {:html2markdown, "~> 0.3.1"},
       {:codepagex, "~> 0.1.12"},
       # Telegram
-      {:ex_gram, "~> 0.54"},
+      {:ex_gram, "~> 0.58"},
       {:tesla, "~> 1.2"},
       {:hackney, "~> 1.21"},
       {:mint, "~> 1.7"},
