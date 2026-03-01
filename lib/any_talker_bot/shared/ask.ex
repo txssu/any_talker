@@ -54,8 +54,8 @@ defmodule AnyTalkerBot.Shared.Ask do
 
   def replace_keywords(text) do
     text
-    |> String.replace(~r/достаточно/iu, "#достаточно")
-    |> String.replace(~r/не\s+нужно/iu, "#ненужно")
+    |> String.replace(~r/\bдостаточно\b/iu, "#достаточно")
+    |> String.replace(~r/\bне\s+нужно\b/iu, "#ненужно")
   end
 
   def format_time(time_left_ms) do
