@@ -31,19 +31,59 @@ defmodule AnyTalker.GlobalConfig do
   end
 
   def update_config(config, attrs) do
-    result =
-      config
-      |> changeset(attrs)
-      |> Repo.update()
-
-    if match?({:ok, _}, result), do: Cache.delete_all()
-
-    result
+    config
+    |> changeset(attrs)
+    |> Repo.update()
+    |> maybe_clear_cache()
   end
 
   def change_config(config, attrs \\ %{}) do
     changeset(config, attrs)
   end
+
+  def change_general(config, attrs \\ %{}) do
+    config
+    |> cast(attrs, [:timezone])
+    |> validate_required([:timezone])
+  end
+
+  def update_general(config, attrs) do
+    config
+    |> change_general(attrs)
+    |> Repo.update()
+    |> maybe_clear_cache()
+  end
+
+  def change_ask_model(config, attrs \\ %{}) do
+    cast(config, attrs, [:ask_model, :ask_prompt])
+  end
+
+  def update_ask_model(config, attrs) do
+    config
+    |> change_ask_model(attrs)
+    |> Repo.update()
+    |> maybe_clear_cache()
+  end
+
+  def change_ask_limits(config, attrs \\ %{}) do
+    config
+    |> cast(attrs, [:ask_max_tokens, :ask_refill_interval_ms, :ask_refill_amount])
+    |> validate_required([:ask_max_tokens, :ask_refill_interval_ms, :ask_refill_amount])
+  end
+
+  def update_ask_limits(config, attrs) do
+    config
+    |> change_ask_limits(attrs)
+    |> Repo.update()
+    |> maybe_clear_cache()
+  end
+
+  defp maybe_clear_cache({:ok, _config} = result) do
+    Cache.delete_all()
+    result
+  end
+
+  defp maybe_clear_cache(result), do: result
 
   defp changeset(config, attrs) do
     config

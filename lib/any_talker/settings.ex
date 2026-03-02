@@ -26,6 +26,46 @@ defmodule AnyTalker.Settings do
     ChatConfig.changeset(chat_config, attrs)
   end
 
+  def change_antispam_config(config, attrs \\ %{}), do: ChatConfig.antispam_changeset(config, attrs)
+
+  def update_antispam_config(config, attrs) do
+    config
+    |> ChatConfig.antispam_changeset(attrs)
+    |> Repo.update()
+  end
+
+  def change_ask_command_config(config, attrs \\ %{}), do: ChatConfig.ask_command_changeset(config, attrs)
+
+  def update_ask_command_config(config, attrs) do
+    config
+    |> ChatConfig.ask_command_changeset(attrs)
+    |> Repo.update()
+  end
+
+  def change_ask_model_config(config, attrs \\ %{}), do: ChatConfig.ask_model_changeset(config, attrs)
+
+  def update_ask_model_config(config, attrs) do
+    config
+    |> ChatConfig.ask_model_changeset(attrs)
+    |> Repo.update()
+  end
+
+  def change_ask_limits_config(config, attrs \\ %{}), do: ChatConfig.ask_limits_changeset(config, attrs)
+
+  def update_ask_limits_config(config, attrs) do
+    config
+    |> ChatConfig.ask_limits_changeset(attrs)
+    |> Repo.update()
+  end
+
+  def change_general_chat_config(config, attrs \\ %{}), do: ChatConfig.general_changeset(config, attrs)
+
+  def update_general_chat_config(config, attrs) do
+    config
+    |> ChatConfig.general_changeset(attrs)
+    |> Repo.update()
+  end
+
   def get_full_chat_config(nil), do: merge_configs(%ChatConfig{}, GlobalConfig.get_config())
 
   def get_full_chat_config(id) do
