@@ -46,4 +46,28 @@ defmodule AnyTalker.Settings.ChatConfig do
     ])
     |> validate_required([:ask_command, :promote_pro])
   end
+
+  def antispam_changeset(config, attrs \\ %{}) do
+    cast(config, attrs, [:antispam_captcha, :antispam_via, :antispam_keywords_enabled, :antispam_keywords])
+  end
+
+  def ask_command_changeset(config, attrs \\ %{}) do
+    config
+    |> cast(attrs, [:ask_command, :bot_name])
+    |> validate_required([:ask_command])
+  end
+
+  def ask_model_changeset(config, attrs \\ %{}) do
+    cast(config, attrs, [:ask_model, :ask_prompt])
+  end
+
+  def ask_limits_changeset(config, attrs \\ %{}) do
+    cast(config, attrs, [:ask_max_tokens, :ask_refill_interval_ms, :ask_refill_amount])
+  end
+
+  def general_changeset(config, attrs \\ %{}) do
+    config
+    |> cast(attrs, [:timezone, :promote_pro])
+    |> validate_required([:promote_pro])
+  end
 end

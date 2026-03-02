@@ -16,20 +16,30 @@ defmodule AnyTalkerWeb.WebApp.GlobalConfigLive do
     </.section>
 
     <.section class="mt-5">
-      <:header>Настройки</:header>
-      <.form for={@form} phx-change="validate" phx-submit="save">
+      <:header>Общее</:header>
+      <.form for={@general_form} phx-change="validate_general" phx-submit="save_general">
         <div class="space-y-3">
-          <.tg_input label="Таймзона" field={@form[:timezone]} />
-          <.tg_input label="Модели /ask" field={@form[:ask_model]} />
-          <.tg_input type="number" label="Макс. токенов /ask" field={@form[:ask_max_tokens]} />
-          <.tg_input
-            type="number"
-            label="Интервал пополнения /ask (мс)"
-            field={@form[:ask_refill_interval_ms]}
-          />
-          <.tg_input type="number" label="Пополнение токенов /ask" field={@form[:ask_refill_amount]} />
+          <.tg_input label="Таймзона" field={@general_form[:timezone]} />
+          <div class="px-3 pt-3">
+            <button
+              type="submit"
+              phx-disable-with="Сохранение..."
+              class="w-full rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-700"
+            >
+              Сохранить
+            </button>
+          </div>
+        </div>
+      </.form>
+    </.section>
+
+    <.section class="mt-5">
+      <:header>Модель /ask</:header>
+      <.form for={@ask_model_form} phx-change="validate_ask_model" phx-submit="save_ask_model">
+        <div class="space-y-3">
+          <.tg_input label="Модели /ask" field={@ask_model_form[:ask_model]} />
           <div class="mt-2">
-            <.textarea label="Промпт /ask" field={@form[:ask_prompt]} />
+            <.textarea label="Промпт /ask" field={@ask_model_form[:ask_prompt]} />
           </div>
           <div class="px-3 pt-3">
             <button
@@ -59,6 +69,34 @@ defmodule AnyTalkerWeb.WebApp.GlobalConfigLive do
       <div class="mt-2 space-y-3">
         <.model_card :for={{model_id, result} <- @models_info.result} id={model_id} result={result} />
       </div>
+    </.section>
+
+    <.section class="mt-5">
+      <:header>Лимиты /ask</:header>
+      <.form for={@ask_limits_form} phx-change="validate_ask_limits" phx-submit="save_ask_limits">
+        <div class="space-y-3">
+          <.tg_input type="number" label="Макс. токенов /ask" field={@ask_limits_form[:ask_max_tokens]} />
+          <.tg_input
+            type="number"
+            label="Интервал пополнения /ask (мс)"
+            field={@ask_limits_form[:ask_refill_interval_ms]}
+          />
+          <.tg_input
+            type="number"
+            label="Пополнение токенов /ask"
+            field={@ask_limits_form[:ask_refill_amount]}
+          />
+          <div class="px-3 pt-3">
+            <button
+              type="submit"
+              phx-disable-with="Сохранение..."
+              class="w-full rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-700"
+            >
+              Сохранить
+            </button>
+          </div>
+        </div>
+      </.form>
     </.section>
     """
   end
@@ -148,29 +186,41 @@ defmodule AnyTalkerWeb.WebApp.GlobalConfigLive do
   end
 
   @impl Phoenix.LiveView
-  def handle_event("validate", %{"global_config" => attrs}, socket) do
-    config = socket.assigns.global_config
-
+  def handle_event("validate_general", %{"general" => attrs}, socket) do
     changeset =
-      config
-      |> GlobalConfig.change_config(attrs)
+      socket.assigns.global_config
+      |> GlobalConfig.change_general(attrs)
       |> Map.put(:action, :validate)
 
-    form = to_form(changeset)
-
-    {:noreply, assign(socket, form: form)}
+    {:noreply, assign(socket, general_form: to_form(changeset, as: "general"))}
   end
 
-  @impl Phoenix.LiveView
-  def handle_event("save", %{"global_config" => attrs}, socket) do
+  def handle_event("save_general", %{"general" => attrs}, socket) do
+    config = socket.assigns.global_config
+
+    case GlobalConfig.update_general(config, attrs) do
+      {:ok, new_config} -> {:noreply, assign_config(socket, new_config)}
+      {:error, _changeset} -> {:noreply, assign_config(socket, config)}
+    end
+  end
+
+  def handle_event("validate_ask_model", %{"ask_model" => attrs}, socket) do
+    changeset =
+      socket.assigns.global_config
+      |> GlobalConfig.change_ask_model(attrs)
+      |> Map.put(:action, :validate)
+
+    {:noreply, assign(socket, ask_model_form: to_form(changeset, as: "ask_model"))}
+  end
+
+  def handle_event("save_ask_model", %{"ask_model" => attrs}, socket) do
     config = socket.assigns.global_config
     old_model = config.ask_model
 
-    case GlobalConfig.update_config(config, attrs) do
+    case GlobalConfig.update_ask_model(config, attrs) do
       {:ok, new_config} ->
         socket = assign_config(socket, new_config)
         socket = if new_config.ask_model == old_model, do: socket, else: fetch_models_info(socket, new_config.ask_model)
-
         {:noreply, socket}
 
       {:error, _changeset} ->
@@ -178,13 +228,30 @@ defmodule AnyTalkerWeb.WebApp.GlobalConfigLive do
     end
   end
 
-  defp assign_config(socket, config) do
-    form =
-      config
-      |> GlobalConfig.change_config()
-      |> to_form()
+  def handle_event("validate_ask_limits", %{"ask_limits" => attrs}, socket) do
+    changeset =
+      socket.assigns.global_config
+      |> GlobalConfig.change_ask_limits(attrs)
+      |> Map.put(:action, :validate)
 
-    assign(socket, form: form, global_config: config)
+    {:noreply, assign(socket, ask_limits_form: to_form(changeset, as: "ask_limits"))}
+  end
+
+  def handle_event("save_ask_limits", %{"ask_limits" => attrs}, socket) do
+    config = socket.assigns.global_config
+
+    case GlobalConfig.update_ask_limits(config, attrs) do
+      {:ok, new_config} -> {:noreply, assign_config(socket, new_config)}
+      {:error, _changeset} -> {:noreply, assign_config(socket, config)}
+    end
+  end
+
+  defp assign_config(socket, config) do
+    socket
+    |> assign(:global_config, config)
+    |> assign(:general_form, to_form(GlobalConfig.change_general(config), as: "general"))
+    |> assign(:ask_model_form, to_form(GlobalConfig.change_ask_model(config), as: "ask_model"))
+    |> assign(:ask_limits_form, to_form(GlobalConfig.change_ask_limits(config), as: "ask_limits"))
   end
 
   defp fetch_models_info(socket, model_string) do

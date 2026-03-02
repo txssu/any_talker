@@ -20,28 +20,100 @@ defmodule AnyTalkerWeb.WebApp.ChatLive do
       </.section>
 
       <.section :if={@user_owner?}>
-        <:header>Настройки</:header>
+        <:header>Антиспам</:header>
         <div class="px-2">
-          <.form for={@form} phx-change="validate" phx-submit="save">
-            <.switch label="Капча для новых участников" field={@form[:antispam_captcha]} />
-            <.switch label="Удалять via-сообщения" field={@form[:antispam_via]} />
-            <.switch label="Фильтр ключевых слов" field={@form[:antispam_keywords_enabled]} />
-            <.tg_input label="Ключевые слова антиспама" field={@form[:antispam_keywords]} />
-            <.switch label="Команда /ask" field={@form[:ask_command]} />
-            <.switch label="Реклама PRO" field={@form[:promote_pro]} />
-            <.tg_input label="Имя бота" field={@form[:bot_name]} />
-            <.tg_input label="Таймзона" field={@form[:timezone]} />
-            <.tg_input label="Модели /ask" field={@form[:ask_model]} />
-            <.tg_input type="number" label="Макс. токенов /ask" field={@form[:ask_max_tokens]} />
+          <.form for={@antispam_form} phx-change="validate_antispam" phx-submit="save_antispam">
+            <.switch label="Капча для новых участников" field={@antispam_form[:antispam_captcha]} />
+            <.switch label="Удалять via-сообщения" field={@antispam_form[:antispam_via]} />
+            <.switch label="Фильтр ключевых слов" field={@antispam_form[:antispam_keywords_enabled]} />
+            <.tg_input label="Ключевые слова антиспама" field={@antispam_form[:antispam_keywords]} />
+            <div class="px-1 pt-3">
+              <button
+                type="submit"
+                phx-disable-with="Сохранение..."
+                class="w-full rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-700"
+              >
+                Сохранить
+              </button>
+            </div>
+          </.form>
+        </div>
+      </.section>
+
+      <.section :if={@user_owner?}>
+        <:header>Команда /ask</:header>
+        <div class="px-2">
+          <.form for={@ask_command_form} phx-change="validate_ask_command" phx-submit="save_ask_command">
+            <.switch label="Команда /ask" field={@ask_command_form[:ask_command]} />
+            <.tg_input label="Имя бота" field={@ask_command_form[:bot_name]} />
+            <div class="px-1 pt-3">
+              <button
+                type="submit"
+                phx-disable-with="Сохранение..."
+                class="w-full rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-700"
+              >
+                Сохранить
+              </button>
+            </div>
+          </.form>
+        </div>
+      </.section>
+
+      <.section :if={@user_owner?}>
+        <:header>Модель /ask</:header>
+        <div class="px-2">
+          <.form for={@ask_model_form} phx-change="validate_ask_model" phx-submit="save_ask_model">
+            <.tg_input label="Модели /ask" field={@ask_model_form[:ask_model]} />
+            <div class="mt-2">
+              <.textarea label="Промпт /ask" field={@ask_model_form[:ask_prompt]} />
+            </div>
+            <div class="px-1 pt-3">
+              <button
+                type="submit"
+                phx-disable-with="Сохранение..."
+                class="w-full rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-700"
+              >
+                Сохранить
+              </button>
+            </div>
+          </.form>
+        </div>
+      </.section>
+
+      <.section :if={@user_owner?}>
+        <:header>Лимиты /ask</:header>
+        <div class="px-2">
+          <.form for={@ask_limits_form} phx-change="validate_ask_limits" phx-submit="save_ask_limits">
+            <.tg_input type="number" label="Макс. токенов /ask" field={@ask_limits_form[:ask_max_tokens]} />
             <.tg_input
               type="number"
               label="Интервал пополнения /ask (мс)"
-              field={@form[:ask_refill_interval_ms]}
+              field={@ask_limits_form[:ask_refill_interval_ms]}
             />
-            <.tg_input type="number" label="Пополнение токенов /ask" field={@form[:ask_refill_amount]} />
-            <div class="mt-2">
-              <.textarea label="Промпт /ask" field={@form[:ask_prompt]} />
+            <.tg_input
+              type="number"
+              label="Пополнение токенов /ask"
+              field={@ask_limits_form[:ask_refill_amount]}
+            />
+            <div class="px-1 pt-3">
+              <button
+                type="submit"
+                phx-disable-with="Сохранение..."
+                class="w-full rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-700"
+              >
+                Сохранить
+              </button>
             </div>
+          </.form>
+        </div>
+      </.section>
+
+      <.section :if={@user_owner?}>
+        <:header>Общее</:header>
+        <div class="px-2">
+          <.form for={@general_form} phx-change="validate_general" phx-submit="save_general">
+            <.switch label="Реклама PRO" field={@general_form[:promote_pro]} />
+            <.tg_input label="Таймзона" field={@general_form[:timezone]} />
             <div class="px-1 pt-3">
               <button
                 type="submit"
@@ -63,13 +135,10 @@ defmodule AnyTalkerWeb.WebApp.ChatLive do
   @impl Phoenix.LiveView
   def mount(%{"chat_id" => chat_id}, _session, socket) do
     user_owner? = Accounts.owner?(socket.assigns.current_user)
-
     chat_config = Settings.get_chat_config(chat_id)
     chat_members = Accounts.list_chat_members(chat_id)
 
-    Task.async(fn ->
-      Settings.get_or_fetch_chat_avatar(chat_id)
-    end)
+    Task.async(fn -> Settings.get_or_fetch_chat_avatar(chat_id) end)
 
     {:ok,
      socket
@@ -78,43 +147,134 @@ defmodule AnyTalkerWeb.WebApp.ChatLive do
   end
 
   @impl Phoenix.LiveView
-  def handle_event("validate", %{"chat_config" => attrs}, socket) do
-    chat_config = socket.assigns.chat_config
-
+  def handle_event("validate_antispam", %{"antispam" => attrs}, socket) do
     changeset =
-      chat_config
-      |> Settings.change_chat_config(attrs)
+      socket.assigns.chat_config
+      |> Settings.change_antispam_config(attrs)
       |> Map.put(:action, :validate)
 
-    form = to_form(changeset)
-
-    {:noreply, assign(socket, form: form)}
+    {:noreply, assign(socket, antispam_form: to_form(changeset, as: "antispam"))}
   end
 
-  @impl Phoenix.LiveView
-  def handle_event("save", %{"chat_config" => attrs}, socket) do
+  def handle_event("save_antispam", %{"antispam" => attrs}, socket) do
+    save_section(
+      socket,
+      attrs,
+      &Settings.update_antispam_config/2,
+      :antispam_form,
+      "antispam",
+      &Settings.change_antispam_config/2
+    )
+  end
+
+  def handle_event("validate_ask_command", %{"ask_command" => attrs}, socket) do
+    changeset =
+      socket.assigns.chat_config
+      |> Settings.change_ask_command_config(attrs)
+      |> Map.put(:action, :validate)
+
+    {:noreply, assign(socket, ask_command_form: to_form(changeset, as: "ask_command"))}
+  end
+
+  def handle_event("save_ask_command", %{"ask_command" => attrs}, socket) do
+    save_section(
+      socket,
+      attrs,
+      &Settings.update_ask_command_config/2,
+      :ask_command_form,
+      "ask_command",
+      &Settings.change_ask_command_config/2
+    )
+  end
+
+  def handle_event("validate_ask_model", %{"ask_model" => attrs}, socket) do
+    changeset =
+      socket.assigns.chat_config
+      |> Settings.change_ask_model_config(attrs)
+      |> Map.put(:action, :validate)
+
+    {:noreply, assign(socket, ask_model_form: to_form(changeset, as: "ask_model"))}
+  end
+
+  def handle_event("save_ask_model", %{"ask_model" => attrs}, socket) do
+    save_section(
+      socket,
+      attrs,
+      &Settings.update_ask_model_config/2,
+      :ask_model_form,
+      "ask_model",
+      &Settings.change_ask_model_config/2
+    )
+  end
+
+  def handle_event("validate_ask_limits", %{"ask_limits" => attrs}, socket) do
+    changeset =
+      socket.assigns.chat_config
+      |> Settings.change_ask_limits_config(attrs)
+      |> Map.put(:action, :validate)
+
+    {:noreply, assign(socket, ask_limits_form: to_form(changeset, as: "ask_limits"))}
+  end
+
+  def handle_event("save_ask_limits", %{"ask_limits" => attrs}, socket) do
+    save_section(
+      socket,
+      attrs,
+      &Settings.update_ask_limits_config/2,
+      :ask_limits_form,
+      "ask_limits",
+      &Settings.change_ask_limits_config/2
+    )
+  end
+
+  def handle_event("validate_general", %{"general" => attrs}, socket) do
+    changeset =
+      socket.assigns.chat_config
+      |> Settings.change_general_chat_config(attrs)
+      |> Map.put(:action, :validate)
+
+    {:noreply, assign(socket, general_form: to_form(changeset, as: "general"))}
+  end
+
+  def handle_event("save_general", %{"general" => attrs}, socket) do
+    save_section(
+      socket,
+      attrs,
+      &Settings.update_general_chat_config/2,
+      :general_form,
+      "general",
+      &Settings.change_general_chat_config/2
+    )
+  end
+
+  defp save_section(socket, attrs, update_fn, form_key, form_name, change_fn) do
     chat_config = socket.assigns.chat_config
     user_owner? = socket.assigns.user_owner?
 
     if user_owner? do
-      case Settings.update_chat_config(chat_config, attrs) do
+      case update_fn.(chat_config, attrs) do
         {:ok, new_config} ->
-          {:noreply, assign_chat_config(socket, new_config)}
+          {:noreply,
+           assign(socket, [
+             {form_key, to_form(change_fn.(new_config), as: form_name)},
+             {:chat_config, new_config}
+           ])}
 
-        {:error, _error_changeset} ->
-          {:noreply, assign_chat_config(socket, chat_config)}
+        {:error, _changeset} ->
+          {:noreply, assign(socket, form_key, to_form(change_fn.(chat_config), as: form_name))}
       end
     else
-      {:noreply, assign_chat_config(socket, chat_config)}
+      {:noreply, socket}
     end
   end
 
   defp assign_chat_config(socket, chat_config) do
-    form =
-      chat_config
-      |> Settings.change_chat_config()
-      |> to_form()
-
-    assign(socket, form: form, chat_config: chat_config)
+    socket
+    |> assign(:chat_config, chat_config)
+    |> assign(:antispam_form, to_form(Settings.change_antispam_config(chat_config), as: "antispam"))
+    |> assign(:ask_command_form, to_form(Settings.change_ask_command_config(chat_config), as: "ask_command"))
+    |> assign(:ask_model_form, to_form(Settings.change_ask_model_config(chat_config), as: "ask_model"))
+    |> assign(:ask_limits_form, to_form(Settings.change_ask_limits_config(chat_config), as: "ask_limits"))
+    |> assign(:general_form, to_form(Settings.change_general_chat_config(chat_config), as: "general"))
   end
 end
