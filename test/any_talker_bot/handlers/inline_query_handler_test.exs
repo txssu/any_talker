@@ -12,12 +12,12 @@ defmodule AnyTalkerBot.Handlers.InlineQueryHandlerTest do
       assert InlineQueryHandler.query_type("   ") == :empty
     end
 
-    test "https URL is :url" do
-      assert InlineQueryHandler.query_type("https://example.com/page") == :url
+    test "https URL is :ask" do
+      assert InlineQueryHandler.query_type("https://example.com/page") == :ask
     end
 
-    test ".com domain is :url" do
-      assert InlineQueryHandler.query_type("example.com") == :url
+    test ".com domain is :ask" do
+      assert InlineQueryHandler.query_type("example.com") == :ask
     end
 
     test "three words with numeric last word is :currency" do

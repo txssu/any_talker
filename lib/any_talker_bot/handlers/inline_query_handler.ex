@@ -8,7 +8,6 @@ defmodule AnyTalkerBot.Handlers.InlineQueryHandler do
   def execute(reply, {:inline_query, query}) do
     case query_type(query.query) do
       :empty -> send_combined_help(reply, query)
-      :url -> AnyTalkerBot.EmbedLinkCommand.handle_inline_query(reply, query)
       :currency -> AnyTalkerBot.CurrencyCommand.handle_inline_query(reply, query)
       :ask -> AnyTalkerBot.InlineHandlers.AskInlineHandler.handle_inline_query(reply, query)
     end
@@ -22,10 +21,10 @@ defmodule AnyTalkerBot.Handlers.InlineQueryHandler do
   end
 
   defp classify(trimmed) do
-    cond do
-      String.contains?(trimmed, [".com", ".org", ".net", "http://", "https://"]) -> :url
-      currency_format?(trimmed) -> :currency
-      true -> :ask
+    if currency_format?(trimmed) do
+      :currency
+    else
+      :ask
     end
   end
 
@@ -56,16 +55,6 @@ defmodule AnyTalkerBot.Handlers.InlineQueryHandler do
       }
     }
 
-    embed_help = %InlineQueryResultArticle{
-      type: "article",
-      id: "embed_help",
-      title: "Встроенные ссылки",
-      description: "Конвертация ссылок в embedded версии",
-      input_message_content: %InputTextMessageContent{
-        message_text: "Вставьте ссылку для создания embedded превью."
-      }
-    }
-
-    Reply.answer_inline_query(reply, query.id, [currency_help, embed_help])
+    Reply.answer_inline_query(reply, query.id, [currency_help])
   end
 end
