@@ -47,7 +47,7 @@ config :any_talker,
   nikita_chat_id: -1_002_634_925_169,
   nikita_counter_timeout_min: 1
 
-config :any_talker, yt_dlp_version: "2026.02.04"
+config :any_talker, yt_dlp_version: "2026.02.21"
 
 config :codepagex, :encodings, [
   :"VENDORS/MISC/KOI8-R"
