@@ -1,4 +1,4 @@
-defmodule AnyTalkerBot.AskCommand.ResponseBlock do
+defmodule AnyTalkerBot.Shared.ResponseBlock do
   @moduledoc """
   Behaviour for response blocks that can be prepended to AI responses.
 
@@ -16,8 +16,8 @@ defmodule AnyTalkerBot.AskCommand.ResponseBlock do
   @callback extract(%Generation{}, %User{}) :: String.t() | nil
 
   @blocks [
-    AnyTalkerBot.AskCommand.YouTubeSummaryBlock,
-    AnyTalkerBot.AskCommand.ReminderBlock
+    AnyTalkerBot.Shared.YouTubeSummaryBlock,
+    AnyTalkerBot.Shared.ReminderBlock
   ]
 
   def prepend_all(text, %Generation{} = gen, %User{} = user) do

@@ -7,10 +7,10 @@ defmodule AnyTalkerBot.AskCommand do
   alias AnyTalker.AI.Generation
   alias AnyTalker.Settings
   alias AnyTalker.Settings.ChatConfig
-  alias AnyTalkerBot.AskCommand.ResponseBlock
   alias AnyTalkerBot.HtmlUtils
   alias AnyTalkerBot.Reply
   alias AnyTalkerBot.Shared.Ask
+  alias AnyTalkerBot.Shared.ResponseBlock
   alias ExGram.Model.Message
 
   require Logger

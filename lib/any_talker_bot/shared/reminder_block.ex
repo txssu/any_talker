@@ -1,6 +1,6 @@
-defmodule AnyTalkerBot.AskCommand.ReminderBlock do
+defmodule AnyTalkerBot.Shared.ReminderBlock do
   @moduledoc false
-  @behaviour AnyTalkerBot.AskCommand.ResponseBlock
+  @behaviour AnyTalkerBot.Shared.ResponseBlock
 
   alias AnyTalker.Accounts
   alias AnyTalker.Accounts.User
@@ -15,7 +15,7 @@ defmodule AnyTalkerBot.AskCommand.ReminderBlock do
 
   require TypedStructAccess
 
-  @impl AnyTalkerBot.AskCommand.ResponseBlock
+  @impl AnyTalkerBot.Shared.ResponseBlock
   def extract(%Generation{} = gen, %User{} = user) do
     chat = TypedStructAccess.get(gen.request.function_context.chat, [Request, FunctionContext])
     timezone = Accounts.get_timezone(user, chat)
