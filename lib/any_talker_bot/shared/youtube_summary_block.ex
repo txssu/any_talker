@@ -1,6 +1,6 @@
-defmodule AnyTalkerBot.AskCommand.YouTubeSummaryBlock do
+defmodule AnyTalkerBot.Shared.YouTubeSummaryBlock do
   @moduledoc false
-  @behaviour AnyTalkerBot.AskCommand.ResponseBlock
+  @behaviour AnyTalkerBot.Shared.ResponseBlock
 
   alias AnyTalker.Accounts.Subscription
   alias AnyTalker.Accounts.User
@@ -9,7 +9,7 @@ defmodule AnyTalkerBot.AskCommand.YouTubeSummaryBlock do
   alias AnyTalker.AI.YouTubeTool
   alias AnyTalkerBot.HtmlUtils
 
-  @impl AnyTalkerBot.AskCommand.ResponseBlock
+  @impl AnyTalkerBot.Shared.ResponseBlock
   def extract(%Generation{} = gen, %User{} = user) do
     if Subscription.active_pro?(user.current_subscription) do
       gen

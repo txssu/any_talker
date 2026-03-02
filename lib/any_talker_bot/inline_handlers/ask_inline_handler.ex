@@ -9,6 +9,7 @@ defmodule AnyTalkerBot.InlineHandlers.AskInlineHandler do
   alias AnyTalkerBot.HtmlUtils
   alias AnyTalkerBot.Reply
   alias AnyTalkerBot.Shared.Ask
+  alias AnyTalkerBot.Shared.ResponseBlock
   alias ExGram.Model.ChosenInlineResult
   alias ExGram.Model.InlineKeyboardButton
   alias ExGram.Model.InlineKeyboardMarkup
@@ -88,6 +89,7 @@ defmodule AnyTalkerBot.InlineHandlers.AskInlineHandler do
           gen.response.data.content
           |> HtmlUtils.escape_html_preserving_tags()
           |> Ask.replace_keywords()
+          |> ResponseBlock.prepend_all(gen, user_with_sub)
 
         Reply.edit_inline_message(reply, result.inline_message_id, inline_reply_text(result.query, text),
           parse_mode: "HTML",
