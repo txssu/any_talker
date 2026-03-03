@@ -27,6 +27,10 @@ defmodule AnyTalkerBot.Handlers.CommandHandler do
     AnyTalkerBot.BuyProCommand.call(reply)
   end
 
+  def execute(reply, {:command, :clean, _msg}) do
+    AnyTalkerBot.CleanUrlCommand.call(reply)
+  end
+
   def execute(reply, {:command, _unknown, _msg}) do
     Reply.halt(reply)
   end

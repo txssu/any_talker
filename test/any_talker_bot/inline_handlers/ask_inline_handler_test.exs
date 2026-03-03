@@ -19,21 +19,23 @@ defmodule AnyTalkerBot.InlineHandlers.AskInlineHandlerTest do
   alias ExGram.Model.InlineQuery
   alias ExGram.Model.User
 
-  describe "handle_inline_query/2" do
-    test "returns a single InlineQueryResultArticle for any text" do
+  describe "match?/1" do
+    test "matches any text" do
+      assert AskInlineHandler.match?("anything")
+      assert AskInlineHandler.match?("купить яндекс")
+      assert AskInlineHandler.match?("https://example.com")
+    end
+  end
+
+  describe "build_results/1" do
+    test "returns a single InlineQueryResultArticle for PRO user" do
       tg_user = user()
+      {:ok, db_user} = Accounts.upsert_user(%{id: tg_user.id, first_name: "Test"}, ~w[first_name]a)
+      Repo.insert!(%Subscription{user_id: db_user.id, plan: :pro})
 
-      query = %InlineQuery{
-        id: "query123",
-        from: tg_user,
-        query: "купить яндекс",
-        offset: ""
-      }
+      query = %InlineQuery{id: "query123", from: tg_user, query: "купить яндекс", offset: ""}
 
-      reply = Reply.new(context())
-
-      assert %Reply{action: %Reply.InlineQuery{query_id: "query123", results: [result]}} =
-               AskInlineHandler.handle_inline_query(reply, query)
+      assert [result] = AskInlineHandler.build_results(query)
 
       assert result.id == "ask"
       assert result.title == "Спросить AI"
@@ -44,38 +46,36 @@ defmodule AnyTalkerBot.InlineHandlers.AskInlineHandlerTest do
 
     test "trims whitespace from query text" do
       tg_user = user()
+      {:ok, db_user} = Accounts.upsert_user(%{id: tg_user.id, first_name: "Test"}, ~w[first_name]a)
+      Repo.insert!(%Subscription{user_id: db_user.id, plan: :pro})
+
       query = %InlineQuery{id: "q1", from: tg_user, query: "  hello  ", offset: ""}
 
-      reply = Reply.new(context())
-
-      assert %Reply{action: %Reply.InlineQuery{results: [result]}} =
-               AskInlineHandler.handle_inline_query(reply, query)
-
+      assert [result] = AskInlineHandler.build_results(query)
       assert result.input_message_content.message_text == "<blockquote>hello</blockquote>"
     end
 
     test "result has a ⏳ loading button" do
       tg_user = user()
+      {:ok, db_user} = Accounts.upsert_user(%{id: tg_user.id, first_name: "Test"}, ~w[first_name]a)
+      Repo.insert!(%Subscription{user_id: db_user.id, plan: :pro})
+
       query = %InlineQuery{id: "q1", from: tg_user, query: "test", offset: ""}
 
-      reply = Reply.new(context())
-
-      assert %Reply{action: %Reply.InlineQuery{results: [result]}} =
-               AskInlineHandler.handle_inline_query(reply, query)
+      assert [result] = AskInlineHandler.build_results(query)
 
       [[button]] = result.reply_markup.inline_keyboard
       assert button.text == "⏳"
       assert button.callback_data == "noop"
     end
 
-    test "inline query is not cached and is personal" do
+    test "returns empty list for non-PRO user" do
       tg_user = user()
-      query = %InlineQuery{id: "q1", from: tg_user, query: "test", offset: ""}
+      {:ok, _db_user} = Accounts.upsert_user(%{id: tg_user.id, first_name: "Test"}, ~w[first_name]a)
 
-      reply = Reply.new(context())
+      query = %InlineQuery{id: "q1", from: tg_user, query: "купить яндекс", offset: ""}
 
-      assert %Reply{action: %Reply.InlineQuery{cache_time: 0, is_personal: true}} =
-               AskInlineHandler.handle_inline_query(reply, query)
+      assert [] = AskInlineHandler.build_results(query)
     end
   end
 
