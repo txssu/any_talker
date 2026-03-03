@@ -14,6 +14,7 @@ defmodule AnyTalkerBot.Dispatcher do
   command("ban")
   command("buy_pro")
   command("que_pro")
+  command("clean")
 
   # ExGram calls extract_info/1 (text → {:command, name, msg}) BEFORE our build_reply pipeline runs.
   # Middlewares in @middleware_pipeline are therefore too late to affect command routing.

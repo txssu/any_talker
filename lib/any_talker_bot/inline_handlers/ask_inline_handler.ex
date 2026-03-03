@@ -1,6 +1,8 @@
 defmodule AnyTalkerBot.InlineHandlers.AskInlineHandler do
   @moduledoc false
 
+  @behaviour AnyTalkerBot.InlineHandler
+
   alias AnyTalker.Accounts
   alias AnyTalker.AI.Envelope.Context
   alias AnyTalker.AI.Envelope.Source
@@ -18,11 +20,27 @@ defmodule AnyTalkerBot.InlineHandlers.AskInlineHandler do
 
   require Logger
 
-  def handle_inline_query(reply, query) do
+  @impl AnyTalkerBot.InlineHandler
+  def match?(_query_text), do: true
+
+  @impl AnyTalkerBot.InlineHandler
+  def build_results(query) do
+    tg_user = Map.from_struct(query.from)
+
+    with {:ok, user} <- Accounts.upsert_user(tg_user, ~w[username first_name last_name]a),
+         user_with_sub = Accounts.preload_current_subscription(user),
+         :ok <- Ask.validate_pro(user_with_sub) do
+      [build_ask_result(query)]
+    else
+      _error -> []
+    end
+  end
+
+  defp build_ask_result(query) do
     text = String.trim(query.query)
     text_html = HtmlUtils.escape_html(text)
 
-    result = %InlineQueryResultArticle{
+    %InlineQueryResultArticle{
       type: "article",
       id: "ask",
       title: "Спросить AI",
@@ -35,8 +53,6 @@ defmodule AnyTalkerBot.InlineHandlers.AskInlineHandler do
         inline_keyboard: [[%InlineKeyboardButton{text: "⏳", callback_data: "noop"}]]
       }
     }
-
-    Reply.answer_inline_query(reply, query.id, [result], cache_time: 0, is_personal: true)
   end
 
   def handle_chosen_inline_result(reply, %ChosenInlineResult{inline_message_id: nil}), do: Reply.halt(reply)

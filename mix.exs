@@ -34,8 +34,6 @@ defmodule AnyTalker.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:tidewave, "~> 0.2", only: [:dev]},
-      {:usage_rules, "~> 0.1", only: [:dev]},
       {:phoenix, "~> 1.8.0"},
       {:phoenix_ecto, "~> 4.5"},
       {:ecto_sql, "~> 3.10"},
@@ -70,6 +68,7 @@ defmodule AnyTalker.MixProject do
       {:ex_cldr_numbers, "~> 2.33"},
       {:html2markdown, "~> 0.3.1"},
       {:codepagex, "~> 0.1.12"},
+      {:clearurl_rules, github: "ClearURLs/Rules", app: false, compile: false, depth: 1},
       # Telegram
       {:ex_gram, "~> 0.58"},
       {:tesla, "~> 1.2"},
