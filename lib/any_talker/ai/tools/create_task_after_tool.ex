@@ -5,7 +5,7 @@ defmodule AnyTalker.AI.CreateTaskAfterTool do
   alias AnyTalker.AI.FunctionContext
   alias AnyTalker.AI.Tool.Function
   alias AnyTalker.AI.Tool.FunctionArg
-  alias AnyTalker.Reminders
+  alias AnyTalker.Reminders.AITool
 
   def spec do
     %Function{
@@ -40,27 +40,9 @@ defmodule AnyTalker.AI.CreateTaskAfterTool do
   def call(%{"message" => message, "hours" => hours, "minutes" => minutes}, %FunctionContext{} = ctx) do
     total_minutes = hours * 60 + minutes
 
-    with :ok <- validate_minimum_delay(total_minutes) do
+    with :ok <- AITool.validate_minimum_delay_minutes(total_minutes) do
       scheduled_at = DateTime.add(DateTime.utc_now(), total_minutes * 60, :second)
-
-      attrs = %{
-        message: message,
-        chat_id: ctx.chat.id,
-        user_id: ctx.user.id,
-        reply_to_id: ctx.message.message_id,
-        scheduled_at: scheduled_at
-      }
-
-      case Reminders.create_reminder(attrs) do
-        {:ok, _reminder} -> {:ok, %{"scheduled_at" => scheduled_at}}
-        {:error, _changeset} -> {:error, "Failed to create reminder"}
-      end
+      AITool.create_reminder(%{message: message, scheduled_at: scheduled_at, ctx: ctx})
     end
   end
-
-  defp validate_minimum_delay(delay) when delay < 1 do
-    {:error, "Reminder must be scheduled at least 1 minute in the future"}
-  end
-
-  defp validate_minimum_delay(_delay), do: :ok
 end
