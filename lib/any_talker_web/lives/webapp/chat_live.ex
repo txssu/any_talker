@@ -256,12 +256,12 @@ defmodule AnyTalkerWeb.WebApp.ChatLive do
         {:ok, new_config} ->
           {:noreply,
            assign(socket, [
-             {form_key, to_form(change_fn.(new_config), as: form_name)},
+             {form_key, to_form(change_fn.(new_config, %{}), as: form_name)},
              {:chat_config, new_config}
            ])}
 
         {:error, _changeset} ->
-          {:noreply, assign(socket, form_key, to_form(change_fn.(chat_config), as: form_name))}
+          {:noreply, assign(socket, form_key, to_form(change_fn.(chat_config, %{}), as: form_name))}
       end
     else
       {:noreply, socket}
