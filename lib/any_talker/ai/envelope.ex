@@ -51,7 +51,7 @@ defmodule AnyTalker.AI.Envelope do
   end
 
   def function_context(%__MODULE__{} = envelope) do
-    %FunctionContext{chat: envelope.chat, user: envelope.author, message: envelope.message}
+    %FunctionContext{chat: envelope.chat, user: envelope.author, message: envelope.message, text: envelope.text}
   end
 
   defp json_text(%__MODULE__{} = envelope) do
