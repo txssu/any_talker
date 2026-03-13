@@ -69,6 +69,7 @@ defmodule AnyTalker.MixProject do
       {:html2markdown, "~> 0.3.1"},
       {:codepagex, "~> 0.1.12"},
       {:clearurl_rules, github: "ClearURLs/Rules", app: false, compile: false, depth: 1},
+      {:fast_rss, "~> 0.5.0"},
       # Telegram
       {:ex_gram, "~> 0.58"},
       {:tesla, "~> 1.2"},
