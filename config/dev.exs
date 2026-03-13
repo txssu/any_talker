@@ -1,15 +1,7 @@
 import Config
 
 # Configure your database
-config :any_talker, AnyTalker.PromEx,
-  grafana: [
-    folder_name: "AnyTalker",
-    host: "http://localhost:3000",
-    username: "admin",
-    password: "grafana",
-    upload_dashboards_on_start: true
-  ],
-  metrics_server: :disabled
+config :any_talker, AnyTalker.PromEx, metrics_server: :disabled
 
 config :any_talker, AnyTalker.Repo,
   username: "postgres",
