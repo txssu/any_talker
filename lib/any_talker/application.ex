@@ -7,30 +7,35 @@ defmodule AnyTalker.Application do
 
   @impl Application
   def start(_type, _args) do
-    children = [
-      AnyTalker.PromEx,
-      AnyTalkerWeb.Telemetry,
-      AnyTalker.Repo,
-      {DNSCluster, query: Application.get_env(:any_talker, :dns_cluster_query) || :ignore},
-      {Phoenix.PubSub, name: AnyTalker.PubSub},
-      AnyTalker.RateLimit,
-      # Start the Finch HTTP client for sending emails
-      {Finch, name: AnyTalker.Finch},
-      # Telegram
-      {AnyTalker.Cache, []},
-      ExGram,
-      {AnyTalkerBot.Dispatcher, [method: :polling, token: AnyTalkerBot.Config.bot_token()]},
-      # Start a worker by calling: AnyTalker.Worker.start_link(arg)
-      # {AnyTalker.Worker, arg},
-      # Start to serve requests, typically the last entry
-      AnyTalkerWeb.Endpoint,
-      {Oban, Application.fetch_env!(:any_talker, Oban)}
-    ]
+    children =
+      [
+        AnyTalker.PromEx,
+        AnyTalkerWeb.Telemetry,
+        AnyTalker.Repo,
+        {DNSCluster, query: Application.get_env(:any_talker, :dns_cluster_query) || :ignore},
+        {Phoenix.PubSub, name: AnyTalker.PubSub},
+        AnyTalker.RateLimit,
+        {Finch, name: AnyTalker.Finch},
+        {AnyTalker.Cache, []},
+        AnyTalkerWeb.Endpoint,
+        {Oban, Application.fetch_env!(:any_talker, Oban)}
+      ] ++ bot_children()
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: AnyTalker.Supervisor]
     Supervisor.start_link(children, opts)
+  end
+
+  defp bot_children do
+    if Application.get_env(:any_talker, :start_bot) do
+      [
+        ExGram,
+        {AnyTalkerBot.Dispatcher, [method: :polling, token: AnyTalkerBot.Config.bot_token()]}
+      ]
+    else
+      []
+    end
   end
 
   # Tell Phoenix to update the endpoint configuration

@@ -31,6 +31,10 @@ defmodule AnyTalkerBot.Handlers.CommandHandler do
     AnyTalkerBot.CleanUrlCommand.call(reply)
   end
 
+  def execute(reply, {:command, :rss, _msg}) do
+    AnyTalkerBot.RssCommand.call(reply)
+  end
+
   def execute(reply, {:command, _unknown, _msg}) do
     Reply.halt(reply)
   end

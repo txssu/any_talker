@@ -33,7 +33,9 @@ defmodule AnyTalkerBot.Reply.Message do
             mode: nil,
             as_reply?: false,
             for_dm: false,
-            on_sent: nil
+            on_sent: nil,
+            reply_markup: nil,
+            link_preview_options: nil
 
   @doc """
   Creates a new Message with the given text.
@@ -123,5 +125,13 @@ defmodule AnyTalkerBot.Reply.Message do
     |> Common.add_bot()
     |> Common.maybe_add_markdown(message.mode)
     |> Common.maybe_add_reply_to(reply, message.as_reply?)
+    |> maybe_add_reply_markup(message.reply_markup)
+    |> maybe_add_link_preview_options(message.link_preview_options)
   end
+
+  defp maybe_add_reply_markup(opts, nil), do: opts
+  defp maybe_add_reply_markup(opts, markup), do: [{:reply_markup, markup} | opts]
+
+  defp maybe_add_link_preview_options(opts, nil), do: opts
+  defp maybe_add_link_preview_options(opts, options), do: [{:link_preview_options, options} | opts]
 end

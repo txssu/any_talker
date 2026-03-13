@@ -29,12 +29,13 @@ config :any_talker, AnyTalkerWeb.Endpoint,
 
 config :any_talker, Oban,
   engine: Oban.Engines.Basic,
-  queues: [default: 10],
+  queues: [default: 10, rss: 5],
   repo: AnyTalker.Repo,
   plugins: [
     {Oban.Plugins.Cron,
      crontab: [
-       {"30 18 * * *", AnyTalker.Counters.NikitaCounterJob}
+       {"30 18 * * *", AnyTalker.Counters.NikitaCounterJob},
+       {"*/15 * * * *", AnyTalker.RSS.FetchFeedsJob}
      ]}
   ]
 

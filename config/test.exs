@@ -26,6 +26,7 @@ config :any_talker, AnyTalkerWeb.Endpoint,
   server: false
 
 config :any_talker, Oban, testing: :inline
+config :any_talker, :feed_fetcher, AnyTalker.RSS.StubFeedFetcher
 
 # Print only warnings and errors during test
 config :logger, level: :warning

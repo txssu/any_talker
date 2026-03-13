@@ -21,6 +21,10 @@ if System.get_env("PHX_SERVER") do
   config :any_talker, AnyTalkerWeb.Endpoint, server: true
 end
 
+if System.get_env("START_BOT") do
+  config :any_talker, start_bot: true
+end
+
 config :any_talker, AnyTalker.AI.OpenRouterClient,
   api_url: System.get_env("OPENAI_URL", "https://openrouter.ai/api"),
   api_key: System.get_env("OPENAI_KEY"),
