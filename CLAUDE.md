@@ -82,6 +82,10 @@
 - Don’t prefix examples with `elixir`.
 - Group multiple `on_mount` docs into a **single `@doc` block**.
 
+## Git Branching
+
+- Always create branches with the `claude/` prefix (e.g., `claude/fix-username-routing`). This is required for GitHub → GitLab sync via GitHub Actions.
+
 ## Testing
 
 - Mirror controller/module names with `_test` suffix.
