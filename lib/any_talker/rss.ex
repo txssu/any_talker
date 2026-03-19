@@ -182,10 +182,15 @@ defmodule AnyTalker.RSS do
 
     rows =
       Enum.map(entries, fn entry ->
-        Map.merge(entry, %{feed_id: feed.id, inserted_at: now, updated_at: now})
+        entry
+        |> Map.put_new(:guid, entry.url)
+        |> Map.merge(%{feed_id: feed.id, inserted_at: now, updated_at: now})
       end)
 
-    repo.insert_all(Article, rows, on_conflict: :nothing, conflict_target: :url)
+    repo.insert_all(Article, rows,
+      on_conflict: {:replace, [:url, :title, :updated_at]},
+      conflict_target: :guid
+    )
     {:ok, length(rows)}
   end
 

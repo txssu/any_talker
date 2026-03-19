@@ -39,6 +39,7 @@ defmodule AnyTalker.RSS.FetchFeedJob do
         %{
           feed_id: feed.id,
           url: entry.url,
+          guid: Map.get(entry, :guid, entry.url),
           title: entry.title,
           content: entry.content,
           published_at: entry.published_at,
@@ -47,7 +48,10 @@ defmodule AnyTalker.RSS.FetchFeedJob do
         }
       end)
 
-    Repo.insert_all(Article, rows, on_conflict: :nothing, conflict_target: :url)
+    Repo.insert_all(Article, rows,
+      on_conflict: {:replace, [:url, :title, :updated_at]},
+      conflict_target: :guid
+    )
   end
 
   defp update_feed(feed, title) do

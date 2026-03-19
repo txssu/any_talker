@@ -73,8 +73,11 @@ defmodule AnyTalker.RSS.FeedFetcher do
   defp build_rss_entries(items) do
     items
     |> Enum.map(fn item ->
+      url = item["link"] || ""
+
       %{
-        url: item["link"] || "",
+        url: url,
+        guid: extract_rss_guid(item["guid"]) || url,
         title: item["title"],
         content: item["description"],
         published_at: parse_date(item["pub_date"])
@@ -83,11 +86,18 @@ defmodule AnyTalker.RSS.FeedFetcher do
     |> Enum.reject(&(&1.url == ""))
   end
 
+  defp extract_rss_guid(%{"value" => value}) when is_binary(value) and value != "", do: value
+  defp extract_rss_guid(value) when is_binary(value) and value != "", do: value
+  defp extract_rss_guid(_other), do: nil
+
   defp build_atom_entries(entries) do
     entries
     |> Enum.map(fn entry ->
+      url = atom_entry_link(entry["links"] || [])
+
       %{
-        url: atom_entry_link(entry["links"] || []),
+        url: url,
+        guid: entry["id"] || url,
         title: get_in(entry, ["title", "value"]),
         content: atom_entry_content(entry),
         published_at: parse_date(entry["published"] || entry["updated"])

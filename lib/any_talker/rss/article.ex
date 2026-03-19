@@ -8,6 +8,7 @@ defmodule AnyTalker.RSS.Article do
   |--------------|-------------------|------------------------------------|
   | feed_id      | integer           | Parent feed ID                     |
   | url          | string            | Article URL (unique)               |
+  | guid         | string            | Feed-provided unique ID (unique)   |
   | title        | string            | Article title                      |
   | content      | text              | Full article content               |
   | published_at | utc_datetime_usec | Publication date from the feed     |
@@ -23,6 +24,7 @@ defmodule AnyTalker.RSS.Article do
 
   schema "rss_articles" do
     field :url, :string
+    field :guid, :string
     field :title, :string
     field :content, :string
     field :published_at, :utc_datetime_usec
@@ -44,7 +46,7 @@ defmodule AnyTalker.RSS.Article do
   """
   def changeset(article, attrs) do
     article
-    |> cast(attrs, [:url, :title, :content, :published_at, :feed_id])
+    |> cast(attrs, [:url, :guid, :title, :content, :published_at, :feed_id])
     |> validate_required([:url, :feed_id])
     |> unique_constraint(:url)
   end

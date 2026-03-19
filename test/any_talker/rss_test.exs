@@ -16,8 +16,10 @@ defmodule AnyTalker.RSSTest do
   end
 
   defp create_article(feed, attrs \\ %{}) do
-    url = Map.get(attrs, :url, "https://example.com/#{System.unique_integer()}")
-    {:ok, article} = Repo.insert(%Article{feed_id: feed.id, url: url, title: "Test Article"})
+    unique = System.unique_integer()
+    url = Map.get(attrs, :url, "https://example.com/#{unique}")
+    guid = Map.get(attrs, :guid, "guid-#{unique}")
+    {:ok, article} = Repo.insert(%Article{feed_id: feed.id, url: url, guid: guid, title: "Test Article"})
     article
   end
 
@@ -167,8 +169,8 @@ defmodule AnyTalker.RSSTest do
          %{
            title: "My Feed",
            entries: [
-             %{url: "https://example.com/article-1", title: "Article 1", content: "Body 1", published_at: nil},
-             %{url: "https://example.com/article-2", title: "Article 2", content: "Body 2", published_at: nil}
+             %{url: "https://example.com/article-1", guid: "guid-1", title: "Article 1", content: "Body 1", published_at: nil},
+             %{url: "https://example.com/article-2", guid: "guid-2", title: "Article 2", content: "Body 2", published_at: nil}
            ]
          }}
       )
@@ -408,6 +410,56 @@ defmodule AnyTalker.RSSTest do
 
       query = from rs in ReadStatus, where: rs.user_id == ^user.id
       assert length(Repo.all(query)) == 1
+    end
+  end
+
+  describe "guid deduplication" do
+    test "subscribe does not create duplicate articles when URL changes but guid stays the same" do
+      user = user_fixture()
+      {:ok, group} = RSS.create_group(user.id, "Tech")
+
+      Process.put(
+        :stub_feed_fetcher_result,
+        {:ok,
+         %{
+           title: "My Feed",
+           entries: [
+             %{url: "https://example.com/t/old-slug/1", guid: "stable-guid-1", title: "Original Title", content: "Body", published_at: nil}
+           ]
+         }}
+      )
+
+      assert {:ok, _sub} = RSS.subscribe(user.id, "https://feed.example.com/rss", group.id)
+
+      feed = Repo.get_by!(Feed, url: "https://feed.example.com/rss")
+      articles = Article |> where([a], a.feed_id == ^feed.id) |> Repo.all()
+      assert length(articles) == 1
+      assert hd(articles).url == "https://example.com/t/old-slug/1"
+
+      # Simulate re-fetch with changed URL/title but same guid
+      now = DateTime.utc_now()
+
+      Repo.insert_all(Article,
+        [
+          %{
+            feed_id: feed.id,
+            url: "https://example.com/t/new-slug/1",
+            guid: "stable-guid-1",
+            title: "Updated Title",
+            content: "Body",
+            published_at: nil,
+            inserted_at: now,
+            updated_at: now
+          }
+        ],
+        on_conflict: {:replace, [:url, :title, :updated_at]},
+        conflict_target: :guid
+      )
+
+      articles = Article |> where([a], a.feed_id == ^feed.id) |> Repo.all()
+      assert length(articles) == 1
+      assert hd(articles).url == "https://example.com/t/new-slug/1"
+      assert hd(articles).title == "Updated Title"
     end
   end
 
