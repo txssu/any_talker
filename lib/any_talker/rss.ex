@@ -185,7 +185,8 @@ defmodule AnyTalker.RSS do
         Map.merge(entry, %{feed_id: feed.id, inserted_at: now, updated_at: now})
       end)
 
-    repo.insert_all(Article, rows, on_conflict: :nothing, conflict_target: :url)
+    do_upsert_articles(repo, rows)
+
     {:ok, length(rows)}
   end
 
@@ -205,6 +206,28 @@ defmodule AnyTalker.RSS do
   end
 
   defp normalize_subscription_error(ok), do: ok
+
+  @doc """
+  Upserts article rows into the database.
+
+  On conflict (same feed + guid), replaces mutable fields.
+
+  ## Examples
+
+      iex> upsert_articles([%{feed_id: 1, url: "https://example.com", guid: "abc", title: "Post", inserted_at: ~U[...], updated_at: ~U[...]}])
+      {1, nil}
+
+  """
+  def upsert_articles(rows) do
+    do_upsert_articles(Repo, rows)
+  end
+
+  defp do_upsert_articles(repo, rows) do
+    repo.insert_all(Article, rows,
+      on_conflict: {:replace, [:url, :title, :content, :published_at, :updated_at]},
+      conflict_target: [:feed_id, :guid]
+    )
+  end
 
   defp mark_existing_articles_read(repo, user_id, feed_id, cutoff) do
     now = DateTime.utc_now()

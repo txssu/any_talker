@@ -8,7 +8,7 @@ defmodule AnyTalker.RSS.FetchFeedJob do
   use Oban.Worker, queue: :rss
 
   alias AnyTalker.Repo
-  alias AnyTalker.RSS.Article
+  alias AnyTalker.RSS
   alias AnyTalker.RSS.Feed
   alias AnyTalker.RSS.FeedFetcher
 
@@ -39,6 +39,7 @@ defmodule AnyTalker.RSS.FetchFeedJob do
         %{
           feed_id: feed.id,
           url: entry.url,
+          guid: entry.guid,
           title: entry.title,
           content: entry.content,
           published_at: entry.published_at,
@@ -47,7 +48,7 @@ defmodule AnyTalker.RSS.FetchFeedJob do
         }
       end)
 
-    Repo.insert_all(Article, rows, on_conflict: :nothing, conflict_target: :url)
+    RSS.upsert_articles(rows)
   end
 
   defp update_feed(feed, title) do

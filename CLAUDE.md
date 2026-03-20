@@ -15,6 +15,7 @@
 - Use **Elixir’s set-theoretic types** through structs. You don't need to add `@spec`.
 - Name unused variables (e.g., `_error`), don’t leave as `_`.
 - Favor **pattern matching** over `case` or `cond`.
+- When a variable is a struct, pattern match the struct name and use `struct.field` access — don't destructure individual fields in the match. E.g., `def foo(%User{} = user)` then `user.name`, not `def foo(%User{name: name})`.
 
 ## File and Code Structure
 

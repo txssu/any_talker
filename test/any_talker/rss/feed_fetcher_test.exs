@@ -50,6 +50,7 @@ defmodule AnyTalker.RSS.FeedFetcherTest do
     assert result.title == "RSS Feed"
     assert [entry] = result.entries
     assert entry.url == "https://example.com/rss-1"
+    assert entry.guid == "https://example.com/rss-1"
     assert entry.title == "RSS Article"
     assert entry.content == "RSS content"
     assert %DateTime{} = entry.published_at
@@ -64,6 +65,7 @@ defmodule AnyTalker.RSS.FeedFetcherTest do
     assert result.title == "Atom Feed"
     assert [entry] = result.entries
     assert entry.url == "https://example.com/atom-1"
+    assert entry.guid == "urn:uuid:1"
     assert entry.title == "Atom Article"
     assert entry.content == "Atom content"
     assert %DateTime{} = entry.published_at
@@ -83,6 +85,32 @@ defmodule AnyTalker.RSS.FeedFetcherTest do
     end)
 
     assert {:error, {:http_status, 404}} = FeedFetcher.fetch_and_parse("https://example.com/404")
+  end
+
+  test "RSS entry uses guid element when present" do
+    rss_with_guid = """
+    <?xml version="1.0" encoding="UTF-8"?>
+    <rss version="2.0">
+      <channel>
+        <title>RSS Feed</title>
+        <item>
+          <title>Article</title>
+          <link>https://example.com/post/slug-may-change/123</link>
+          <guid>https://example.com/post/123</guid>
+          <description>Content</description>
+        </item>
+      </channel>
+    </rss>
+    """
+
+    Repatch.patch(Tesla, :get, fn _client, _url ->
+      {:ok, %Tesla.Env{status: 200, body: rss_with_guid}}
+    end)
+
+    assert {:ok, result} = FeedFetcher.fetch_and_parse("https://example.com/feed")
+    assert [entry] = result.entries
+    assert entry.guid == "https://example.com/post/123"
+    assert entry.url == "https://example.com/post/slug-may-change/123"
   end
 
   test "Atom entry uses summary when content is absent" do
