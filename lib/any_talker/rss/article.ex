@@ -7,7 +7,8 @@ defmodule AnyTalker.RSS.Article do
   | Field Name   | Type              | Description                        |
   |--------------|-------------------|------------------------------------|
   | feed_id      | integer           | Parent feed ID                     |
-  | url          | string            | Article URL (unique)               |
+  | url          | string            | Article URL                        |
+  | guid         | string            | Feed-provided unique ID (unique per feed) |
   | title        | string            | Article title                      |
   | content      | text              | Full article content               |
   | published_at | utc_datetime_usec | Publication date from the feed     |
@@ -23,6 +24,7 @@ defmodule AnyTalker.RSS.Article do
 
   schema "rss_articles" do
     field :url, :string
+    field :guid, :string
     field :title, :string
     field :content, :string
     field :published_at, :utc_datetime_usec
@@ -38,14 +40,14 @@ defmodule AnyTalker.RSS.Article do
 
   ## Examples
 
-      iex> changeset(%Article{}, %{url: "https://example.com/post", feed_id: 1})
+      iex> changeset(%Article{}, %{url: "https://example.com/post", guid: "https://example.com/post", feed_id: 1})
       %Ecto.Changeset{valid?: true}
 
   """
   def changeset(article, attrs) do
     article
-    |> cast(attrs, [:url, :title, :content, :published_at, :feed_id])
-    |> validate_required([:url, :feed_id])
-    |> unique_constraint(:url)
+    |> cast(attrs, [:url, :guid, :title, :content, :published_at, :feed_id])
+    |> validate_required([:url, :guid, :feed_id])
+    |> unique_constraint([:feed_id, :guid])
   end
 end
