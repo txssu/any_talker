@@ -111,7 +111,10 @@ defmodule AnyTalkerBot.RssCommand do
     if is_nil(user_with_sub.current_subscription) do
       Reply.send_message(reply, "Сводка доступна только для PRO-подписчиков.")
     else
-      handle_summary(reply, user.id, articles, group_name, group_id)
+      AnyTalkerBot.TypingStatus.with_typing(
+        &handle_summary(&1, user.id, articles, group_name, group_id),
+        reply
+      )
     end
   end
 
