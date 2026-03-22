@@ -11,6 +11,10 @@ defmodule AnyTalkerBot.Handlers.CallbackQueryHandler do
     AnyTalkerBot.RssMarkReadHandler.call(reply)
   end
 
+  def execute(reply, {:callback_query, %{data: "rss_refresh:" <> _rest}}) do
+    AnyTalkerBot.RssRefreshHandler.call(reply)
+  end
+
   def execute(reply, {:callback_query, %{data: "counter-" <> _rest}}) do
     AnyTalkerBot.NikitaCounterAnswerHandler.call(reply)
   end
