@@ -67,8 +67,9 @@ defmodule AnyTalkerBot.RssFormatter do
     group_str = encode_group(group_id_or_nil)
     nav_row = nav_buttons(page, total_pages, group_str)
     read_row = [%{text: "Прочитано ✓", callback_data: "rss_read:#{group_str}"}]
+    refresh_row = [%{text: "Обновить", callback_data: "rss_refresh:#{group_str}"}]
 
-    rows = if nav_row == [], do: [read_row], else: [nav_row, read_row]
+    rows = if nav_row == [], do: [read_row, refresh_row], else: [nav_row, read_row, refresh_row]
     %ExGram.Model.InlineKeyboardMarkup{inline_keyboard: rows}
   end
 

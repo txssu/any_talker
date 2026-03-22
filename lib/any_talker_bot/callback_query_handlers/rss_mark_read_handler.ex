@@ -5,6 +5,7 @@ defmodule AnyTalkerBot.RssMarkReadHandler do
 
   alias AnyTalker.RSS
   alias AnyTalkerBot.Reply
+  alias AnyTalkerBot.RssFormatter
 
   require Logger
 
@@ -18,11 +19,16 @@ defmodule AnyTalkerBot.RssMarkReadHandler do
 
     RSS.mark_all_read(user_id, group_id)
 
-    ExGram.edit_message_reply_markup(
+    {articles, total} = RSS.list_articles(user_id, group_id, 0)
+    {text, keyboard} = RssFormatter.format_news_page(articles, 0, total, group_id)
+
+    ExGram.edit_message_text(text,
       chat_id: chat_id,
       message_id: message_id,
       bot: AnyTalkerBot.bot(),
-      reply_markup: %ExGram.Model.InlineKeyboardMarkup{inline_keyboard: []}
+      parse_mode: "HTML",
+      reply_markup: keyboard,
+      link_preview_options: %ExGram.Model.LinkPreviewOptions{is_disabled: true}
     )
 
     Reply.answer_callback_query(reply, callback_query.id, text: "Отмечено как прочитанное")
