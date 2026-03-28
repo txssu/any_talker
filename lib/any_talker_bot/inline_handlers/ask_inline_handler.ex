@@ -4,9 +4,11 @@ defmodule AnyTalkerBot.InlineHandlers.AskInlineHandler do
   @behaviour AnyTalkerBot.InlineHandler
 
   alias AnyTalker.Accounts
+  alias AnyTalker.AI.Envelope
   alias AnyTalker.AI.Envelope.Context
   alias AnyTalker.AI.Envelope.Source
   alias AnyTalker.AI.Generation
+  alias AnyTalker.AI.History
   alias AnyTalker.Settings
   alias AnyTalkerBot.HtmlUtils
   alias AnyTalkerBot.Reply
@@ -19,6 +21,9 @@ defmodule AnyTalkerBot.InlineHandlers.AskInlineHandler do
   alias ExGram.Model.InputTextMessageContent
 
   require Logger
+
+  @inline_history_ttl to_timeout(minute: 20)
+  @inline_history_max_messages 10
 
   @impl AnyTalkerBot.InlineHandler
   def match?(_query_text), do: true
@@ -100,6 +105,7 @@ defmodule AnyTalkerBot.InlineHandlers.AskInlineHandler do
     case AnyTalker.AI.request(envelope) do
       {:ok, %Generation{} = gen} ->
         Ask.consume_tokens(user_with_sub, config, gen.response)
+        save_inline_history(envelope, gen)
 
         text =
           gen.response.data.content
@@ -119,6 +125,14 @@ defmodule AnyTalkerBot.InlineHandlers.AskInlineHandler do
           parse_mode: "HTML"
         )
     end
+  end
+
+  defp save_inline_history(_envelope, %Generation{history: nil}), do: :ok
+
+  defp save_inline_history(%Envelope{} = envelope, %Generation{} = gen) do
+    history_key = History.Storable.to_key(envelope)
+    history = History.trim(gen.history, @inline_history_max_messages)
+    History.put(history_key, history, ttl: @inline_history_ttl)
   end
 
   defp inline_reply_text(query, text) do

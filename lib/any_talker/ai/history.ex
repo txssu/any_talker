@@ -33,6 +33,14 @@ defmodule AnyTalker.AI.History do
     end)
   end
 
+  def trim(%__MODULE__{messages: messages} = history, max) when length(messages) <= max do
+    history
+  end
+
+  def trim(%__MODULE__{messages: messages}, max) do
+    %__MODULE__{messages: Enum.take(messages, max)}
+  end
+
   def set_last_uniq_key(%__MODULE__{messages: [last | rest]}, uniq_key) do
     %__MODULE__{messages: [%{last | uniq_key: uniq_key} | rest]}
   end
@@ -47,7 +55,7 @@ defmodule AnyTalker.AI.History do
     end
   end
 
-  def put(%Key{} = key, %__MODULE__{} = history) do
-    Cache.put(key, history)
+  def put(%Key{} = key, %__MODULE__{} = history, opts \\ []) do
+    Cache.put(key, history, opts)
   end
 end

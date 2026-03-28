@@ -7,6 +7,8 @@ defmodule AnyTalkerBot.InlineHandlers.AskInlineHandlerTest do
   alias AnyTalker.Accounts
   alias AnyTalker.Accounts.Subscription
   alias AnyTalker.AI.Generation
+  alias AnyTalker.AI.History
+  alias AnyTalker.AI.Message
   alias AnyTalker.AI.Response
   alias AnyTalker.AI.Response.TextOutput
   alias AnyTalker.RateLimit.Context
@@ -170,6 +172,85 @@ defmodule AnyTalkerBot.InlineHandlers.AskInlineHandlerTest do
       assert Keyword.get(opts, :inline_message_id) == "inline_msg_id_1"
     end
 
+    test "saves conversation history after successful AI response" do
+      alias AnyTalker.AI.History.Key
+
+      tg_user = user()
+      {:ok, db_user} = Accounts.upsert_user(%{id: tg_user.id, first_name: "Test"}, ~w[first_name]a)
+      Repo.insert!(%Subscription{user_id: db_user.id, plan: :pro})
+
+      mock_gen = build_mock_generation_with_history("Ответ от AI")
+      Repatch.patch(AnyTalker.AI, :request, fn _envelope -> {:ok, mock_gen} end)
+
+      result = chosen_inline_result(tg_user)
+      AskInlineHandler.handle_chosen_inline_result(base_reply(), result)
+
+      history_key = Key.new(db_user.id, nil)
+      history = History.get(history_key)
+      messages = History.messages(history)
+
+      assert length(messages) == 2
+
+      assert hd(messages).role == "user"
+      assert List.last(messages).role == "assistant"
+    end
+
+    test "AI receives previous inline history in subsequent requests" do
+      tg_user = user()
+      {:ok, db_user} = Accounts.upsert_user(%{id: tg_user.id, first_name: "Test"}, ~w[first_name]a)
+      Repo.insert!(%Subscription{user_id: db_user.id, plan: :pro})
+
+      captured_messages = :ets.new(:captured_messages, [:set, :public])
+
+      Repatch.patch(AnyTalker.AI, :request, fn envelope ->
+        # Replicate what real AI.request does: fetch history, build messages, generate
+        history_key = History.Storable.to_key(envelope)
+        history = History.get(history_key)
+
+        messages =
+          history
+          |> History.append(AnyTalker.AI.Envelope.messages(envelope))
+          |> History.messages()
+
+        :ets.insert(captured_messages, {:messages, messages})
+
+        # Build assistant response message the same way do_generate does
+        assistant_msg = AnyTalker.AI.ToMessage.to_message(%TextOutput{content: "Два"})
+
+        gen_history =
+          messages
+          |> History.new()
+          |> History.append(assistant_msg)
+
+        gen = %Generation{
+          response: %Response{
+            data: %TextOutput{content: "Два"},
+            usage: %Response.Usage{total_tokens: 10, cost: Decimal.new("0.001")}
+          },
+          history: gen_history
+        }
+
+        {:ok, gen}
+      end)
+
+      # First request
+      result1 = chosen_inline_result(tg_user, query: "Сколько 1+1?")
+      AskInlineHandler.handle_chosen_inline_result(base_reply(), result1)
+
+      # Second request — should see first query + response in history
+      result2 = chosen_inline_result(tg_user, query: "Ты уверен?")
+      AskInlineHandler.handle_chosen_inline_result(base_reply(), result2)
+
+      [{:messages, messages}] = :ets.lookup(captured_messages, :messages)
+      :ets.delete(captured_messages)
+
+      # Should have: previous user msg, previous assistant msg, current user msg
+      assert length(messages) == 3
+      assert Enum.at(messages, 0).role == "user"
+      assert Enum.at(messages, 1).role == "assistant"
+      assert Enum.at(messages, 2).role == "user"
+    end
+
     test "edits message with error text when AI request fails" do
       tg_user = user()
       {:ok, db_user} = Accounts.upsert_user(%{id: tg_user.id, first_name: "Test"}, ~w[first_name]a)
@@ -196,6 +277,24 @@ defmodule AnyTalkerBot.InlineHandlers.AskInlineHandlerTest do
         data: %TextOutput{content: content},
         usage: %Response.Usage{total_tokens: 10, cost: Decimal.new("0.001")}
       }
+    }
+  end
+
+  defp build_mock_generation_with_history(content) do
+    user_msg = Message.new(nil, "user", "купить яндекс", nil)
+    assistant_msg = Message.new(nil, "assistant", content, nil)
+
+    history =
+      History.new()
+      |> History.append(user_msg)
+      |> History.append(assistant_msg)
+
+    %Generation{
+      response: %Response{
+        data: %TextOutput{content: content},
+        usage: %Response.Usage{total_tokens: 10, cost: Decimal.new("0.001")}
+      },
+      history: history
     }
   end
 
