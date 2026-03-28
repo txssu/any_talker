@@ -46,6 +46,7 @@ defimpl AnyTalker.AI.Envelope.Source, for: ExGram.Model.ChosenInlineResult do
     models = String.split(model_string, " ", trim: true)
 
     %Envelope{
+      source: :inline,
       message_id: nil,
       role: "user",
       username: Accounts.display_name(context.author),

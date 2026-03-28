@@ -19,7 +19,8 @@ defmodule AnyTalker.AI.Envelope do
     # Metadata
     :chat,
     :author,
-    :message
+    :message,
+    source: :chat
   ]
 
   @type t :: %__MODULE__{}
@@ -78,6 +79,8 @@ defmodule AnyTalker.AI.Envelope do
     alias AnyTalker.Settings.ChatConfig
 
     require TypedStructAccess
+
+    def to_key(%Envelope{source: :inline} = envelope), do: Key.new(envelope.author.id, nil)
 
     def to_key(%Envelope{} = envelope) do
       case envelope.reply do
